@@ -27,8 +27,8 @@ export interface WorkflowApiJSON {
 
 
 export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON {
-    const basicInputs: IInputField[] = [];
-    const advancedInputs: IMultiValueInput[] = [];
+    let basicInputs: IMultiValueInput[] = [];
+    let advancedInputs: IMultiValueInput[] = [];
 
     for (const [key, value] of Object.entries(source)) {
         const inputs: IInputField[] = [];
@@ -38,29 +38,48 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON 
                 inputs.push(input);
             }
         }
-        if (value.class_type === 'CLIPTextEncode') {
-            const input = inputs[0];
-            input.valueType = "long-text";
-            input.title = value._meta.title;
-            input.placeholder = value._meta.title;
-            basicInputs.push(input);
-        } else if (value.class_type === "LoadImage" || value.class_type === "LoadImageMask") {
-            const uploadInput = inputs.find(input => input.title === "Upload");
-            if (uploadInput) {
-                const input = inputs[0];
-                input.valueType = "image";
-                input.title = value._meta.title;
-                input.placeholder = value._meta.title;
-                input.value = null;
-                basicInputs.push(input);
+        try {
+            if (value.class_type === 'CLIPTextEncode') {
+                if (inputs.length > 0) {
+                    const input = inputs[0];
+                    input.valueType = "long-text";
+                    input.title = value._meta.title;
+                    input.placeholder = value._meta.title;
+                    basicInputs.push({
+                        title: value._meta.title,
+                        inputs: inputs,
+                        key: `${key}-${value.class_type}`
+                    });
+                }
+            } else if (value.class_type === "LoadImage" || value.class_type === "LoadImageMask") {
+                const uploadInput = inputs.find(input => input.title === "Upload");
+                if (uploadInput) {
+                    const input = inputs[0];
+                    input.valueType = "image";
+                    input.title = value._meta.title;
+                    input.placeholder = value._meta.title;
+                    input.value = null;
+                    basicInputs.push({
+                        title: value._meta.title,
+                        inputs: [input],
+                        key: `${key}-${value.class_type}`
+                    });
+                }
+            } else if (inputs.length > 0) {
+                advancedInputs.push({
+                    title: value._meta.title,
+                    inputs: inputs,
+                    key: `${key}-${value.class_type}`
+                });
             }
-        } else if (inputs.length > 1) {
-            advancedInputs.push({
-                title: value._meta.title,
-                inputs: inputs,
-                key: `${key}-${value.class_type}`
-            });
+        } catch (e) {
+            console.log("Error", e);
         }
+    }
+
+    if (basicInputs.length === 0) {
+        basicInputs = [...advancedInputs];
+        advancedInputs = [];
     }
 
     return { inputs: basicInputs, advancedInputs, title: "", description: "" };

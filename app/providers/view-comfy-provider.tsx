@@ -7,7 +7,7 @@ export interface IViewComfyJSON {
     version?: string;
     title: string;
     description: string;
-    inputs: IInputField[];
+    inputs: IMultiValueInput[];
     advancedInputs: IMultiValueInput[];
 }
 
@@ -61,19 +61,6 @@ function viewComfyReducer(state: IViewComfyState | undefined, action: Action): I
                 ...state,
                 viewComfyJSON: action.payload,
             }
-        case ActionType.ADD_INPUT:
-            return state && state.viewComfyJSON ? { ...state, viewComfyJSON: { ...state.viewComfyJSON, inputs: [...state.viewComfyJSON.inputs, action.payload] } } : undefined;
-        case ActionType.UPDATE_INPUT:
-            if (!state || !state.viewComfyJSON) return undefined;
-            return {
-                ...state,
-                viewComfyJSON: {
-                    ...state.viewComfyJSON,
-                    inputs: state.viewComfyJSON.inputs.map((input, index) =>
-                        index === action.payload.index ? action.payload.input : input
-                    )
-                }
-            };
         case ActionType.REMOVE_INPUT:
             return state && state.viewComfyJSON ? {
                 ...state,

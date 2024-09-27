@@ -91,9 +91,35 @@ export function ViewComfyForm(args: {
                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                     Basic Inputs
                                 </legend>
-                                {(inputFieldArray.fields).map((field, index) =>
-                                    <InputField key={field.id} form={form} index={index} input={field as IInputForm} editMode={editMode} remove={inputFieldArray.remove} />
-                                )}
+                                {inputFieldArray.fields.map((field, index) => {
+                                    // @ts-ignore
+                                    if (field.inputs.length > 0) {
+                                        return (
+                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                               
+                                                    <legend className="-ml-1 px-1 text-sm font-medium">
+                                                        {
+                                                            // @ts-ignore
+                                                            field.title
+                                                        }
+                                                        {editMode && (
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="text-muted-foreground"
+                                                                onClick={() => inputFieldArray.remove(index)}
+                                                            >
+                                                                <Trash2 className="size-5" />
+                                                            </Button>
+                                                        )}
+                                                    </legend>
+                                        
+                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                            </fieldset>
+                                        )
+                                    }
+                                    return undefined;
+                                })}
                                 {!editMode && (args.children)}
                             </fieldset>
                             {advancedFieldArray.fields.length > 0 && (
@@ -104,7 +130,7 @@ export function ViewComfyForm(args: {
                     </Form>
                 </div>
             </div>
-        </ScrollArea>
+        </ScrollArea >
     </>)
 }
 
@@ -149,7 +175,7 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
                                     </Button>
                                 )}
                             </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} />
+                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" />
                         </fieldset>
                     ))}
                 </fieldset>
@@ -158,29 +184,12 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
     </>)
 }
 
-function InputField(args: { form: UseFormReturn<IViewComfyJSON, any, undefined>, index: number, input: IInputForm, editMode: boolean, remove: UseFieldArrayRemove }) {
-    const { form, index, input, editMode, remove } = args;
-
-    return (
-        <FormField
-            key={input.id}
-            control={form.control}
-            // @ts-ignore
-            name={`inputs[${index}].value`}
-            render={({ field }) => (
-                <InputFieldToUI input={input} field={field} editMode={editMode} remove={remove} index={index} />
-            )}
-        />
-    )
-}
-
-
-function NestedInputField(args: { form: UseFormReturn<IViewComfyJSON, any, undefined>, nestedIndex: number, editMode: boolean }) {
-    const { form, nestedIndex, editMode } = args;
+function NestedInputField(args: { form: UseFormReturn<IViewComfyJSON, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string }) {
+    const { form, nestedIndex, editMode, formFieldName } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
         // @ts-ignore
-        name: `advancedInputs[${nestedIndex}].inputs`
+        name: `${formFieldName}[${nestedIndex}].inputs`
     });
     return (
         <>
@@ -191,7 +200,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyJSON, any, undef
                         key={input.id}
                         control={form.control}
                         // @ts-ignore
-                        name={`advancedInputs[${nestedIndex}].inputs[${k}].value`}
+                        name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         render={({ field }) => (
                             <>
                                 <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} />

@@ -56,7 +56,9 @@ function PlaygroundPageContent() {
         setFormState(data);
         const inputs: { key: string, value: string }[] = [];
         data.inputs.forEach((input) => {
-            inputs.push({ key: input.key, value: input.value });
+            input.inputs.forEach((input) => {
+                inputs.push({ key: input.key, value: input.value });
+            });
         });
         data.advancedInputs.forEach((advancedInput) => {
             advancedInput.inputs.forEach((input) => {
