@@ -84,7 +84,7 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
                 )}
             </nav>
             <nav className="mt-auto grid gap-1 p-2">
-                <Link href="https://github.com/ViewComfy/viewcomfy" target="_blank" rel="noopener noreferrer">
+                <Link href="https://github.com/ViewComfy/ViewComfy" target="_blank" rel="noopener noreferrer">
                     <TooltipButton
                         icon={<LifeBuoy className="size-5" />}
                         label="Help"
