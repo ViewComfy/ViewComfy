@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
     let workflow = undefined;
-    if (formData.get('workflow') && typeof formData.get('workflow') === 'object') {
+    if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
         workflow = JSON.parse(formData.get('workflow') as string);
     }
     const viewComfy: { key: string, value: string | File }[] = [];
