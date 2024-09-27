@@ -1,0 +1,15 @@
+.custom-dropzone {
+    height: 100px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-dropzone {
+    height: 20px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

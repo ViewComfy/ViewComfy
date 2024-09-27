@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ViewComfy
 
-## Getting Started
+ViewComfy is a open source tool to help you create beautiful web apps from ComfyUI
+[![Discord](https://img.shields.io/badge/ViewComfy-Discord-%235865F2.svg)](https://discord.gg/DXubrz5R7E)
 
-First, run the development server:
+// Screenshot of the UI playground
+
+## Playground
+
+The Playground is a simplified UI where you can run your workflows.
+
+## Form Editor
+
+You can drag and drop your ComfyUI workflow_api.json file into the form editor. The form editor will generate a form that you can use to configure the inputs that you want to show in the playground.
+
+### How to use it
+
+Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
+
+Clone the repo
+
+Install dependencies and start the dev server
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ViewMode
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+ViewMode is a mode that will load only the playground page so people can use it without needing to load the workflow_api.json file  
+or to prevent people from editing the form.
+to use ViewMode you need to download the view_comfy.json that is generated when you use the form editor. You need to place that file in the root of the project along with the workflow_api.json.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+e.g. with env file:
 
-## Learn More
+```bash
+.env file ->
+NEXT_PUBLIC_VIEW_MODE="true"
 
-To learn more about Next.js, take a look at the following resources:
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ViewComfy by default will look at a file called view_comfy.json in the root of the project or you can specify a different file with the VIEW_COMFY_FILE_NAME environment variable. You can also specify a different workflow_api.json with the WORKFLOW_API_FILE_NAME environment variable.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+.env file ->
+VIEW_COMFY_FILE_NAME="view_comfy.json"
+WORKFLOW_API_FILE_NAME="workflow_api.json"
+NEXT_PUBLIC_VIEW_MODE="true"
 
-## Deploy on Vercel
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+e.g with command line:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+
+VIEW_COMFY_FILE_NAME="view_comfy.json" NEXT_PUBLIC_VIEW_MODE="true" npm run dev
+```
+
+## Form Editor Advanced
+
+In the form editor you can also drop the view_comfy.json to edit and create a new version of it without the need of the workflow_api.json.
+But we aware if you're only using the view_comfy.json the workflow_api.json needs to be present in the root of the project.
+
+Feel free to contribute with feedback, suggestions, issues or pull requests.
+
+### Tech
+
+ViewComfy is a Next.js app - [Next.js Documentation](https://nextjs.org/docs)
