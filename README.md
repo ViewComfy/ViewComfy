@@ -3,7 +3,7 @@
 ViewComfy is a open source tool to help you create beautiful web apps from ComfyUI workflows  
 [![Discord](https://img.shields.io/badge/ViewComfy-Discord-%235865F2.svg)](https://discord.gg/DXubrz5R7E)
 
-// Screenshot of the UI playground
+![image](https://github.com/user-attachments/assets/2cdacb83-3f71-4e11-9fbd-55b61852a1cb)
 
 ## Playground
 
