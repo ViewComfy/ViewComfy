@@ -41,13 +41,13 @@ export function WorkflowApiPage() {
                         payload: undefined
                     });
                 }
+                setFile(null);
             };
             reader.readAsText(file);
         }
     }, [file, viewComfyStateDispatcher]);
 
     const removeFileOnClick = () => {
-        setFile(null);
         viewComfyStateDispatcher({
             type: ActionType.SET_JSON,
             payload: undefined
@@ -80,10 +80,14 @@ export function WorkflowApiPage() {
 
     const deleteViewComfyJSON = () => {
         if (viewComfyState?.workflowApiJSON) {
-            console.log(viewComfyState?.workflowApiJSON);
             viewComfyStateDispatcher({
                 type: ActionType.SET_VIEW_COMFY_JSON,
                 payload: workflowAPItoViewComfy(viewComfyState?.workflowApiJSON as WorkflowApiJSON)
+            });
+        } else {
+            viewComfyStateDispatcher({
+                type: ActionType.SET_VIEW_COMFY_JSON,
+                payload: undefined
             });
         }
     }
