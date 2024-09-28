@@ -15,11 +15,29 @@ You can drag and drop your ComfyUI workflow_api.json file into the form editor. 
 
 ### How to use it
 
+You need to have [comfy-cli](https://github.com/Comfy-Org/comfy-cli/) installed
+
+```bash
+pip install comfy-cli
+comfy install
+```
+
 Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
 
 Clone the repo
 
-Install dependencies and start the dev server
+If you're using a **virtual environment**, activate it.
+
+If you're using a virtual environment with **PowerShell** you need to put the full path of the Activate.ps1 file in the .env file
+e.g:
+
+```bash
+.env file ->
+VENV_ACTIVATION_PATH="C:\Users\YourUsername\comfyui\venv\Scripts\Activate.ps1"
+```
+
+Install dependencies and start the dev server  
+(Don't forget to activate the virtual environment if you're using one)
 
 ```bash
 npm install
