@@ -5,6 +5,14 @@ import { ComfyWorkflow } from "../models/comfy-workflow";
 import fs from 'fs/promises';
 
 const execProm = util.promisify(require('child_process').exec);
+function getComfyLaunchCmd(args: string) {
+    if (process.platform === 'win32' && process.env.VENV_ACTIVATION_PATH) {
+        const venv = process.env.VENV_ACTIVATION_PATH;
+        return `powershell -NoProfile -ExecutionPolicy Bypass -Command "& {. .${venv}; comfy ${args}}"`
+    }
+    return `comfy ${args}`
+}
+
 
 export class ComfyUIService {
 
@@ -16,7 +24,8 @@ export class ComfyUIService {
     }
 
     async launchComfyUI() {
-        const cmd = "comfy launch --background";
+        // const cmd = "comfy launch --background";
+        const cmd = getComfyLaunchCmd("launch --background");
         let err: string | null = null;
         try {
             const { stdout, stderr } = await execProm(cmd);
@@ -27,7 +36,7 @@ export class ComfyUIService {
                 err = stderr.toString();
             }
         } catch (error: any) {
-            throw new Error(error.stdout || "Failed to launch ComfyUI");
+            throw new Error(error || "Failed to launch ComfyUI");
         }
         throw new Error(err || "Failed to launch ComfyUI");
     }
@@ -65,7 +74,7 @@ export class ComfyUIService {
         await comfyWorkflow.saveWorkflowAsFile();
 
         try {
-            const cmd = `comfy run --workflow "${comfyWorkflow.getWorkflowFilePath()}" --wait`;
+            const cmd = getComfyLaunchCmd(`run --workflow "${comfyWorkflow.getWorkflowFilePath()}" --wait`);
             const { stdout, stderr } = await execProm(cmd);
 
             if (stderr) {
@@ -83,13 +92,13 @@ export class ComfyUIService {
 
             return imagePaths;
         } catch (error: any) {
-            throw new Error(error.stdout);
+            throw new Error(error);
         }
     }
 
 
     async getEnvVariables() {
-        let cmd = "comfy env";
+        let cmd = getComfyLaunchCmd("env");
         let err = "";
         try {
             let { stdout, stderr } = await execProm(cmd);
@@ -102,26 +111,27 @@ export class ComfyUIService {
             }
             err = stderr.toString();
         } catch (error: any) {
-            throw new Error(error.stdout || "Failed to get environment variables");
+            throw new Error(error || "Failed to get environment variables");
         }
         throw new Error(err || "Failed to get environment variables");
     }
 
     async getOutputDir() {
-        let cmd = "comfy which";
+        let cmd = getComfyLaunchCmd("which");
         let err = "";
         try {
             let { stdout, stderr } = await execProm(cmd);
             if (!stderr) {
                 if (stdout) {
-                    return `${stdout.toString().split(":")[1].trim()}/output`;
+                    const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
+                    return `${comfyPath}/output`;
                 } else {
                     throw new Error("Failed to get output directory");
                 }
             }
             err = stderr.toString();
         } catch (error: any) {
-            throw new Error(error.stdout || "Failed to get output directory");
+            throw new Error(error || "Failed to get output directory");
         }
         throw new Error(err || "Failed to get output directory");
     }

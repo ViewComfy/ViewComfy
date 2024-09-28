@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
             return new NextResponse('No images generated', { status: 404 });
         }
     } catch (error: any) {
+        console.error(error)
         return new NextResponse(`Error running ComfyUI: ${error.message}`, { status: 500 });
     }
 }
