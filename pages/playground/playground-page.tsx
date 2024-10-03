@@ -18,13 +18,13 @@ import { PlaygroundForm } from "./playground-from";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
-import { IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-provider";
+import { type IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-provider";
 
 function PlaygroundPageContent() {
     const { viewComfyState } = useViewComfy();
     const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [images, setImages] = useState<{ image: Blob, url: string }[]>([]);
-    const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true" ? true : false;
+    const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
 
     useEffect(() => {
         if (viewMode) {
@@ -41,7 +41,7 @@ function PlaygroundPageContent() {
         if (viewComfyState?.viewComfyJSON) {
             setFormState({ ...viewComfyState.viewComfyJSON });
         }
-    }, [viewComfyState?.viewComfyJSON, setFormState]);
+    }, [viewComfyState?.viewComfyJSON]);
 
     const { doPost, loading } = usePostPlayground();
 
@@ -50,21 +50,24 @@ function PlaygroundPageContent() {
             setFormState({ ...viewComfyState.viewComfyJSON });
             setImages([]);
         }
-    }, [viewComfyState?.viewComfyJSON, setFormState]);
+    }, [viewComfyState?.viewComfyJSON]);
 
     function onSubmit(data: IViewComfyJSON) {
         setFormState(data);
         const inputs: { key: string, value: string }[] = [];
-        data.inputs.forEach((input) => {
-            input.inputs.forEach((input) => {
+
+        for (const dataInputs of data.inputs) {
+            for (const input of dataInputs.inputs) {
                 inputs.push({ key: input.key, value: input.value });
-            });
-        });
-        data.advancedInputs.forEach((advancedInput) => {
-            advancedInput.inputs.forEach((input) => {
+            }
+        }
+
+        for (const advancedInput of data.advancedInputs) {
+            for (const input of advancedInput.inputs) {
                 inputs.push({ key: input.key, value: input.value });
-            });
-        });
+            }
+        }
+
         doPost({
             viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
                 onSetImages(data);
@@ -79,9 +82,12 @@ function PlaygroundPageContent() {
         setImages(newImages);
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         return () => {
-            images.forEach((image) => URL.revokeObjectURL(image.url));
+            for (const image of images) {
+                URL.revokeObjectURL(image.url);
+            }
         };
     }, []);
 
