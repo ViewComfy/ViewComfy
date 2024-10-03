@@ -4,17 +4,33 @@ import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/components/ui/dropzone';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { ViewComfyFormEditor } from '@/pages/workflow-api/view-comfy';
-import { WorkflowApiJSON, workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
+import { type WorkflowApiJSON, workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
 import { Trash2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import JsonView from 'react18-json-view'
 import 'react18-json-view/src/style.css'
-import { ActionType, IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
+import { ActionType, type IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
 import { Label } from '@/components/ui/label';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
+class WorkflowJSONError extends Error {
+    constructor() {
+        super("Workflow.json file is not supported, please use workflow_api.json");
+    }
+}
 
 export function WorkflowApiPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
+    const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
 
     useEffect(() => {
         if (file) {
@@ -28,7 +44,10 @@ export function WorkflowApiPage() {
                             type: ActionType.SET_VIEW_COMFY_JSON,
                             payload: parsed as IViewComfyJSON
                         });
-                    } else {
+                    } else if (parsed.last_node_id) {
+                        throw new WorkflowJSONError();
+                    }
+                    else {
                         viewComfyStateDispatcher({
                             type: ActionType.SET_JSON,
                             payload: { viewComfyJSON: workflowAPItoViewComfy(parsed), file: file, workflowApiJSON: parsed }
@@ -36,10 +55,12 @@ export function WorkflowApiPage() {
                     }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
+                    setErrorDialog({ open: true, error: error as Error });
                     viewComfyStateDispatcher({
                         type: ActionType.SET_JSON,
                         payload: undefined
                     });
+                    setFile(null);
                 }
                 setFile(null);
             };
@@ -67,15 +88,14 @@ export function WorkflowApiPage() {
             return <div className="text-muted-foreground text-lg">
                 Drag and drop your <b>workflow_api.json</b> or Click Here
             </div>
-        } else {
-            return <div className="text-muted-foreground text-lg">
-                Drag and drop your <b>workflow_api.json</b> or <b>view_comfy.json</b> or Click Here
-            </div>
         }
+        return <div className="text-muted-foreground text-lg">
+            Drag and drop your <b>workflow_api.json</b> or <b>view_comfy.json</b> or Click Here
+        </div>
     }
 
     const showDeleteViewComfyJSON = () => {
-        return viewComfyState?.viewComfyJSON && viewComfyState?.viewComfyJSON.file_type
+        return viewComfyState?.viewComfyJSON?.file_type
     }
 
     const deleteViewComfyJSON = () => {
@@ -142,6 +162,37 @@ export function WorkflowApiPage() {
                     </div>
                 )}
             </main>
+            <AlertDialogDemo open={errorDialog.open} error={errorDialog.error} onClose={() => setErrorDialog({ open: false, error: undefined })} />
         </div>
     )
+}
+
+export function AlertDialogDemo(props: { open: boolean, error: Error | undefined, onClose: () => void }) {
+    return (
+        <AlertDialog open={props.open}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Error</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {props.error && getErrorText(props.error)}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogAction onClick={props.onClose}>Ok</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}
+
+function getErrorText(error: Error) {
+    if (error instanceof WorkflowJSONError) {
+        return <>
+            Looks like you have uploaded a workflow.json instead of workflow_api.json <br />
+            To generate workflow_api.json, enable dev mode options in the ComfyUI settings and export using the “Save (API format)” button.
+        </>
+    }
+
+    return <> An error occurred while parsing the JSON, most commons cuase is the json is not valid or is empty. <br /> <b> error details: </b> <br/> {error.message} </>
+
 }

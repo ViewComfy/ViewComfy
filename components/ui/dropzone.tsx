@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import type React from 'react';
+import { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
 // Define the props expected by the Dropzone component
@@ -46,7 +47,7 @@ export function Dropzone({
     // Function to handle processing of uploaded files
     const handleFiles = (files: FileList) => {
         if (files.length > 1) {
-            setError(`You can only upload one file at a time`);
+            setError("You can only upload one file at a time");
             return;
         }
         const uploadedFile = files[0];
@@ -59,6 +60,9 @@ export function Dropzone({
 
         onChange(uploadedFile); // Pass the File object directly
 
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
         setError(null); // Reset error state
     };
 
@@ -75,11 +79,11 @@ export function Dropzone({
             onClick={handleButtonClick}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            
+
         >
             <CardContent
                 className="flex flex-col items-center justify-center space-y-2 px-2 py-4 text-medium"
-                
+
             >
                 <div className="flex items-center justify-center text-muted-foreground">
                     <span className="font-medium ml-2 mr-2">{inputPlaceholder || "Drag Files to Upload or Click Here"}</span>
