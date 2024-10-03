@@ -1,8 +1,8 @@
-import fs from 'fs/promises';
-import { ReadableStream } from 'stream/web';
+import fs from 'node:fs/promises';
+import { ReadableStream } from 'node:stream/web';
 import mime from 'mime-types';
 import { ComfyUIService } from '@/app/services/comfyui-service';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!viewComfy) {
-        return new NextResponse(`ViewComfy is required`, { status: 400 });
+        return new NextResponse("ViewComfy is required", { status: 400 });
     }
 
     try {
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
                     'Content-Disposition': 'attachment; filename="generated_images.bin"'
                 }
             });
-        } else {
-            return new NextResponse('No images generated', { status: 404 });
         }
+        return new NextResponse('No images generated', { status: 404 });
+
     } catch (error: any) {
         console.error(error)
         return new NextResponse(`Error running ComfyUI: ${error.message}`, { status: 500 });

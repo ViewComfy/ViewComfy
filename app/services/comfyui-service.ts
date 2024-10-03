@@ -1,10 +1,10 @@
-import util from 'util';
-import path from "path";
-import { IComfyInput } from "../interfaces/comfy-input";
+import util from "node:util";
+import path from "node:path";
+import type { IComfyInput } from "../interfaces/comfy-input";
 import { ComfyWorkflow } from "../models/comfy-workflow";
-import fs from 'fs/promises';
+import fs from "node:fs/promises";
 
-const execProm = util.promisify(require('child_process').exec);
+const execProm = util.promisify(require("node:child_process").exec);
 function getComfyLaunchCmd(args: string) {
     if (process.platform === 'win32' && process.env.VENV_ACTIVATION_PATH) {
         const venv = process.env.VENV_ACTIVATION_PATH;
@@ -41,7 +41,7 @@ export class ComfyUIService {
         throw new Error(err || "Failed to launch ComfyUI");
     }
 
-    async isComfyUIRunning(port: number = 8188, host: string = "localhost") {
+    async isComfyUIRunning(port = 8188, host = "localhost") {
         const url = `http://${host}:${port}/history`;
         try {
             const response = await fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -98,16 +98,15 @@ export class ComfyUIService {
 
 
     async getEnvVariables() {
-        let cmd = getComfyLaunchCmd("env");
+        const cmd = getComfyLaunchCmd("env");
         let err = "";
         try {
-            let { stdout, stderr } = await execProm(cmd);
+            const { stdout, stderr } = await execProm(cmd);
             if (!stderr) {
                 if (stdout) {
                     return this.parseEnvOutput(stdout.toString());
-                } else {
-                    throw new Error("Failed to get environment variables");
                 }
+                throw new Error("Failed to get environment variables");
             }
             err = stderr.toString();
         } catch (error: any) {
@@ -117,17 +116,16 @@ export class ComfyUIService {
     }
 
     async getOutputDir() {
-        let cmd = getComfyLaunchCmd("which");
+        const cmd = getComfyLaunchCmd("which");
         let err = "";
         try {
-            let { stdout, stderr } = await execProm(cmd);
+            const { stdout, stderr } = await execProm(cmd);
             if (!stderr) {
                 if (stdout) {
                     const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
                     return `${comfyPath}/output`;
-                } else {
-                    throw new Error("Failed to get output directory");
                 }
+                throw new Error("Failed to get output directory");
             }
             err = stderr.toString();
         } catch (error: any) {
@@ -141,12 +139,12 @@ export class ComfyUIService {
         const lines = stdout.split('\n').slice(3, -2);
         const result: Record<string, string> = {};
 
-        lines.forEach(line => {
+        for (const line of lines) {
             const [key, value] = line.split('│').slice(1, 3).map(s => s.trim());
             if (key && value) {
                 result[key] = value;
             }
-        });
+        };
 
         return {
             workspacePath: result['Current selected workspace'].split(" ")[1]

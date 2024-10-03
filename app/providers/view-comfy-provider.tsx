@@ -1,5 +1,5 @@
-import { IInputField, IMultiValueInput } from '@/lib/workflow-api-parser';
-import React, { createContext, useContext, useReducer, ReactNode, Dispatch, useState } from 'react';
+import type { IInputField, IMultiValueInput } from '@/lib/workflow-api-parser';
+import React, { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react';
 
 export interface IViewComfyJSON {
     file_type?: string;
@@ -46,15 +46,14 @@ export type Action =
 function viewComfyReducer(state: IViewComfyState | undefined, action: Action): IViewComfyState | undefined {
     switch (action.type) {
         case ActionType.SET_JSON:
-            if (state?.viewComfyJSON && state?.viewComfyJSON.file_type) {
+            if (state?.viewComfyJSON?.file_type) {
                 return {
                     ...state,
                     workflowApiJSON: action.payload?.workflowApiJSON,
                     file: action.payload?.file
                 }
-            } else {
-                return action.payload;
             }
+            return action.payload;
 
         case ActionType.SET_VIEW_COMFY_JSON:
             return {
@@ -62,7 +61,7 @@ function viewComfyReducer(state: IViewComfyState | undefined, action: Action): I
                 viewComfyJSON: action.payload,
             }
         case ActionType.REMOVE_INPUT:
-            return state && state.viewComfyJSON ? {
+            return state?.viewComfyJSON ? {
                 ...state,
                 viewComfyJSON: {
                     ...state.viewComfyJSON,
@@ -70,7 +69,7 @@ function viewComfyReducer(state: IViewComfyState | undefined, action: Action): I
                 }
             } : undefined;
         case ActionType.ADD_ADVANCED_INPUT:
-            return state && state.viewComfyJSON ? {
+            return state?.viewComfyJSON ? {
                 ...state,
                 viewComfyJSON: {
                     ...state.viewComfyJSON,
@@ -78,7 +77,7 @@ function viewComfyReducer(state: IViewComfyState | undefined, action: Action): I
                 }
             } : undefined;
         case ActionType.UPDATE_ADVANCED_INPUT:
-            return state && state.viewComfyJSON ? {
+            return state?.viewComfyJSON ? {
                 ...state,
                 viewComfyJSON: {
                     ...state.viewComfyJSON,
@@ -88,7 +87,7 @@ function viewComfyReducer(state: IViewComfyState | undefined, action: Action): I
                 }
             } : undefined;
         case ActionType.REMOVE_ADVANCED_INPUT:
-            return state && state.viewComfyJSON ? {
+            return state?.viewComfyJSON ? {
                 ...state,
                 viewComfyJSON: {
                     ...state.viewComfyJSON,

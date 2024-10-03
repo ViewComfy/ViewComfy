@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { type NextRequest, NextResponse } from 'next/server';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 
 const viewComfyFileName = process.env.VIEW_COMFY_FILE_NAME || "view_comfy.json";
 

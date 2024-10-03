@@ -1,7 +1,7 @@
-import path from "path";
-import fs from 'fs/promises';
-import crypto from 'crypto';
-import { IInput } from "../interfaces/input";
+import path from "node:path";
+import fs from 'node:fs/promises';
+import crypto from 'node:crypto';
+import type { IInput } from "../interfaces/input";
 
 const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");

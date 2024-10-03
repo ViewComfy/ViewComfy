@@ -1,4 +1,4 @@
-import { IInput } from "./input";
+import type { IInput } from "./input";
 
 export interface IComfyInput {
     viewComfy: IInput[];
