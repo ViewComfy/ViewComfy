@@ -35,6 +35,7 @@ export class ComfyUIService {
             if (stderr) {
                 err = stderr.toString();
             }
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             throw new Error(error || "Failed to launch ComfyUI");
         }
@@ -91,6 +92,7 @@ export class ComfyUIService {
             }
 
             return imagePaths;
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             throw new Error(error);
         }
@@ -109,6 +111,7 @@ export class ComfyUIService {
                 throw new Error("Failed to get environment variables");
             }
             err = stderr.toString();
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             throw new Error(error || "Failed to get environment variables");
         }
@@ -128,6 +131,7 @@ export class ComfyUIService {
                 throw new Error("Failed to get output directory");
             }
             err = stderr.toString();
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             throw new Error(error || "Failed to get output directory");
         }
