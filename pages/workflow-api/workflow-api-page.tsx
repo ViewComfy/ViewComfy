@@ -11,15 +11,7 @@ import JsonView from 'react18-json-view'
 import 'react18-json-view/src/style.css'
 import { ActionType, type IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
 import { Label } from '@/components/ui/label';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 
 class WorkflowJSONError extends Error {
     constructor() {
@@ -162,30 +154,18 @@ export function WorkflowApiPage() {
                     </div>
                 )}
             </main>
-            <AlertDialogDemo open={errorDialog.open} error={errorDialog.error} onClose={() => setErrorDialog({ open: false, error: undefined })} />
-        </div>
-    )
+            <ErrorAlertDialog
+                open={errorDialog.open}
+                errorDescription={getErrorText(errorDialog.error)}
+                onClose={() => setErrorDialog({ open: false, error: undefined })} />
+            </div>
+        )
 }
 
-export function AlertDialogDemo(props: { open: boolean, error: Error | undefined, onClose: () => void }) {
-    return (
-        <AlertDialog open={props.open}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Error</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {props.error && getErrorText(props.error)}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogAction onClick={props.onClose}>Ok</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    )
-}
-
-function getErrorText(error: Error) {
+function getErrorText(error: Error | undefined) {
+    if (!error) {
+        return <> </>
+    }
     if (error instanceof WorkflowJSONError) {
         return <>
             Looks like you have uploaded a workflow.json instead of workflow_api.json <br />

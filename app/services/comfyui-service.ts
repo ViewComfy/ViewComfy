@@ -3,6 +3,9 @@ import path from "node:path";
 import type { IComfyInput } from "../interfaces/comfy-input";
 import { ComfyWorkflow } from "../models/comfy-workflow";
 import fs from "node:fs/promises";
+import { ComfyErrorHandler } from "../helpers/comfy-error-handler";
+import { ComfyError, ComfyWorkflowError } from "../models/errors";
+import { missingWorkflowApiFileError, workflowApiFileName } from "../constants";
 
 const execProm = util.promisify(require("node:child_process").exec);
 function getComfyLaunchCmd(args: string) {
@@ -13,8 +16,20 @@ function getComfyLaunchCmd(args: string) {
     return `comfy ${args}`
 }
 
+const baseComfyErrorMsg = "the most common case is that the comfy-cli is pointing to the wrong ComfyUI path, to solve this you can try \n"
+    + "`comfy set-default <path-to-comfyui>`, \n"
+    + "if you're using a virtual environment remember to activate it, \n"
+    + "you can check the errors in the console where you launched the ViewComfy server \n"
+    + "and you can check our readme in: https://github.com/ViewComfy/ViewComfy for more details";
+
 
 export class ComfyUIService {
+
+    private comfyErrorHandler: ComfyErrorHandler;
+
+    constructor() {
+        this.comfyErrorHandler = new ComfyErrorHandler();
+    }
 
     async runComfyUI(args: IComfyInput) {
         if (!await this.isComfyUIRunning()) {
@@ -24,7 +39,6 @@ export class ComfyUIService {
     }
 
     async launchComfyUI() {
-        // const cmd = "comfy launch --background";
         const cmd = getComfyLaunchCmd("launch --background");
         let err: string | null = null;
         try {
@@ -35,11 +49,18 @@ export class ComfyUIService {
             if (stderr) {
                 err = stderr.toString();
             }
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
-            throw new Error(error || "Failed to launch ComfyUI");
+            console.error("Failed to launch ComfyUI")
+            console.error({ stderr: error.stderr, stdout: error.stdout });
+
+            const errorMsg = `Failed to launch ComfyUI, ${baseComfyErrorMsg}`
+            const comfyError = new ComfyWorkflowError({
+                message: "Failed to launch ComfyUI",
+                errors: [errorMsg]
+            });
+            throw comfyError;
         }
-        throw new Error(err || "Failed to launch ComfyUI");
     }
 
     async isComfyUIRunning(port = 8188, host = "localhost") {
@@ -54,19 +75,25 @@ export class ComfyUIService {
 
     async runWorkflow(args: IComfyInput) {
         let workflow = args.workflow;
+
+        const missingWorkflowError = new ComfyError({
+            message: "Failed to launch ComfyUI",
+            errors: [missingWorkflowApiFileError]
+        });
+
         if (!workflow) {
-            const workflowFile = process.env.WORKFLOW_API_FILE_NAME || "workflow_api.json";
+
             try {
-                const filePath = path.join(process.cwd(), workflowFile);
+                const filePath = path.join(process.cwd(), workflowApiFileName);
                 const fileContent = await fs.readFile(filePath, 'utf8');
                 workflow = JSON.parse(fileContent);
             } catch (error) {
-                throw new Error(`Workflow file ${workflowFile} not found`);
+                throw missingWorkflowError;
             }
         }
 
         if (!workflow) {
-            throw new Error("Workflow is required");
+            throw missingWorkflowError
         }
 
         const outputDir = await this.getOutputDir();
@@ -92,8 +119,12 @@ export class ComfyUIService {
             }
 
             return imagePaths;
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
+            const comfyError = this.comfyErrorHandler.tryToParseWorkflowError(error);
+            if (comfyError) {
+                throw comfyError;
+            }
             throw new Error(error);
         }
     }
@@ -101,41 +132,45 @@ export class ComfyUIService {
 
     async getEnvVariables() {
         const cmd = getComfyLaunchCmd("env");
-        let err = "";
         try {
-            const { stdout, stderr } = await execProm(cmd);
-            if (!stderr) {
-                if (stdout) {
-                    return this.parseEnvOutput(stdout.toString());
-                }
-                throw new Error("Failed to get environment variables");
+            const { stdout } = await execProm(cmd);
+            if (stdout) {
+                return this.parseEnvOutput(stdout.toString());
             }
-            err = stderr.toString();
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            throw new Error("Failed to get environment variables");
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
-            throw new Error(error || "Failed to get environment variables");
+            console.error("Failed to get environment variables")
+            console.error({ error });
+
+            const errorMsg = `Failed to get environment variables, ${baseComfyErrorMsg}`
+            throw new ComfyError({
+                message: "Failed to launch ComfyUI",
+                errors: [errorMsg]
+            });
         }
-        throw new Error(err || "Failed to get environment variables");
+
     }
 
     async getOutputDir() {
         const cmd = getComfyLaunchCmd("which");
-        let err = "";
         try {
-            const { stdout, stderr } = await execProm(cmd);
-            if (!stderr) {
+            const { stdout } = await execProm(cmd);
                 if (stdout) {
                     const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
                     return `${comfyPath}/output`;
                 }
                 throw new Error("Failed to get output directory");
-            }
-            err = stderr.toString();
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
-            throw new Error(error || "Failed to get output directory");
+            console.error("Failed to get output directory");
+            console.error({ error });
+            const errorMsg = `Failed to get output directory, ${baseComfyErrorMsg}`
+            throw new ComfyError({
+                message: "Failed to launch ComfyUI",
+                errors: [errorMsg]
+            });
         }
-        throw new Error(err || "Failed to get output directory");
     }
 
     parseEnvOutput(stdout: string) {

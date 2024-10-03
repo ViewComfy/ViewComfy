@@ -1,3 +1,4 @@
+import type { ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react"
 
 const url = "/api/comfy"
@@ -6,6 +7,7 @@ export interface IUsePostPlayground {
     viewComfy: { key: string, value: string | File }[],
     workflow?: object,
     onSuccess: (images: Blob[]) => void,
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     onError: (error: any) => void,
 }
 
@@ -16,9 +18,9 @@ export const usePostPlayground = () => {
         setLoading(true);
         try {
             const formData = new FormData();
-            viewComfy.forEach(({ key, value }) => {
+            for (const { key, value } of viewComfy) {
                 formData.append(key, value);
-            });
+            }
             formData.append('workflow', JSON.stringify(workflow));
 
             const response = await fetch(url, {
@@ -27,7 +29,8 @@ export const usePostPlayground = () => {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const responseError: ResponseError = await response.json();
+                throw responseError;
             }
 
             if (!response.body) {
@@ -45,7 +48,8 @@ export const usePostPlayground = () => {
 
                 buffer = concatUint8Arrays(buffer, value);
 
-                let separatorIndex;
+                let separatorIndex: number;
+                // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
                 while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
                     const imagePart = buffer.slice(0, separatorIndex);
                     buffer = buffer.slice(separatorIndex + separator.length);

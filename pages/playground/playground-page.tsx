@@ -19,19 +19,53 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { type IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-provider";
+import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
+import { ApiErrorHandler } from "@/lib/api-error-handler";
+import type { ResponseError } from "@/app/models/errors";
+
+
+const apiErrorHandler = new ApiErrorHandler();
 
 function PlaygroundPageContent() {
     const { viewComfyState } = useViewComfy();
     const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [images, setImages] = useState<{ image: Blob, url: string }[]>([]);
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
+    const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
 
     useEffect(() => {
         if (viewMode) {
             const fetchViewComfy = async () => {
-                const response = await fetch('/api/playground');
-                const data = await response.json();
-                setFormState(data.viewComfyJSON);
+                try {
+                    const response = await fetch("/api/playground");
+
+                    if (!response.ok) {
+                        const responseError: ResponseError =
+                            await response.json();
+                        throw responseError;
+                    }
+                    const data = await response.json();
+                    setFormState(data.viewComfyJSON);
+                    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+                } catch (error: any) {
+                    if (error.errorType) {
+                        const responseError =
+                            apiErrorHandler.apiErrorToDialog(error);
+                        setErrorAlertDialog({
+                            open: true,
+                            errorTitle: responseError.title,
+                            errorDescription: <>{responseError.description}</>,
+                            onClose: () => { },
+                        });
+                    } else {
+                        setErrorAlertDialog({
+                            open: true,
+                            errorTitle: "Error",
+                            errorDescription: <>{error.message}</>,
+                            onClose: () => { },
+                        });
+                    }
+                }
             };
             fetchViewComfy();
         }
@@ -72,7 +106,15 @@ function PlaygroundPageContent() {
             viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
                 onSetImages(data);
             }, onError: (error) => {
-                console.log(error);
+                const errorDialog = apiErrorHandler.apiErrorToDialog(error);
+                setErrorAlertDialog({
+                    open: true,
+                    errorTitle: errorDialog.title,
+                    errorDescription: <> {errorDialog.description} </>,
+                    onClose: () => {
+                        setErrorAlertDialog({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+                    }
+                });
             }
         });
     }
@@ -92,7 +134,11 @@ function PlaygroundPageContent() {
     }, []);
 
     if (!formState) {
-        return <></>;
+        return <>
+            <div className="flex flex-col h-screen">
+                <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
+            </div>
+        </>;
     }
 
     return (
@@ -148,6 +194,7 @@ function PlaygroundPageContent() {
                         )}
                     </div>
                 </main>
+                <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
             </div>
         </>
     )

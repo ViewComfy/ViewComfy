@@ -50,6 +50,7 @@ export function ViewComfyFormEditor() {
         }
     }, [viewComfyState, form]);
 
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     function onSubmit(data: any) {
         viewComfyStateDispatcher({
             type: ActionType.SET_VIEW_COMFY_JSON,
@@ -67,6 +68,7 @@ export function ViewComfyFormEditor() {
         });
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     function downloadViewComfyJSON(data: any) {
         viewComfyStateDispatcher({
             type: ActionType.SET_VIEW_COMFY_JSON,

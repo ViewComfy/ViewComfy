@@ -3,6 +3,9 @@ import { ReadableStream } from 'node:stream/web';
 import mime from 'mime-types';
 import { ComfyUIService } from '@/app/services/comfyui-service';
 import { type NextRequest, NextResponse } from 'next/server';
+import { ErrorResponseFactory } from '@/app/models/errors';
+
+const errorResponseFactory = new ErrorResponseFactory();
 
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
@@ -50,10 +53,12 @@ export async function POST(request: NextRequest) {
         }
         return new NextResponse('No images generated', { status: 404 });
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     } catch (error: any) {
-        console.error(error)
-        return new NextResponse(`Error running ComfyUI: ${error.message}`, { status: 500 });
+        const responseError = errorResponseFactory.getErrorResponse(error);
+
+        return NextResponse.json(responseError, {
+            status: 500,
+        });
     }
 }
-

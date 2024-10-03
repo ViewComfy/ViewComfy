@@ -13,7 +13,7 @@ export const description =
 export default function Page() {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
 
-    const [currentTab, setCurrentTab] = useState(viewMode ? TabValue.WorkflowApi : TabValue.Playground);
+    const [currentTab, setCurrentTab] = useState(viewMode ? TabValue.Playground : TabValue.WorkflowApi);
 
     return (
         <ViewComfyProvider>
