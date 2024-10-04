@@ -121,6 +121,9 @@ export class ComfyUIService {
             return imagePaths;
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
+            console.error("Failed to run the workflow")
+            console.error({ error });
+
             const comfyError = this.comfyErrorHandler.tryToParseWorkflowError(error);
             if (comfyError) {
                 throw comfyError;
