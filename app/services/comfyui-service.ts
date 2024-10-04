@@ -129,7 +129,7 @@ export class ComfyUIService {
                 throw comfyError;
             }
 
-            return new ComfyWorkflowError({
+            throw new ComfyWorkflowError({
                 message: "Error running workflow",
                 errors: ["Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. "]
             });
