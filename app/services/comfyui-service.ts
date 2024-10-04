@@ -128,7 +128,12 @@ export class ComfyUIService {
             if (comfyError) {
                 throw comfyError;
             }
-            throw new Error(error);
+
+            return new ComfyWorkflowError({
+                message: "Error running workflow",
+                errors: ["Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. "]
+            });
+
         }
     }
 
@@ -159,11 +164,11 @@ export class ComfyUIService {
         const cmd = getComfyLaunchCmd("which");
         try {
             const { stdout } = await execProm(cmd);
-                if (stdout) {
-                    const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
-                    return `${comfyPath}/output`;
-                }
-                throw new Error("Failed to get output directory");
+            if (stdout) {
+                const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
+                return `${comfyPath}/output`;
+            }
+            throw new Error("Failed to get output directory");
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             console.error("Failed to get output directory");
