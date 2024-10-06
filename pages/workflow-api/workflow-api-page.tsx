@@ -78,11 +78,11 @@ export function WorkflowApiPage() {
     const getDropZoneText = () => {
         if (viewComfyState?.viewComfyJSON) {
             return <div className="text-muted-foreground text-lg">
-                Drag and drop your <b>workflow_api.json</b> or Click Here
+                Drag and drop your <b>workflow_api.json</b> to start
             </div>
         }
         return <div className="text-muted-foreground text-lg">
-            Drag and drop your <b>workflow_api.json</b> or <b>view_comfy.json</b> or Click Here
+            Drag and drop your <b>workflow_api.json</b> or <b>view_comfy.json</b> to start
         </div>
     }
 

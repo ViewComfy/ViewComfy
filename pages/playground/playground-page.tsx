@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/drawer"
 import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
-import { PlaygroundForm } from "./playground-from";
+import { PlaygroundForm } from "./playground-form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";

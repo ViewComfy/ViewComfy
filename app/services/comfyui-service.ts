@@ -131,7 +131,7 @@ export class ComfyUIService {
 
             throw new ComfyWorkflowError({
                 message: "Error running workflow",
-                errors: ["Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. "]
+                errors: ["Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. Make sure that you can run this workflow in your local comfy"]
             });
 
         }
