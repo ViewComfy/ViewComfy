@@ -106,12 +106,12 @@ export function WorkflowApiPage() {
 
     return (
         <div className="flex flex-col h-screen">
-            <Header title="Form Editor for Workflow_api.json">
+            <Header title="Editor">
             </Header>
             <main className={`flex-1 overflow-hidden p-4 ${viewComfyState?.workflowApiJSON || viewComfyState?.viewComfyJSON ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
                 <div className="flex flex-col w-full h-full overflow-hidden">
                     {!viewComfyState?.workflowApiJSON && (
-                        <div className="w-full sm:w-1/2 sm:h-1/2 mx-auto">
+                        <div className="w-full mt-10 sm:w-1/2 sm:h-1/2 mx-auto">
                             <Dropzone
                                 onChange={setFile}
                                 fileExtension=".json"

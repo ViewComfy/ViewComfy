@@ -85,7 +85,7 @@ export function Dropzone({
                 className="flex flex-col items-center justify-center space-y-2 px-2 py-4 text-medium"
 
             >
-                <div className="flex items-center justify-center text-muted-foreground">
+                <div className="flex items-center justify-center  text-center text-muted-foreground">
                     <span className="font-medium ml-2 mr-2">{inputPlaceholder || "Drag Files to Upload or Click Here"}</span>
                     <input
                         ref={fileInputRef}

@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+comfy/*
 
 # debug
 npm-debug.log*
@@ -28,6 +29,7 @@ yarn-error.log*
 # local env files
 .env*.local
 venv
+powershell_venv
 
 # vercel
 .vercel

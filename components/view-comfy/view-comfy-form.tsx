@@ -40,7 +40,7 @@ export function ViewComfyForm(args: {
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
     return (<>
-        <ScrollArea className="w-full flex-1 rounded-md">
+        <ScrollArea className="w-full flex-1 rounded-md px-[5px]">
             <div className='relative hidden flex-col items-start gap-2 md:flex'>
                 <div id="inputs-form" className="grid w-full items-start gap-2">
                     <Form {...form}>
@@ -87,36 +87,42 @@ export function ViewComfyForm(args: {
                                     <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
                                 </div>
                             )}
-                            <fieldset disabled={isLoading} className="grid gap-2 rounded-lg border p-4">
-                                <legend className="-ml-1 px-1 text-sm font-medium">
+                            <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+                                {/* <legend className="-ml-1 px-1 text-sm font-medium">
                                     Basic Inputs
-                                </legend>
+                                </legend> */}
                                 {inputFieldArray.fields.map((field, index) => {
                                     // @ts-ignore
                                     if (field.inputs.length > 0) {
-                                        return (
-                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                               
-                                                    <legend className="-ml-1 px-1 text-sm font-medium">
-                                                        {
-                                                            // @ts-ignore
-                                                            field.title
-                                                        }
-                                                        {editMode && (
-                                                            <Button
-                                                                size="icon"
-                                                                variant="ghost"
-                                                                className="text-muted-foreground"
-                                                                onClick={() => inputFieldArray.remove(index)}
-                                                            >
-                                                                <Trash2 className="size-5" />
-                                                            </Button>
-                                                        )}
-                                                    </legend>
-                                        
-                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                            </fieldset>
-                                        )
+                                        if (editMode) {
+                                            return (
+                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                                        <legend className="-ml-1 px-1 text-sm font-medium">
+                                                            {
+                                                                // @ts-ignore
+                                                                field.title
+                                                            }
+                                                            
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="text-muted-foreground"
+                                                                    onClick={() => inputFieldArray.remove(index)}
+                                                                >
+                                                                    <Trash2 className="size-5" />
+                                                                </Button>
+                                                        </legend>
+                                                    <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                </fieldset>
+                                            )
+                                        }
+                                        else {
+                                            return (
+                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4 p-1">
+                                                    <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                </fieldset>
+                                            )
+                                        }
                                     }
                                     return undefined;
                                 })}
@@ -146,17 +152,17 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
             {!editMode && (<div className="flex items-center space-x-4 px-4">
                 <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="default" className="w-full">
-                        Show Advanced Inputs
+                        Advanced Inputs
                         <ChevronsUpDown className="size-5" />
                     </Button>
                 </CollapsibleTrigger>
             </div>
             )}
             <CollapsibleContent className="space-y-2">
-                <fieldset className="grid gap-2 rounded-lg border p-2">
-                    <legend className="-ml-1 px-1 text-sm font-medium">
+                <fieldset className="grid gap-2 rounded-lg p-1">
+                    {/* <legend className="-ml-1 px-1 text-sm font-medium">
                         Advanced Inputs
-                    </legend>
+                    </legend> */}
                     {advancedFieldArray.fields.map((advancedField, index) => (
                         <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
                             <legend className="-ml-1 px-1 text-sm font-medium">
@@ -300,7 +306,7 @@ function FormImageInput(args: { input: IInputForm, field: any, editMode?: boolea
                             </div>
                             <Button
                                 variant="secondary"
-                                className="border-2 border-dashed text-muted-foreground"
+                                className="border-2 text-muted-foreground"
                                 onClick={onDelete}
                             >
                                 <Trash2 className="size-5 mr-2" /> Remove Image
@@ -344,9 +350,11 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                     {...field}
                 />
             </FormControl>
-            <FormDescription>
-                {input.helpText}
-            </FormDescription>
+            {(input.helpText != "Helper Text") && (
+                <FormDescription>
+                    {input.helpText}
+                </FormDescription>
+            )}
         </FormItem>
     )
 }
@@ -402,9 +410,11 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
             <FormControl>
                 <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} />
             </FormControl>
-            <FormDescription>
-                {input.helpText}
-            </FormDescription>
+            {(input.helpText != "Helper Text") && (
+                <FormDescription>
+                    {input.helpText}
+                </FormDescription>
+            )}
         </FormItem>
     )
 }

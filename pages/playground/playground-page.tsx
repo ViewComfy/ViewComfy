@@ -176,8 +176,7 @@ function PlaygroundPageContent() {
                                 <Loader />
                             </div>
                         ) : (
-                            <ScrollArea className="w-full h-full flex">
-                                <div className="flex-1 p-4 flex items-center justify-center">
+                                <div className="flex-1 h-full p-4 flex items-center justify-center overflow-y-auto">
                                     <div className="flex flex-wrap justify-center items-center gap-4 w-full h-full">
                                         {images.map((image, index) => (
                                             <div key={image.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
@@ -190,7 +189,6 @@ function PlaygroundPageContent() {
                                         ))}
                                     </div>
                                 </div>
-                            </ScrollArea>
                         )}
                     </div>
                 </main>

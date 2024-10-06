@@ -22,8 +22,8 @@ export function ErrorAlertDialog(props: { open: boolean, errorTitle?: string, er
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex-col items-start">
                     <p className={cn("text-sm text-muted-foreground w-full mb-4")}>
-                        ViewComfy is in beta, if you find any bug or need help, you can join our
-                        <Link href="https://discord.gg/DXubrz5R7E" target="_blank" rel="noopener noreferrer" className="underline"> Discord</Link> or create an issue on <Link href="https://github.com/ViewComfy/ViewComfy" target="_blank" rel="noopener noreferrer" className="underline">GitHub</Link>
+                        ViewComfy is in beta, if you find any bug or need help, you can join our&nbsp;
+                        <Link href="https://discord.gg/DXubrz5R7E" target="_blank" rel="noopener noreferrer" className="underline">Discord</Link> or create an issue on <Link href="https://github.com/ViewComfy/ViewComfy" target="_blank" rel="noopener noreferrer" className="underline">GitHub</Link>
                     </p>
                     <AlertDialogAction onClick={props.onClose}>Ok</AlertDialogAction>
                 </AlertDialogFooter>
