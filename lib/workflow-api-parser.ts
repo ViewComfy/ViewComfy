@@ -6,7 +6,7 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text";
+    valueType: InputValueType | "long-text" | "video";
     validations: { required: boolean };
     key: string;
 }
@@ -65,6 +65,20 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON 
                         key: `${key}-${value.class_type}`
                     });
                 }
+            } else if (value.class_type === "VHS_LoadVideo") {
+                const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
+                console.log('uploadInputIndex: ', uploadInputIndex)
+                console.log('inputs: ', inputs)
+                if (typeof uploadInputIndex !== "undefined") {
+                    console.log('true')
+                    inputs[uploadInputIndex].valueType = "video"
+                    inputs[uploadInputIndex].value = null
+                }
+                basicInputs.push({
+                    title: value._meta.title,
+                    inputs: inputs,
+                    key: `${key}-${value.class_type}`
+                });
             } else if (inputs.length > 0) {
                 advancedInputs.push({
                     title: value._meta.title,

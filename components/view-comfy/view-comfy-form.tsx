@@ -230,9 +230,9 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
         return (
             <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
-    } else if (input.valueType === "image") {
+    } else if (input.valueType === "video" || input.valueType === "image") {
         return (
-            <FormImageInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
     } else {
         return (
@@ -241,12 +241,19 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
     }
 }
 
-function FormImageInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
-    const [image, setImage] = useState({
+    const [media, setMedia] = useState({
         src: "",
         name: "",
     });
+    
+    let extensions:string[] = []
+    if (input.valueType === "image") {
+        extensions = ['png', 'jpg', 'jpeg']
+    } else if (input.valueType === "video") {
+        extensions = ['mp4']
+    }
 
     useEffect(() => {
         if (field.value && field.value instanceof File) {
@@ -254,13 +261,23 @@ function FormImageInput(args: { input: IInputForm, field: any, editMode?: boolea
             reader.onload = (e) => {
                 try {
                     const content = e.target?.result as string;
-                    setImage({
-                        src: content,
-                        name: field.value.name
-                    });
+                    const name = field.value.name
+                    if (extensions.some(extension => name.endsWith(extension))) {
+                        setMedia({
+                            src: content,
+                            name: name
+                        });
+                    } else {
+                        console.error('media type not supported');
+                        field.onChange(null);
+                        setMedia({
+                            src: "",
+                            name: ""
+                        });
+                    }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
-                    setImage({
+                    setMedia({
                         src: "",
                         name: ""
                     });
@@ -272,7 +289,7 @@ function FormImageInput(args: { input: IInputForm, field: any, editMode?: boolea
 
     const onDelete = () => {
         field.onChange(null);
-        setImage({
+        setMedia({
             src: "",
             name: ""
         });
@@ -294,22 +311,28 @@ function FormImageInput(args: { input: IInputForm, field: any, editMode?: boolea
             </FormLabel>
             <FormControl>
                 <>
-                    {image.src ? (
+                    {media.src ? (
                         <div key={input.id} className="flex flex-col items-center gap-2">
                             <div className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md">
-                                <img
-                                    src={image.src}
-                                    alt={image.name}
-                                    className="max-w-full max-h-full object-contain"
-                                />
-
+                                {(input.valueType === "image") && (
+                                    <img
+                                        src={media.src}
+                                        alt={media.name}
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                )}
+                                {(input.valueType === "video") && (
+                                    <video className="max-w-full max-h-full object-contain">
+                                        <source src={media.src} />                                 
+                                    </video>
+                                )}
                             </div>
                             <Button
                                 variant="secondary"
                                 className="border-2 text-muted-foreground"
                                 onClick={onDelete}
                             >
-                                <Trash2 className="size-5 mr-2" /> Remove Image
+                                <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
                             </Button>
                         </div>
                     ) : (
