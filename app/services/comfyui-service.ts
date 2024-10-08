@@ -32,6 +32,7 @@ export class ComfyUIService {
     }
 
     async runComfyUI(args: IComfyInput) {
+        console.log('GB, launching comfy with args: ', args)
         if (!await this.isComfyUIRunning()) {
             await this.launchComfyUI();
         }
@@ -110,15 +111,18 @@ export class ComfyUIService {
             }
 
             const outputFiles = await fs.readdir(comfyWorkflow.getOutputDir());
-            const imagePaths = [];
+            console.log('GB, outputFiles: ', outputFiles)
+            const outputPaths = [];
             for (const file of outputFiles) {
+                console.log('GB, comfyWorkflow.getFileNamePrefix()', comfyWorkflow.getFileNamePrefix())
                 if (file.startsWith(comfyWorkflow.getFileNamePrefix())) {
                     const filePath = path.join(comfyWorkflow.getOutputDir(), file);
-                    imagePaths.push(filePath);
+                    outputPaths.push(filePath);
                 }
             }
+            console.log('GB, outputPaths: ', outputPaths)
 
-            return imagePaths;
+            return outputPaths;
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             console.error("Failed to run the workflow")

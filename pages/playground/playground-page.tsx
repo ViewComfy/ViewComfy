@@ -26,10 +26,10 @@ import type { ResponseError } from "@/app/models/errors";
 
 const apiErrorHandler = new ApiErrorHandler();
 
-function PlaygroundPageContent() {
+function PlaygroundPageContent() {    
     const { viewComfyState } = useViewComfy();
     const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
-    const [images, setImages] = useState<{ image: Blob, url: string }[]>([]);
+    const [outputs, setOutputs] = useState<{ outputs: Blob, url: string }[]>([]);
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
 
@@ -82,7 +82,7 @@ function PlaygroundPageContent() {
     useEffect(() => {
         if (viewComfyState?.viewComfyJSON) {
             setFormState({ ...viewComfyState.viewComfyJSON });
-            setImages([]);
+            setOutputs([]);
         }
     }, [viewComfyState?.viewComfyJSON]);
 
@@ -104,7 +104,7 @@ function PlaygroundPageContent() {
 
         doPost({
             viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
-                onSetImages(data);
+                onSetOutputs(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -119,16 +119,16 @@ function PlaygroundPageContent() {
         });
     }
 
-    const onSetImages = (images: Blob[]) => {
-        const newImages = images.map((image) => ({ image, url: URL.createObjectURL(image) }));
-        setImages(newImages);
+    const onSetOutputs = (outputs: Blob[]) => {
+        const newOutputs = outputs.map((output) => ({ output, url: URL.createObjectURL(output) }));
+        setOutputs(newOutputs);
     };
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         return () => {
-            for (const image of images) {
-                URL.revokeObjectURL(image.url);
+            for (const output of outputs) {
+                URL.revokeObjectURL(output.url);
             }
         };
     }, []);
@@ -178,13 +178,24 @@ function PlaygroundPageContent() {
                         ) : (
                                 <div className="flex-1 h-full p-4 flex items-center justify-center overflow-y-auto">
                                     <div className="flex flex-wrap justify-center items-center gap-4 w-full h-full">
-                                        {images.map((image, index) => (
-                                            <div key={image.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
-                                                <img
-                                                    src={image.url}
-                                                    alt={`${image.url}`}
-                                                    className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
-                                                />
+                                        {outputs.map((output, index) => (
+                                            <div key={output.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
+                                                {(true) && (
+                                                    <img
+                                                        src={output.url}
+                                                        alt={`${output.url}`}
+                                                        className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
+                                                    />
+                                                )}
+                                                {(false) && (
+                                                    <video 
+                                                        className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
+                                                        autoPlay
+                                                        loop 
+                                                    >
+                                                        <source src={output.url} />                                 
+                                                    </video>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

@@ -114,7 +114,7 @@ export function WorkflowApiPage() {
                         <div className="w-full mt-10 sm:w-1/2 sm:h-1/2 mx-auto">
                             <Dropzone
                                 onChange={setFile}
-                                fileExtension=".json"
+                                fileExtensions={[".json"]}
                                 className="custom-dropzone w-full h-full"
                                 inputPlaceholder={getDropZoneText()}
                             />

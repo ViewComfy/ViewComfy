@@ -6,7 +6,7 @@ const url = "/api/comfy"
 export interface IUsePostPlayground {
     viewComfy: { key: string, value: string | File }[],
     workflow?: object,
-    onSuccess: (images: Blob[]) => void,
+    onSuccess: (outputs: Blob[]) => void,
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     onError: (error: any) => void,
 }
@@ -39,8 +39,8 @@ export const usePostPlayground = () => {
 
             const reader = response.body.getReader();
             let buffer = new Uint8Array(0);
-            const images: Blob[] = [];
-            const separator = new TextEncoder().encode('--IMAGE_SEPARATOR--');
+            const output: Blob[] = [];
+            const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -51,20 +51,20 @@ export const usePostPlayground = () => {
                 let separatorIndex: number;
                 // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
                 while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
-                    const imagePart = buffer.slice(0, separatorIndex);
+                    const outputPart = buffer.slice(0, separatorIndex);
                     buffer = buffer.slice(separatorIndex + separator.length);
 
-                    const mimeEndIndex = findSubarray(imagePart, new TextEncoder().encode('\r\n\r\n'));
+                    const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
                     if (mimeEndIndex !== -1) {
-                        const mimeType = new TextDecoder().decode(imagePart.slice(0, mimeEndIndex)).split(': ')[1];
-                        const imageData = imagePart.slice(mimeEndIndex + 4);
-                        const blob = new Blob([imageData], { type: mimeType });
-                        images.push(blob);
+                        const mimeType = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex)).split(': ')[1];
+                        const outputData = outputPart.slice(mimeEndIndex + 4);
+                        const blob = new Blob([outputData], { type: mimeType });
+                        output.push(blob);
                     }
                 }
             }
 
-            onSuccess(images);
+            onSuccess(output);
         } catch (error) {
             onError(error);
         }
