@@ -111,16 +111,21 @@ export class ComfyUIService {
             }
 
             const outputFiles = await fs.readdir(comfyWorkflow.getOutputDir());
-            console.log('GB, outputFiles: ', outputFiles)
             const outputPaths = [];
+            const fileFormats = new Set<string>();
             for (const file of outputFiles) {
-                console.log('GB, comfyWorkflow.getFileNamePrefix()', comfyWorkflow.getFileNamePrefix())
                 if (file.startsWith(comfyWorkflow.getFileNamePrefix())) {
+                    const fileExtension = path.extname(file).toLowerCase();
+                    fileFormats.add(fileExtension);
                     const filePath = path.join(comfyWorkflow.getOutputDir(), file);
                     outputPaths.push(filePath);
                 }
             }
-            console.log('GB, outputPaths: ', outputPaths)
+
+            // If there are multiple file formats, remove PNG files
+            if (fileFormats.size > 1) {
+                return outputPaths.filter(filePath => path.extname(filePath).toLowerCase() !== '.png');
+            }
 
             return outputPaths;
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
