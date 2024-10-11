@@ -140,7 +140,7 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-
+    
     return (
         <>
             <div className="flex flex-col h-screen">
@@ -180,14 +180,14 @@ function PlaygroundPageContent() {
                                     <div className="flex flex-wrap justify-center items-center gap-4 w-full h-full">
                                         {outputs.map((output, index) => (
                                             <div key={output.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
-                                                {(true) && (
+                                                {(output.outputs.type.startsWith('image/')) && (
                                                     <img
                                                         src={output.url}
                                                         alt={`${output.url}`}
                                                         className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
                                                     />
                                                 )}
-                                                {(false) && (
+                                                {(output.outputs.type.startsWith('video/')) && (
                                                     <video 
                                                         className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
                                                         autoPlay
