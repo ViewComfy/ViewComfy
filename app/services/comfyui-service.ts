@@ -32,7 +32,6 @@ export class ComfyUIService {
     }
 
     async runComfyUI(args: IComfyInput) {
-        console.log('GB, launching comfy with args: ', args)
         if (!await this.isComfyUIRunning()) {
             await this.launchComfyUI();
         }
@@ -126,7 +125,7 @@ export class ComfyUIService {
             if (fileFormats.size > 1) {
                 return outputPaths.filter(filePath => path.extname(filePath).toLowerCase() !== '.png');
             }
-
+            
             return outputPaths;
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {

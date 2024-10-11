@@ -101,7 +101,7 @@ function PlaygroundPageContent() {
                 inputs.push({ key: input.key, value: input.value });
             }
         }
-
+        
         doPost({
             viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
                 onSetOutputs(data);
@@ -120,7 +120,7 @@ function PlaygroundPageContent() {
     }
 
     const onSetOutputs = (outputs: Blob[]) => {
-        const newOutputs = outputs.map((output) => ({ output, url: URL.createObjectURL(output) }));
+        const newOutputs = outputs.map((output) => ({ outputs: output, url: URL.createObjectURL(output) }));
         setOutputs(newOutputs);
     };
 

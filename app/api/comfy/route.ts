@@ -8,7 +8,6 @@ import { ErrorResponseFactory } from '@/app/models/errors';
 const errorResponseFactory = new ErrorResponseFactory();
 
 export async function POST(request: NextRequest) {
-    console.log('GB, posting request: ')
     const formData = await request.formData();
     let workflow = undefined;
     if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
     try {
         const comfyUIService = new ComfyUIService();
         const outputPaths = await comfyUIService.runComfyUI({ workflow, viewComfy });
-        console.log('GB, outputPaths: ', outputPaths)
 
         if (outputPaths.length > 0) {
             const stream = new ReadableStream({
