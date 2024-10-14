@@ -110,15 +110,23 @@ export class ComfyUIService {
             }
 
             const outputFiles = await fs.readdir(comfyWorkflow.getOutputDir());
-            const imagePaths = [];
+            const outputPaths = [];
+            const fileFormats = new Set<string>();
             for (const file of outputFiles) {
                 if (file.startsWith(comfyWorkflow.getFileNamePrefix())) {
+                    const fileExtension = path.extname(file).toLowerCase();
+                    fileFormats.add(fileExtension);
                     const filePath = path.join(comfyWorkflow.getOutputDir(), file);
-                    imagePaths.push(filePath);
+                    outputPaths.push(filePath);
                 }
             }
 
-            return imagePaths;
+            // If there are multiple file formats, remove PNG files
+            if (fileFormats.size > 1) {
+                return outputPaths.filter(filePath => path.extname(filePath).toLowerCase() !== '.png');
+            }
+            
+            return outputPaths;
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
             console.error("Failed to run the workflow")

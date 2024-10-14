@@ -27,18 +27,18 @@ export async function POST(request: NextRequest) {
 
     try {
         const comfyUIService = new ComfyUIService();
-        const imagePaths = await comfyUIService.runComfyUI({ workflow, viewComfy });
+        const outputPaths = await comfyUIService.runComfyUI({ workflow, viewComfy });
 
-        if (imagePaths.length > 0) {
+        if (outputPaths.length > 0) {
             const stream = new ReadableStream({
                 async start(controller) {
-                    for (const imagePath of imagePaths) {
-                        const mimeType = mime.lookup(imagePath) || 'application/octet-stream';
-                        const imageBuffer = await fs.readFile(imagePath);
+                    for (const outputPath of outputPaths) {
+                        const mimeType = mime.lookup(outputPath) || 'application/octet-stream';
+                        const ooutputBuffer = await fs.readFile(outputPath);
                         const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                         controller.enqueue(new TextEncoder().encode(mimeInfo));
-                        controller.enqueue(new Uint8Array(imageBuffer));
-                        controller.enqueue(new TextEncoder().encode('\r\n--IMAGE_SEPARATOR--\r\n'));
+                        controller.enqueue(new Uint8Array(ooutputBuffer));
+                        controller.enqueue(new TextEncoder().encode('\r\n--BLOB_SEPARATOR--\r\n'));
                     }
                     controller.close();
                 }

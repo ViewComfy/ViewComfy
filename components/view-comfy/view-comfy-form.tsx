@@ -248,11 +248,11 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
         name: "",
     });
     
-    let extensions:string[] = []
+    let fileExtensions:string[] = []
     if (input.valueType === "image") {
-        extensions = ['png', 'jpg', 'jpeg']
+        fileExtensions = ['png', 'jpg', 'jpeg']
     } else if (input.valueType === "video") {
-        extensions = ['mp4']
+        fileExtensions = ['mp4', 'avi', 'webm', 'mkv', 'gif']
     }
 
     useEffect(() => {
@@ -262,19 +262,10 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                 try {
                     const content = e.target?.result as string;
                     const name = field.value.name
-                    if (extensions.some(extension => name.endsWith(extension))) {
-                        setMedia({
-                            src: content,
-                            name: name
-                        });
-                    } else {
-                        console.error('media type not supported');
-                        field.onChange(null);
-                        setMedia({
-                            src: "",
-                            name: ""
-                        });
-                    }
+                    setMedia({
+                        src: content,
+                        name: name
+                    });
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     setMedia({
@@ -322,7 +313,11 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                                     />
                                 )}
                                 {(input.valueType === "video") && (
-                                    <video className="max-w-full max-h-full object-contain">
+                                    <video 
+                                        className="max-w-full max-h-full object-contain"
+                                        autoPlay
+                                        loop    
+                                    >
                                         <source src={media.src} />                                 
                                     </video>
                                 )}
@@ -339,7 +334,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                         <Dropzone
                             key={input.id}
                             onChange={field.onChange}
-                            fileExtension=""
+                            fileExtensions={fileExtensions}
                             className="form-dropzone"
                             inputPlaceholder={field.value?.name}
                         />

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 interface DropzoneProps {
     onChange: (file: File | null) => void;
     className?: string;
-    fileExtension?: string;
+    fileExtensions?: string[];
     inputPlaceholder?: React.ReactNode;
 }
 
@@ -14,7 +14,7 @@ interface DropzoneProps {
 export function Dropzone({
     onChange,
     className,
-    fileExtension,
+    fileExtensions,
     inputPlaceholder,
     ...props
 }: DropzoneProps) {
@@ -53,8 +53,9 @@ export function Dropzone({
         const uploadedFile = files[0];
 
         // Check file extension
-        if (fileExtension && !uploadedFile.name.endsWith(`${fileExtension}`)) {
-            setError(`Invalid file type. Expected: ${fileExtension}`);
+        if (fileExtensions && !fileExtensions.some(fileExtension => uploadedFile.name.endsWith(fileExtension))) {
+        // if (fileExtensions && !uploadedFile.name.endsWith(`${fileExtension}`)) {
+            setError(`Invalid file type. Expected: ${fileExtensions.join(', ')}`);
             return;
         }
 
@@ -90,7 +91,7 @@ export function Dropzone({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept={`${fileExtension}`}
+                        accept={`${fileExtensions}`}
                         onChange={handleFileInputChange}
                         className="hidden"
                         multiple={false}

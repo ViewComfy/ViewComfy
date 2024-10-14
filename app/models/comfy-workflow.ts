@@ -41,7 +41,7 @@ export class ComfyWorkflow {
             }
         }
         for (const key in this.workflow) {
-            if (this.workflow[key].class_type === "SaveImage") {
+            if (this.workflow[key].class_type === "SaveImage" || this.workflow[key].class_type === "VHS_VideoCombine") {
                 this.workflow[key].inputs.filename_prefix = this.getFileNamePrefix();
             }
         }

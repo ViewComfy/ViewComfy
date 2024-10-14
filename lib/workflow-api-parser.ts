@@ -67,10 +67,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON 
                 }
             } else if (value.class_type === "VHS_LoadVideo") {
                 const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
-                console.log('uploadInputIndex: ', uploadInputIndex)
-                console.log('inputs: ', inputs)
                 if (typeof uploadInputIndex !== "undefined") {
-                    console.log('true')
                     inputs[uploadInputIndex].valueType = "video"
                     inputs[uploadInputIndex].value = null
                 }
