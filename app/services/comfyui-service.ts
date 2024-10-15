@@ -1,208 +1,118 @@
-import util from "node:util";
 import path from "node:path";
-import type { IComfyInput } from "../interfaces/comfy-input";
-import { ComfyWorkflow } from "../models/comfy-workflow";
+import type { IComfyInput } from "@/app/interfaces/comfy-input";
+import { ComfyWorkflow } from "@/app/models/comfy-workflow";
 import fs from "node:fs/promises";
-import { ComfyErrorHandler } from "../helpers/comfy-error-handler";
-import { ComfyError, ComfyWorkflowError } from "../models/errors";
-import { missingWorkflowApiFileError, workflowApiFileName } from "../constants";
-
-const execProm = util.promisify(require("node:child_process").exec);
-function getComfyLaunchCmd(args: string) {
-    if (process.platform === 'win32' && process.env.VENV_ACTIVATION_PATH) {
-        const venv = process.env.VENV_ACTIVATION_PATH;
-        return `powershell -NoProfile -ExecutionPolicy Bypass -Command "& {. .${venv}; comfy ${args}}"`
-    }
-    return `comfy ${args}`
-}
-
-const baseComfyErrorMsg = "the most common case is that the comfy-cli is pointing to the wrong ComfyUI path, to solve this you can try \n"
-    + "`comfy set-default <path-to-comfyui>`, \n"
-    + "if you're using a virtual environment remember to activate it, \n"
-    + "you can check the errors in the console where you launched the ViewComfy server \n"
-    + "and you can check our readme in: https://github.com/ViewComfy/ViewComfy for more details";
-
+import { ComfyErrorHandler } from "@/app/helpers/comfy-error-handler";
+import { ComfyError, ComfyWorkflowError } from "@/app/models/errors";
+import { missingWorkflowApiFileError, workflowApiFileName } from "@/app/constants";
+import { ComfyUIAPIService } from "@/app/services/comfyui-api-service";
+import mime from 'mime-types';
 
 export class ComfyUIService {
-
     private comfyErrorHandler: ComfyErrorHandler;
+    private comfyUIAPIService: ComfyUIAPIService;
+    private clientId: string;
 
     constructor() {
+        this.clientId = crypto.randomUUID();
         this.comfyErrorHandler = new ComfyErrorHandler();
-    }
-
-    async runComfyUI(args: IComfyInput) {
-        if (!await this.isComfyUIRunning()) {
-            await this.launchComfyUI();
-        }
-        return await this.runWorkflow(args);
-    }
-
-    async launchComfyUI() {
-        const cmd = getComfyLaunchCmd("launch --background");
-        let err: string | null = null;
-        try {
-            const { stdout, stderr } = await execProm(cmd);
-            if (stdout) {
-                return stdout.toString();
-            }
-            if (stderr) {
-                err = stderr.toString();
-            }
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        } catch (error: any) {
-            console.error("Failed to launch ComfyUI")
-            console.error({ stderr: error.stderr, stdout: error.stdout });
-
-            const errorMsg = `Failed to launch ComfyUI, ${baseComfyErrorMsg}`
-            const comfyError = new ComfyWorkflowError({
-                message: "Failed to launch ComfyUI",
-                errors: [errorMsg]
-            });
-            throw comfyError;
-        }
-    }
-
-    async isComfyUIRunning(port = 8188, host = "localhost") {
-        const url = `http://${host}:${port}/history`;
-        try {
-            const response = await fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
-            return response.status === 200;
-        } catch (error) {
-            return false;
-        }
+        this.comfyUIAPIService = new ComfyUIAPIService(this.clientId);
     }
 
     async runWorkflow(args: IComfyInput) {
         let workflow = args.workflow;
 
-        const missingWorkflowError = new ComfyError({
-            message: "Failed to launch ComfyUI",
-            errors: [missingWorkflowApiFileError]
-        });
-
         if (!workflow) {
-
-            try {
-                const filePath = path.join(process.cwd(), workflowApiFileName);
-                const fileContent = await fs.readFile(filePath, 'utf8');
-                workflow = JSON.parse(fileContent);
-            } catch (error) {
-                throw missingWorkflowError;
-            }
+            workflow = await this.getLocalWorkflow();
         }
 
-        if (!workflow) {
-            throw missingWorkflowError
-        }
-
-        const outputDir = await this.getOutputDir();
-        const comfyWorkflow = new ComfyWorkflow(workflow, outputDir);
+        const comfyWorkflow = new ComfyWorkflow(workflow);
         await comfyWorkflow.setViewComfy(args.viewComfy);
-        await comfyWorkflow.saveWorkflowAsFile();
 
         try {
-            const cmd = getComfyLaunchCmd(`run --workflow "${comfyWorkflow.getWorkflowFilePath()}" --wait`);
-            const { stdout, stderr } = await execProm(cmd);
 
-            if (stderr) {
-                throw new Error(stderr);
+            const promptData = await this.comfyUIAPIService.queuePrompt(workflow);
+            const outputFiles = promptData.outputFiles;
+            const comfyUIAPIService = this.comfyUIAPIService;
+
+            if (outputFiles.length === 0) {
+                throw new ComfyWorkflowError({
+                    message: "No output files found",
+                    errors: ["No output files found"],
+                });
             }
 
-            const outputFiles = await fs.readdir(comfyWorkflow.getOutputDir());
-            const outputPaths = [];
-            const fileFormats = new Set<string>();
-            for (const file of outputFiles) {
-                if (file.startsWith(comfyWorkflow.getFileNamePrefix())) {
-                    const fileExtension = path.extname(file).toLowerCase();
-                    fileFormats.add(fileExtension);
-                    const filePath = path.join(comfyWorkflow.getOutputDir(), file);
-                    outputPaths.push(filePath);
-                }
-            }
+            const stream = new ReadableStream<Uint8Array>({
+                async start(controller) {
+                    for (const file of outputFiles) {
+                        try {
+                            const ooutputBuffer = await comfyUIAPIService.getOutputFiles({ file });
+                            const mimeType =
+                                mime.lookup(file?.filename) || "application/octet-stream";
+                            const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
+                            controller.enqueue(new TextEncoder().encode(mimeInfo));
+                            controller.enqueue(
+                                new Uint8Array(await ooutputBuffer.arrayBuffer()),
+                            );
+                            controller.enqueue(
+                                new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"),
+                            );
+                        } catch (error) {
+                            console.error("Failed to get output file");
+                            console.error(error);
+                        }
+                    }
+                    controller.close();
+                },
+            });
 
-            // If there are multiple file formats, remove PNG files
-            if (fileFormats.size > 1) {
-                return outputPaths.filter(filePath => path.extname(filePath).toLowerCase() !== '.png');
-            }
-            
-            return outputPaths;
+            return stream;
+
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         } catch (error: any) {
-            console.error("Failed to run the workflow")
+            console.error("Failed to run the workflow");
             console.error({ error });
 
-            const comfyError = this.comfyErrorHandler.tryToParseWorkflowError(error);
+            if (error instanceof ComfyWorkflowError) {
+                throw error;
+            }
+
+            const comfyError =
+                this.comfyErrorHandler.tryToParseWorkflowError(error);
             if (comfyError) {
                 throw comfyError;
             }
 
             throw new ComfyWorkflowError({
                 message: "Error running workflow",
-                errors: ["Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. Make sure that you can run this workflow in your local comfy"]
+                errors: [
+                    "Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. Make sure that you can run this workflow in your local comfy",
+                ],
             });
-
         }
     }
 
+    private async getLocalWorkflow(): Promise<object> {
+        const missingWorkflowError = new ComfyError({
+            message: "Failed to launch ComfyUI",
+            errors: [missingWorkflowApiFileError],
+        });
 
-    async getEnvVariables() {
-        const cmd = getComfyLaunchCmd("env");
+        let workflow = undefined;
+
         try {
-            const { stdout } = await execProm(cmd);
-            if (stdout) {
-                return this.parseEnvOutput(stdout.toString());
-            }
-            throw new Error("Failed to get environment variables");
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        } catch (error: any) {
-            console.error("Failed to get environment variables")
-            console.error({ error });
-
-            const errorMsg = `Failed to get environment variables, ${baseComfyErrorMsg}`
-            throw new ComfyError({
-                message: "Failed to launch ComfyUI",
-                errors: [errorMsg]
-            });
+            const filePath = path.join(process.cwd(), workflowApiFileName);
+            const fileContent = await fs.readFile(filePath, "utf8");
+            workflow = JSON.parse(fileContent);
+        } catch (error) {
+            throw missingWorkflowError;
         }
 
-    }
-
-    async getOutputDir() {
-        const cmd = getComfyLaunchCmd("which");
-        try {
-            const { stdout } = await execProm(cmd);
-            if (stdout) {
-                const comfyPath = stdout.toString().split("Target ComfyUI path: ")[1].replace(/\r?\n/g, '').replace(/'/g, '');
-                return `${comfyPath}/output`;
-            }
-            throw new Error("Failed to get output directory");
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        } catch (error: any) {
-            console.error("Failed to get output directory");
-            console.error({ error });
-            const errorMsg = `Failed to get output directory, ${baseComfyErrorMsg}`
-            throw new ComfyError({
-                message: "Failed to launch ComfyUI",
-                errors: [errorMsg]
-            });
+        if (!workflow) {
+            throw missingWorkflowError;
         }
+
+        return workflow;
     }
 
-    parseEnvOutput(stdout: string) {
-        // comfy which
-        const lines = stdout.split('\n').slice(3, -2);
-        const result: Record<string, string> = {};
-
-        for (const line of lines) {
-            const [key, value] = line.split('│').slice(1, 3).map(s => s.trim());
-            if (key && value) {
-                result[key] = value;
-            }
-        };
-
-        return {
-            workspacePath: result['Current selected workspace'].split(" ")[1]
-        };
-    }
 }
