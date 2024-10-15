@@ -86,7 +86,14 @@ export class ComfyUIAPIService {
     }
 
     private comfyEventDataHandler(eventData: string) {
-        const event = JSON.parse(eventData) as IComfyUIWSEventData;
+        let event: IComfyUIWSEventData | undefined;
+        try {
+            event = JSON.parse(eventData) as IComfyUIWSEventData;
+        } catch (error) {
+            // console.log("Error parsing event data:", eventData);
+            // console.error(error);
+            return;
+        }
 
         const data = event.data as object;
         // Skip any messages that aren't about our prompt
@@ -246,10 +253,11 @@ export class ComfyUIAPIService {
         const output = data.output as { [key: string]: unknown } | undefined;
         for (const key in output) {
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-            for (const value of output[key] as any[]) {
-                this.outputFiles.push(value)
+            for (const dict of output[key] as any[]) {
+                if (dict.type !== "temp") {
+                    this.outputFiles.push(dict)
+                }
             }
         }
-
     }
 }
