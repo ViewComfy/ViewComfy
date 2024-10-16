@@ -1,6 +1,6 @@
 import { useFieldArray, useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button";
-import { IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-provider";
+import type { IViewComfyJSON } from "@/app/providers/view-comfy-provider";
 import { cn } from "@/lib/utils";
 import { ViewComfyForm } from "@/components/view-comfy/view-comfy-form";
 import { WandSparkles } from "lucide-react";
@@ -35,8 +35,8 @@ export function PlaygroundForm(props: {
         <>
             <ViewComfyForm form={form} onSubmit={onSubmit} inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} isLoading={loading}>
                 <div className={cn("sticky bottom-0 p-4 bg-background w-full  rounded-md")}>
-                <Button type="submit" className="w-full" disabled={loading}>
-                    Generate <WandSparkles className={cn(`size-5 ml-2`)} /> 
+                    <Button type="submit" className="w-full" disabled={loading}>
+                        Generate <WandSparkles className={cn("size-5 ml-2")} />
                     </Button>
                 </div>
             </ViewComfyForm>

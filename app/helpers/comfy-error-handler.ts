@@ -1,4 +1,4 @@
-import { ComfyWorkflowError } from "../models/errors";
+import { ComfyWorkflowError } from "@/app/models/errors";
 
 interface ErrorInfo {
     message: string;
@@ -15,29 +15,16 @@ type ErrorDict = Record<string, WorkflowNodeError>;
 export class ComfyErrorHandler {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     public tryToParseWorkflowError(error: any): ComfyWorkflowError | undefined {
-        if (!error.stdout) {
-            return;
-        }
-        const stdout = error.stdout;
-        const errorIndex = stdout.indexOf("Error running workflow");
-        if (errorIndex === -1) {
-            return;
-        }
-
-        let jsonStr = stdout.slice(errorIndex + "Error running workflow".length).trim();
-
-        // Remove any newline characters and escape any that are within string values
-        jsonStr = jsonStr.replace(/\n/g, "")
-            .replace(/\\n/g, "\\n")
-            .replace(/\r/g, "")
-            .replace(/\\r/g, "\\r");
-
         try {
-            // Parse the JSON string into a JavaScript object
-            const errorDict = JSON.parse(jsonStr);
+            if (error.node_errors) {
+                return new ComfyWorkflowError({
+                    message: error.message,
+                    errors: this.extractErrors(error.node_errors)
+                });
+            }
             return new ComfyWorkflowError({
                 message: "Error running workflow",
-                errors: this.extractErrors(errorDict)
+                errors: this.extractErrors(error.message)
             });
         } catch (error) {
             console.error("Error parsing JSON. The extracted string might not be valid JSON.", error);

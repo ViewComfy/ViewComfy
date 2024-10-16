@@ -12,14 +12,12 @@ export class ComfyWorkflow {
     private workflowFileName: string;
     private workflowFilePath: string;
     private id: string;
-    private outputDir: string;
 
-    constructor(workflow: object, outputDir: string) {
+    constructor(workflow: object) {
         this.workflow = workflow;
         this.id = crypto.randomUUID();
         this.workflowFileName = `workflow_${this.id}.json`;
         this.workflowFilePath = path.join(COMFY_WORKFLOWS_DIR, this.workflowFileName);
-        this.outputDir = outputDir;
     }
 
     public async setViewComfy(viewComfy: IInput[]) {
@@ -51,20 +49,12 @@ export class ComfyWorkflow {
         return this.workflow;
     }
 
-    public async saveWorkflowAsFile() {
-        await fs.writeFile(this.workflowFilePath, JSON.stringify(this.workflow, null, 2));
-    }
-
     public getWorkflowFilePath() {
         return this.workflowFilePath;
     }
 
     public getWorkflowFileName() {
         return this.workflowFileName;
-    }
-
-    public getOutputDir() {
-        return this.outputDir;
     }
 
     public getFileNamePrefix() {

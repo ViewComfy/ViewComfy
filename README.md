@@ -21,13 +21,6 @@ The Playground is a simplified UI where you can run your workflows. It can easil
 
 ### How to use it
 
-You need to have [comfy-cli](https://github.com/Comfy-Org/comfy-cli/) installed
-
-```bash
-pip install comfy-cli
-comfy install
-```
-
 Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
 
 Clone the repo
@@ -36,18 +29,7 @@ Clone the repo
 git cone https://github.com/ViewComfy/ViewComfy.git
 ```
 
-If you're using a **virtual environment**, activate it.
-
-If you're using a virtual environment with **PowerShell** you need to put the full path of the Activate.ps1 file in the .env file
-e.g:
-
-```bash
-.env file ->
-VENV_ACTIVATION_PATH="C:\Users\YourUsername\comfyui\venv\Scripts\Activate.ps1"
-```
-
 Install dependencies and start the dev server  
-(Don't forget to activate the virtual environment if you're using one)
 
 ```bash
 npm install
@@ -97,10 +79,10 @@ Feel free to contribute with feedback, suggestions, issues or pull requests.
 
 ## Roadmap
 
-- [ ]  Build a solution to deploy ViewComfy apps on the cloud 
+- [ ]  Build a solution to deploy ViewComfy apps on the cloud
 - [ ]  Enable video inputs and outputs
 - [ ]  Randomize the seed by default at every generation
-- [ ]  Enable adding parameters back to the form editor after deletion 
+- [ ]  Enable adding parameters back to the form editor after deletion
 
 ### Tech
 

@@ -1,6 +1,3 @@
-import fs from 'node:fs/promises';
-import { ReadableStream } from 'node:stream/web';
-import mime from 'mime-types';
 import { ComfyUIService } from '@/app/services/comfyui-service';
 import { type NextRequest, NextResponse } from 'next/server';
 import { ErrorResponseFactory } from '@/app/models/errors';
@@ -27,32 +24,14 @@ export async function POST(request: NextRequest) {
 
     try {
         const comfyUIService = new ComfyUIService();
-        const outputPaths = await comfyUIService.runComfyUI({ workflow, viewComfy });
+        const stream = await comfyUIService.runWorkflow({ workflow, viewComfy });
 
-        if (outputPaths.length > 0) {
-            const stream = new ReadableStream({
-                async start(controller) {
-                    for (const outputPath of outputPaths) {
-                        const mimeType = mime.lookup(outputPath) || 'application/octet-stream';
-                        const ooutputBuffer = await fs.readFile(outputPath);
-                        const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
-                        controller.enqueue(new TextEncoder().encode(mimeInfo));
-                        controller.enqueue(new Uint8Array(ooutputBuffer));
-                        controller.enqueue(new TextEncoder().encode('\r\n--BLOB_SEPARATOR--\r\n'));
-                    }
-                    controller.close();
-                }
-            });
-            // @ts-ignore
-            return new NextResponse(stream, {
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                    'Content-Disposition': 'attachment; filename="generated_images.bin"'
-                }
-            });
-        }
-        return new NextResponse('No images generated', { status: 404 });
-
+        return new NextResponse<ReadableStream<Uint8Array>>(stream, {
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': 'attachment; filename="generated_images.bin"'
+            }
+        });
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     } catch (error: any) {
         const responseError = errorResponseFactory.getErrorResponse(error);

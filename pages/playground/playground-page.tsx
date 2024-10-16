@@ -22,11 +22,13 @@ import { type IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-pr
 import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
 import { ApiErrorHandler } from "@/lib/api-error-handler";
 import type { ResponseError } from "@/app/models/errors";
+import BlurFade from "@/components/ui/blur-fade";
+import { cn } from "@/lib/utils";
 
 
 const apiErrorHandler = new ApiErrorHandler();
 
-function PlaygroundPageContent() {    
+function PlaygroundPageContent() {
     const { viewComfyState } = useViewComfy();
     const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [outputs, setOutputs] = useState<{ outputs: Blob, url: string }[]>([]);
@@ -101,7 +103,7 @@ function PlaygroundPageContent() {
                 inputs.push({ key: input.key, value: input.value });
             }
         }
-        
+
         doPost({
             viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
                 onSetOutputs(data);
@@ -140,7 +142,7 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-    
+
     return (
         <>
             <div className="flex flex-col h-screen">
@@ -176,30 +178,35 @@ function PlaygroundPageContent() {
                                 <Loader />
                             </div>
                         ) : (
-                                <div className="flex-1 h-full p-4 flex items-center justify-center overflow-y-auto">
-                                    <div className="flex flex-wrap justify-center items-center gap-4 w-full h-full">
-                                        {outputs.map((output, index) => (
-                                            <div key={output.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
-                                                {(output.outputs.type.startsWith('image/')) && (
+                            <div className="flex-1 h-full p-4 flex items-center justify-center overflow-y-auto">
+                                <div className="flex flex-wrap justify-center items-center gap-4 w-full h-full">
+                                    {outputs.map((output) => (
+                                        <div key={output.url} className="flex items-center justify-center w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
+                                            {(output.outputs.type.startsWith('image/')) && (
+                                                <BlurFade key={output.url} delay={0.25} inView>
                                                     <img
                                                         src={output.url}
                                                         alt={`${output.url}`}
-                                                        className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
+                                                        className={cn("max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md transition-all hover:scale-105")}
                                                     />
-                                                )}
-                                                {(output.outputs.type.startsWith('video/')) && (
-                                                    <video 
-                                                        className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
-                                                        autoPlay
-                                                        loop 
-                                                    >
-                                                        <source src={output.url} />                                 
-                                                    </video>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                                                </BlurFade>
+                                            )}
+                                            {(output.outputs.type.startsWith('video/')) && (
+                                                <video
+                                                    key={output.url}
+                                                    className="max-w-full max-h-[calc(100vh-12rem)] object-contain rounded-md"
+                                                    autoPlay
+                                                    loop
+
+                                                >
+                                                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                                                    <source src={output.url} />
+                                                </video>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
+                            </div>
                         )}
                     </div>
                 </main>
