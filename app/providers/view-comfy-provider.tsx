@@ -109,7 +109,7 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
                 viewComfys: state.viewComfys.filter((item) => item.viewComfyJSON.id !== action.payload.viewComfyJSON.id)
             };
 
-            if (data.viewComfys.length === 1) {
+            if (data.viewComfys.length > 0) {
                 data.currentViewComfy = data.viewComfys[0];
                 data.viewComfyDraft = {
                     viewComfyJSON: data.viewComfys[0].viewComfyJSON,

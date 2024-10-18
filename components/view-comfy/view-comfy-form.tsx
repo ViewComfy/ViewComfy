@@ -122,7 +122,7 @@ export function ViewComfyForm(args: {
                                         }
 
                                         return (
-                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4 p-1">
+                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
                                                 <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
                                             </fieldset>
                                         )
@@ -151,7 +151,7 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
         <Collapsible
             open={isOpen}
             onOpenChange={setIsOpen}
-            className="space-y-2"
+            className="space-y-2 mb-2"
         >
             {!editMode && (<div className="flex items-center space-x-4 px-4">
                 <CollapsibleTrigger asChild>

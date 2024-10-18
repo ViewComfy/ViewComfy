@@ -164,7 +164,7 @@ function PlaygroundPageContent() {
                         </DrawerContent>
                     </Drawer>
                 </Header>
-                <main className="grid overflow-hidden flex-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+                <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
                         {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                             <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />

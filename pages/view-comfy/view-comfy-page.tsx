@@ -99,11 +99,6 @@ export function ViewComfyPage() {
                 type: ActionType.REMOVE_VIEW_COMFY,
                 payload: viewComfyState.currentViewComfy,
             });
-        } else {
-            viewComfyStateDispatcher({
-                type: ActionType.SET_VIEW_COMFY_DRAFT,
-                payload: undefined,
-            });
         }
     }
 
@@ -158,10 +153,10 @@ export function ViewComfyPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-full overflow-hidden">
             <Header title="Editor">
             </Header>
-            <main className={`flex-1 overflow-hidden p-4 ${viewComfyState.viewComfyDraft?.workflowApiJSON || viewComfyState.viewComfyDraft?.viewComfyJSON ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
+            <main className="flex-1 overflow-hidden p-2">
                 {showDropZone() && (
                     <div className="flex flex-col w-full h-full overflow-hidden">
                         <div className="w-full mt-10 sm:w-1/2 sm:h-1/2 mx-auto">
@@ -176,55 +171,54 @@ export function ViewComfyPage() {
                 )}
 
                 {!showDropZone() && (
-                    <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
-                                <div className="relative flex flex-col items-start gap-4 h-full">
-                                    <div className="w-full flex flex-wrap items-center gap-4 mb-4">
-                                        {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
-                                            <div className="flex">
-                                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
-                                            </div>
-                                        )}
-                                        {showDeleteWorkflowButton() && (
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={deleteViewComfyJSON}
-                                                >
-                                                    Delete Workflow
-                                                </Button>
-                                                <Button onClick={addWorkflowOnClick}>
-                                                    Add Workflow
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-
+                                <div className="w-full flex flex-wrap items-center gap-4 mb-4">
+                                    {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
+                                        <div className="flex">
+                                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                                        </div>
+                                    )}
+                                    {showDeleteWorkflowButton() && (
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="destructive"
+                                                onClick={deleteViewComfyJSON}
+                                            >
+                                                Delete Workflow
+                                            </Button>
+                                            <Button onClick={addWorkflowOnClick}>
+                                                Add Workflow
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 overflow-hidden">
                                     <ViewComfyFormEditor onSubmit={getOnSubmit} viewComfyJSON={viewComfyState.viewComfyDraft?.viewComfyJSON} />
                                 </div>
                             </div>
                         )}
                         {viewComfyState.viewComfyDraft?.workflowApiJSON && (
-                            <div className="relative flex h-full min-h-[50vh] flex-col rounded-xl gap-4">
+                            <div className="flex flex-col h-full overflow-hidden">
                                 {!viewComfyState.currentViewComfy && (
                                     <Button
                                         variant="secondary"
-                                        className="border-2 border-dashed text-muted-foreground"
+                                        className="border-2 border-dashed text-muted-foreground mb-4"
                                         onClick={removeFileOnClick}
                                     >
                                         <p className="text-muted-foreground mr-2">{getFileInfo()}</p>
                                         <Trash2 className="size-5" />
                                     </Button>
                                 )}
-                                <Label>Workflow API JSON</Label>
-                                <ScrollArea className="w-full flex-1 rounded-md border">
+                                <Label className="mb-2">Workflow API JSON</Label>
+                                <ScrollArea className="flex-1 rounded-md border">
                                     <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
                                     <ScrollBar orientation="horizontal" />
                                 </ScrollArea>
                             </div>
                         )}
-                    </>
+                    </div>
                 )}
             </main>
             <ErrorAlertDialog
