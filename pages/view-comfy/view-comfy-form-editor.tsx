@@ -20,10 +20,6 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
     const { viewComfyState } = useViewComfy();
     const { toast } = useToast();
 
-    // if (!viewComfyState.viewComfyDraft?.viewComfyJSON) {
-    //     return null;
-    // }
-
     const [downloadJson, setDownloadJson] = useState<boolean>(false);
 
     const defaultValues: IViewComfyBase = {
