@@ -80,7 +80,7 @@ Feel free to contribute with feedback, suggestions, issues or pull requests.
 ## Roadmap
 
 - [ ]  Build a solution to deploy ViewComfy apps on the cloud
-- [ ]  Enable video inputs and outputs
+- [x]  Enable video inputs and outputs
 - [ ]  Randomize the seed by default at every generation
 - [ ]  Enable adding parameters back to the form editor after deletion
 
