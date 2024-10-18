@@ -13,6 +13,7 @@ import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, 
 import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
+import { BentoGridThirdDemo } from '@/components/images-preview';
 
 
 class WorkflowJSONError extends Error {
@@ -21,11 +22,14 @@ class WorkflowJSONError extends Error {
     }
 }
 
+
+
 export function ViewComfyPage() {
 
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
+    const [preViewMode, setPreViewMode] = useState<"output" | "workflow">("workflow");
 
     useEffect(() => {
         if (file) {
@@ -63,20 +67,6 @@ export function ViewComfyPage() {
         }
     }, [file, viewComfyStateDispatcher]);
 
-    const removeFileOnClick = () => {
-        viewComfyStateDispatcher({
-            type: ActionType.SET_VIEW_COMFY_DRAFT,
-            payload: undefined
-        });
-    }
-
-    const getFileInfo = () => {
-        if (viewComfyState.viewComfyDraft?.file) {
-            const fileSizeInKB = Math.round(viewComfyState.viewComfyDraft.file.size / 1024);
-            return `Uploaded file: ${viewComfyState.viewComfyDraft.file.name} (${fileSizeInKB} KB)`;
-        }
-        return undefined;
-    }
 
     const getDropZoneText = () => {
         if (viewComfyState.viewComfyDraft?.viewComfyJSON) {
@@ -199,25 +189,16 @@ export function ViewComfyPage() {
                                 </div>
                             </div>
                         )}
-                        {viewComfyState.viewComfyDraft?.workflowApiJSON && (
-                            <div className="flex flex-col h-full overflow-hidden">
-                                {!viewComfyState.currentViewComfy && (
-                                    <Button
-                                        variant="secondary"
-                                        className="border-2 border-dashed text-muted-foreground mb-4"
-                                        onClick={removeFileOnClick}
-                                    >
-                                        <p className="text-muted-foreground mr-2">{getFileInfo()}</p>
-                                        <Trash2 className="size-5" />
-                                    </Button>
-                                )}
-                                <Label className="mb-2">Workflow API JSON</Label>
-                                <ScrollArea className="flex-1 rounded-md border">
-                                    <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
-                                    <ScrollBar orientation="horizontal" />
-                                </ScrollArea>
-                            </div>
-                        )}
+                        <div className="flex flex-col h-full overflow-hidden">
+                            {preViewMode === "workflow" && (
+                                <JSONPreview />
+                            )}
+                            {preViewMode === "output" && (
+                                <div className="flex items-center justify-center h-full">
+                                    <BentoGridThirdDemo />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </main>
@@ -242,4 +223,45 @@ function getErrorText(error: Error | undefined) {
 
     return <> An error occurred while parsing the JSON, most commons cuase is the json is not valid or is empty. <br /> <b> error details: </b> <br /> {error.message} </>
 
+}
+
+
+function JSONPreview() {
+    const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
+    const getFileInfo = () => {
+        if (viewComfyState.viewComfyDraft?.file) {
+            const fileSizeInKB = Math.round(viewComfyState.viewComfyDraft.file.size / 1024);
+            return `Uploaded file: ${viewComfyState.viewComfyDraft.file.name} (${fileSizeInKB} KB)`;
+        }
+        return undefined;
+    }
+
+    const removeFileOnClick = () => {
+        viewComfyStateDispatcher({
+            type: ActionType.SET_VIEW_COMFY_DRAFT,
+            payload: undefined
+        });
+    }
+
+
+
+    return (
+        <>
+            {!viewComfyState.currentViewComfy && (
+                <Button
+                    variant="secondary"
+                    className="border-2 border-dashed text-muted-foreground mb-4"
+                    onClick={removeFileOnClick}
+                >
+                    <p className="text-muted-foreground mr-2">{getFileInfo()}</p>
+                    <Trash2 className="size-5" />
+                </Button>
+            )}
+            <Label className="mb-2">Workflow API JSON</Label>
+            <ScrollArea className="flex-1 rounded-md border">
+                <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+        </>
+    )
 }

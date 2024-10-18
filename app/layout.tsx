@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/theme-provider"
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export default function RootLayout({ children }: any) {
   return (
     <>
