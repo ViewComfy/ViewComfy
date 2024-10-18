@@ -51,12 +51,11 @@ NEXT_PUBLIC_VIEW_MODE="true"
 npm run dev
 ```
 
-ViewComfy by default will look for a file called view_comfy.json in the project's root folder to render the web app. You can use the VIEW_COMFY_FILE_NAME environment variable to point to a different file. You can also use the WORKFLOW_API_FILE_NAME environment variable to point to a different workflow than the default workflow_api.json.
+ViewComfy by default will look for a file called view_comfy.json in the project's root folder to render the web app. You can use the VIEW_COMFY_FILE_NAME environment variable to point to a different file.
 
 ```bash
 .env file ->
 VIEW_COMFY_FILE_NAME="view_comfy.json"
-WORKFLOW_API_FILE_NAME="workflow_api.json"
 NEXT_PUBLIC_VIEW_MODE="true"
 
 npm run dev
