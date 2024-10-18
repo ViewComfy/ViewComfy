@@ -180,15 +180,16 @@ export function ViewComfyPage() {
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
                                 <div className="relative flex flex-col items-start gap-4 h-full">
-                                    <div className="flex gap-4">
+                                    <div className="w-full flex flex-wrap items-center gap-4 mb-4">
                                         {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
-                                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                                            <div className="flex">
+                                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                                            </div>
                                         )}
                                         {showDeleteWorkflowButton() && (
-                                            <>
+                                            <div className="flex gap-2">
                                                 <Button
                                                     variant="destructive"
-                                                    className="mb-3"
                                                     onClick={deleteViewComfyJSON}
                                                 >
                                                     Delete Workflow
@@ -196,7 +197,7 @@ export function ViewComfyPage() {
                                                 <Button onClick={addWorkflowOnClick}>
                                                     Add Workflow
                                                 </Button>
-                                            </>
+                                            </div>
                                         )}
                                     </div>
 
