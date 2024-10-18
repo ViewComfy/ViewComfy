@@ -1,15 +1,17 @@
 import { useFieldArray, useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button";
-import type { IViewComfyJSON } from "@/app/providers/view-comfy-provider";
+import type { IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
 import { cn } from "@/lib/utils";
 import { ViewComfyForm } from "@/components/view-comfy/view-comfy-form";
 import { WandSparkles } from "lucide-react";
 import "./PlaygroundForm.css";
+import { useEffect } from "react";
 
 export function PlaygroundForm(props: {
-    viewComfyJSON: IViewComfyJSON, onSubmit: (data: IViewComfyJSON) => void, loading: boolean
+    viewComfyJSON: IViewComfyWorkflow, onSubmit: (data: IViewComfyWorkflow) => void, loading: boolean
 }) {
     const { viewComfyJSON, onSubmit, loading } = props;
+
     const defaultValues = {
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
@@ -30,6 +32,19 @@ export function PlaygroundForm(props: {
         control: form.control,
         name: "advancedInputs"
     });
+
+
+    useEffect(() => {
+        if (viewComfyJSON) {
+            form.reset({
+                title: viewComfyJSON.title,
+                description: viewComfyJSON.description,
+                inputs: viewComfyJSON.inputs,
+                advancedInputs: viewComfyJSON.advancedInputs,
+            });
+        }
+    }, [viewComfyJSON, form]);
+
 
     return (
         <>

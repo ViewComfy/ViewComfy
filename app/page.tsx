@@ -3,7 +3,7 @@ import { Sidebar, TabValue } from "@/components/sidebar";
 
 import { useState } from "react"
 import { PlaygroundPage } from "../pages/playground/playground-page"
-import { WorkflowApiPage } from "@/pages/workflow-api/workflow-api-page";
+import { ViewComfyPage } from "@/pages/view-comfy/view-comfy-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -21,7 +21,7 @@ export default function Page() {
                 <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} />
                 <div className="flex flex-col">
                     {currentTab === TabValue.Playground && <PlaygroundPage />}
-                    {currentTab === TabValue.WorkflowApi && <WorkflowApiPage />}
+                    {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
                 </div>
             </div>
             <Toaster />
