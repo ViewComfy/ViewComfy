@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
 import { BentoGridThirdDemo } from '@/components/images-preview';
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 class WorkflowJSONError extends Error {
     constructor() {
@@ -29,7 +29,6 @@ export function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
-    const [preViewMode, setPreViewMode] = useState<"output" | "workflow">("workflow");
 
     useEffect(() => {
         if (file) {
@@ -190,14 +189,19 @@ export function ViewComfyPage() {
                             </div>
                         )}
                         <div className="flex flex-col h-full overflow-hidden">
-                            {preViewMode === "workflow" && (
-                                <JSONPreview />
-                            )}
-                            {preViewMode === "output" && (
-                                <div className="flex items-center justify-center h-full">
+                            <JSONPreview />
+                            {/* <Tabs defaultValue="output" className="">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="output">Output</TabsTrigger>
+                                    <TabsTrigger value="workflow">Workflow</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="output">
                                     <BentoGridThirdDemo />
-                                </div>
-                            )}
+                                </TabsContent>
+                                <TabsContent value="workflow">
+                                    <JSONPreview />
+                                </TabsContent>
+                            </Tabs> */}
                         </div>
                     </div>
                 )}
