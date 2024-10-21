@@ -1,0 +1,624 @@
+{
+  "file_type": "view_comfy",
+  "file_version": "1.0.0",
+  "version": "0.0.1",
+  "workflows": [
+    {
+      "viewComfyJSON": {
+        "title": "My Awesome Workflow 1",
+        "description": "",
+        "inputs": [
+          {
+            "title": "Load Video (Upload) 🎥🅥🅗🅢",
+            "inputs": [
+              {
+                "title": "Video",
+                "placeholder": "Video",
+                "value": null,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "video"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "video",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-video"
+              },
+              {
+                "title": "Force_rate",
+                "placeholder": "Force_rate",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "force_rate"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-force_rate"
+              },
+              {
+                "title": "Force_size",
+                "placeholder": "Force_size",
+                "value": "Disabled",
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "force_size"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-force_size"
+              },
+              {
+                "title": "Custom_width",
+                "placeholder": "Custom_width",
+                "value": 512,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "custom_width"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-custom_width"
+              },
+              {
+                "title": "Custom_height",
+                "placeholder": "Custom_height",
+                "value": 512,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "custom_height"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-custom_height"
+              },
+              {
+                "title": "Frame_load_cap",
+                "placeholder": "Frame_load_cap",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "frame_load_cap"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-frame_load_cap"
+              },
+              {
+                "title": "Skip_first_frames",
+                "placeholder": "Skip_first_frames",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "skip_first_frames"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-skip_first_frames"
+              },
+              {
+                "title": "Select_every_nth",
+                "placeholder": "Select_every_nth",
+                "value": 1,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "select_every_nth"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-select_every_nth"
+              }
+            ],
+            "key": "10-VHS_LoadVideo"
+          }
+        ],
+        "advancedInputs": [
+          {
+            "title": "Video Combine 🎥🅥🅗🅢",
+            "inputs": [
+              {
+                "title": "Frame_rate",
+                "placeholder": "Frame_rate",
+                "value": 8,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "frame_rate"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-frame_rate"
+              },
+              {
+                "title": "Loop_count",
+                "placeholder": "Loop_count",
+                "value": 0,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "loop_count"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-loop_count"
+              },
+              {
+                "title": "Filename_prefix",
+                "placeholder": "Filename_prefix",
+                "value": "AnimateDiff",
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "filename_prefix"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-filename_prefix"
+              },
+              {
+                "title": "Format",
+                "placeholder": "Format",
+                "value": "video/h264-mp4",
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "format"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-format"
+              },
+              {
+                "title": "Pix_fmt",
+                "placeholder": "Pix_fmt",
+                "value": "yuv420p",
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "pix_fmt"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-pix_fmt"
+              },
+              {
+                "title": "Crf",
+                "placeholder": "Crf",
+                "value": 19,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "crf"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-crf"
+              },
+              {
+                "title": "Save_metadata",
+                "placeholder": "Save_metadata",
+                "value": true,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "save_metadata"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "boolean",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-save_metadata"
+              },
+              {
+                "title": "Pingpong",
+                "placeholder": "Pingpong",
+                "value": false,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "pingpong"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "boolean",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-pingpong"
+              },
+              {
+                "title": "Save_output",
+                "placeholder": "Save_output",
+                "value": true,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "save_output"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "boolean",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-save_output"
+              }
+            ],
+            "key": "11-VHS_VideoCombine"
+          }
+        ],
+        "id": "94a7592ff2dd9"
+      },
+      "workflowApiJSON": {
+        "10": {
+          "inputs": {
+            "video": "3sev-video.mp4",
+            "force_rate": 0,
+            "force_size": "Disabled",
+            "custom_width": 512,
+            "custom_height": 512,
+            "frame_load_cap": 0,
+            "skip_first_frames": 0,
+            "select_every_nth": 1
+          },
+          "class_type": "VHS_LoadVideo",
+          "_meta": {
+            "title": "Load Video (Upload) 🎥🅥🅗🅢"
+          }
+        },
+        "11": {
+          "inputs": {
+            "frame_rate": 8,
+            "loop_count": 0,
+            "filename_prefix": "AnimateDiff",
+            "format": "video/h264-mp4",
+            "pix_fmt": "yuv420p",
+            "crf": 19,
+            "save_metadata": true,
+            "pingpong": false,
+            "save_output": true,
+            "images": [
+              "10",
+              0
+            ]
+          },
+          "class_type": "VHS_VideoCombine",
+          "_meta": {
+            "title": "Video Combine 🎥🅥🅗🅢"
+          }
+        }
+      }
+    },
+    {
+      "viewComfyJSON": {
+        "title": "My Awesome Workflow 2",
+        "description": "",
+        "inputs": [
+          {
+            "title": "Load Video (Upload) 🎥🅥🅗🅢",
+            "inputs": [
+              {
+                "title": "Video",
+                "placeholder": "Video",
+                "value": null,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "video"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "video",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-video"
+              },
+              {
+                "title": "Force_rate",
+                "placeholder": "Force_rate",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "force_rate"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-force_rate"
+              },
+              {
+                "title": "Force_size",
+                "placeholder": "Force_size",
+                "value": "Disabled",
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "force_size"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-force_size"
+              },
+              {
+                "title": "Custom_width",
+                "placeholder": "Custom_width",
+                "value": 512,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "custom_width"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-custom_width"
+              },
+              {
+                "title": "Custom_height",
+                "placeholder": "Custom_height",
+                "value": 512,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "custom_height"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-custom_height"
+              },
+              {
+                "title": "Frame_load_cap",
+                "placeholder": "Frame_load_cap",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "frame_load_cap"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-frame_load_cap"
+              },
+              {
+                "title": "Skip_first_frames",
+                "placeholder": "Skip_first_frames",
+                "value": 0,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "skip_first_frames"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-skip_first_frames"
+              },
+              {
+                "title": "Select_every_nth",
+                "placeholder": "Select_every_nth",
+                "value": 1,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "select_every_nth"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-select_every_nth"
+              }
+            ],
+            "key": "10-VHS_LoadVideo"
+          }
+        ],
+        "advancedInputs": [
+          {
+            "title": "Video Combine 🎥🅥🅗🅢",
+            "inputs": [
+              {
+                "title": "Frame_rate",
+                "placeholder": "Frame_rate",
+                "value": 8,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "frame_rate"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-frame_rate"
+              },
+              {
+                "title": "Loop_count",
+                "placeholder": "Loop_count",
+                "value": 0,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "loop_count"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-loop_count"
+              },
+              {
+                "title": "Filename_prefix",
+                "placeholder": "Filename_prefix",
+                "value": "AnimateDiff",
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "filename_prefix"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-filename_prefix"
+              },
+              {
+                "title": "Format",
+                "placeholder": "Format",
+                "value": "image/gif",
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "format"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-format"
+              },
+              {
+                "title": "Pingpong",
+                "placeholder": "Pingpong",
+                "value": false,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "pingpong"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "boolean",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-pingpong"
+              },
+              {
+                "title": "Save_output",
+                "placeholder": "Save_output",
+                "value": true,
+                "workflowPath": [
+                  "11",
+                  "inputs",
+                  "save_output"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "boolean",
+                "validations": {
+                  "required": true
+                },
+                "key": "11-inputs-save_output"
+              }
+            ],
+            "key": "11-VHS_VideoCombine"
+          }
+        ],
+        "id": "37f5f103b0917"
+      },
+      "workflowApiJSON": {
+        "10": {
+          "inputs": {
+            "video": "2sec video - Made with Clipchamp.mp4",
+            "force_rate": 0,
+            "force_size": "Disabled",
+            "custom_width": 512,
+            "custom_height": 512,
+            "frame_load_cap": 0,
+            "skip_first_frames": 0,
+            "select_every_nth": 1
+          },
+          "class_type": "VHS_LoadVideo",
+          "_meta": {
+            "title": "Load Video (Upload) 🎥🅥🅗🅢"
+          }
+        },
+        "11": {
+          "inputs": {
+            "frame_rate": 8,
+            "loop_count": 0,
+            "filename_prefix": "AnimateDiff",
+            "format": "image/gif",
+            "pingpong": false,
+            "save_output": true,
+            "images": [
+              "10",
+              0
+            ]
+          },
+          "class_type": "VHS_VideoCombine",
+          "_meta": {
+            "title": "Video Combine 🎥🅥🅗🅢"
+          }
+        }
+      }
+    }
+  ]
+}
