@@ -194,7 +194,7 @@ function PlaygroundPageContent() {
                         ) : (
                             <div className="flex-1 h-full p-4 flex overflow-y-auto">
                                 <div className="flex flex-col w-full h-full">
-                                    {Object.entries(results).map(([timestamp, generation]) => (
+                                    {Object.entries(results).map(([timestamp, generation], index, array) => (
                                         <div className="flex flex-col gap-4">
                                             <div className="flex flex-wrap w-full gap-4">
                                                 {generation.map((output) => (
@@ -226,7 +226,11 @@ function PlaygroundPageContent() {
                                                     </div>
                                                 ))}
                                             </div>
-                                            <hr className="w-full border-gray-300 py-4" />
+                                            <hr className={
+                                                `w-full py-4 
+                                                ${index !== array.length - 1 ? 'border-gray-300' : 'border-transparent'}
+                                                `} 
+                                            />
                                         </div>
                                     ))}
                                 </div>
