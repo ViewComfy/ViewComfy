@@ -1,4 +1,4 @@
-import { SquareTerminal, LifeBuoy, FileJson } from "lucide-react"
+import { SquareTerminal, LifeBuoy, FileJson, Cloud } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TooltipButton } from "@/components/ui/tooltip-button"
 import Link from "next/link";
@@ -19,9 +19,11 @@ export enum TabValue {
 interface SidebarProps {
     currentTab: TabValue;
     onTabChange: (tab: TabValue) => void;
+    popUp: boolean;
+    onPopUp: (popUp: boolean) => void;
 }
 
-const PlaygroundButton = ({ currentTab, onTabChange }: SidebarProps) => {
+const PlaygroundButton = ({ currentTab, onTabChange }: { currentTab: TabValue, onTabChange: (tab: TabValue) => void }) => {
     return (
         <TooltipButton
             icon={<SquareTerminal className="size-5" />}
@@ -32,7 +34,7 @@ const PlaygroundButton = ({ currentTab, onTabChange }: SidebarProps) => {
         />
     )
 }
-export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
+export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProps) {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true" ? true : false;
     return (
         <aside className="inset-y fixed left-0 z-20 flex h-full flex-col border-r">
@@ -45,21 +47,21 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
                 {viewMode ? (<PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} />) : (
                     <>
                         <TooltipButton
-                            icon={<FileJson className="size-5" />}
+                            icon={<FileJson className="size-5"/>}
                             label="Workflow_api.json"
                             tooltipContent="Form Editor"
                             className={currentTab === TabValue.WorkflowApi ? 'bg-muted' : ''}
                             onClick={() => onTabChange(TabValue.WorkflowApi)}
                         />
                         <PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} />
-                        {/* <TooltipButton
-                            icon={<Bot className="size-5" />}
-                            label="Models"
-                            tooltipContent="Models"
-                            className={currentTab === TabValue.Models ? 'bg-muted' : ''}
-                            onClick={() => onTabChange(TabValue.Models)}
-                        />
                         <TooltipButton
+                            icon={<Cloud className="size-5 font-bold" />}
+                            label="Deploy"
+                            tooltipContent="Deploy"
+                            className={popUp === true ? 'bg-muted' : ''}
+                            onClick={() => onPopUp(!popUp)}
+                        />
+                        {/* <TooltipButton
                             icon={<Code2 className="size-5" />}
                             label="API"
                             tooltipContent="API"
