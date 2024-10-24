@@ -6,6 +6,7 @@ import { PlaygroundPage } from "../pages/playground/playground-page"
 import { WorkflowApiPage } from "@/pages/workflow-api/workflow-api-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
 
 export const description =
     "An AI playground with a sidebar navigation and a main content area. The playground has a header with a settings drawer and a share button. The sidebar has navigation links and a user menu. The main content area shows a form to configure the model and messages."
@@ -62,8 +63,8 @@ export default function Page() {
                             />
                         </div>
                     </div>
-                    <button 
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    <Button 
+                        className="mt-4 px-4 py-2"
                         onClick={() => {
                             setTimeout(() => {
                                 setPopUp(false)
@@ -72,7 +73,7 @@ export default function Page() {
                         }}
                     >
                         Deploy
-                    </button>
+                    </Button>
                 </div>
             </>
             }
@@ -97,22 +98,22 @@ function DeploymentMessage({setPopUp, setDeploymentMessage}: {setPopUp: (value: 
                         readOnly 
                         className="bg-transparent flex-grow outline-none"
                     />
-                    <button 
-                        onClick={() => navigator.clipboard.writeText("https://your-viewcomfy-app.demo.com")}
-                        className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                    <Button 
+                        onClick={() => navigator.clipboard.writeText("https://n6royv7y39x7fx-8000.proxy.runpod.net/")}
+                        className="ml-2 px-2 py-1"
                     >
                         Copy
-                    </button>
+                    </Button>
                 </div>
-                <button 
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                <Button 
+                        className="mt-4 px-4 py-2"
                         onClick={() => {
                             setPopUp(false)
                             setDeploymentMessage(false)
                         }}
                     >
                         Ok
-                    </button>
+                    </Button>
             </div>
         </>
     )

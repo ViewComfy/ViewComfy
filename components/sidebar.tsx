@@ -55,7 +55,7 @@ export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProp
                         />
                         <PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} />
                         <TooltipButton
-                            icon={<Cloud className="size-5 font-bold" />}
+                            icon={<Cloud className="size-5" />}
                             label="Deploy"
                             tooltipContent="Deploy"
                             className={popUp === true ? 'bg-muted' : ''}
