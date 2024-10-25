@@ -133,11 +133,11 @@ function PlaygroundPageContent() {
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         return () => {
-            Object.values(results).forEach(generation => {
-                generation.forEach(output => {
+            for (const generation of Object.values(results)) {
+                for (const output of generation) {
                     URL.revokeObjectURL(output.url);
-                });
-            });
+                }
+            }
         };
     }, []);
 
@@ -176,67 +176,67 @@ function PlaygroundPageContent() {
                         <PlaygroundForm viewComfyJSON={formState} onSubmit={onSubmit} loading={loading} />
                     </div>
                     <div className="relative h-full min-h-[50vh] rounded-xl bg-muted/50 px-1 lg:col-span-2">
-                    <ScrollArea className="relative flex h-full w-full flex-col">
-                        {(Object.keys(results).length === 0) && !loading && (
-                            <>
-                                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
-                                    Click the Generate button to start.
-                                </span>
-                                <Badge variant="outline" className="absolute right-3 top-3">
-                                    Output
-                                </Badge>
-                            </>
-                        )}
-                        {loading ? (
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                <Loader />
-                            </div>
-                        ) : (
-                            <div className="flex-1 h-full p-4 flex overflow-y-auto">
-                                <div className="flex flex-col w-full h-full">
-                                    {Object.entries(results).map(([timestamp, generation], index, array) => (
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex flex-wrap w-full gap-4">
-                                                {generation.map((output) => (
-                                                    <div 
-                                                        key={output.url} 
-                                                        className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
-                                                    >
-                                                        {(output.outputs.type.startsWith('image/')) && (
-                                                            <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                <img
-                                                                    src={output.url}
-                                                                    alt={`${output.url}`}
-                                                                    className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
-                                                                />
-                                                            </BlurFade>
-                                                        )}
-                                                        {(output.outputs.type.startsWith('video/')) && (
-                                                            <video
-                                                                key={output.url}
-                                                                className="max-w-full max-h-full w-auto h-auto object-contain object-contain rounded-md"
-                                                                autoPlay
-                                                                loop
-
-                                                            >
-                                                                <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
-                                                                <source src={output.url} />
-                                                            </video>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <hr className={
-                                                `w-full py-4 
-                                                ${index !== array.length - 1 ? 'border-gray-300' : 'border-transparent'}
-                                                `} 
-                                            />
-                                        </div>
-                                    ))}
+                        <ScrollArea className="relative flex h-full w-full flex-col">
+                            {(Object.keys(results).length === 0) && !loading && (
+                                <>
+                                    <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
+                                        Click the Generate button to start.
+                                    </span>
+                                    <Badge variant="outline" className="absolute right-3 top-3">
+                                        Output
+                                    </Badge>
+                                </>
+                            )}
+                            {loading ? (
+                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <Loader />
                                 </div>
-                            </div>
-                        )}
-                    </ScrollArea>
+                            ) : (
+                                <div className="flex-1 h-full p-4 flex overflow-y-auto">
+                                    <div className="flex flex-col w-full h-full">
+                                        {Object.entries(results).map(([timestamp, generation], index, array) => (
+                                            <div className="flex flex-col gap-4" key={timestamp}>
+                                                <div className="flex flex-wrap w-full gap-4">
+                                                    {generation.map((output) => (
+                                                        <div
+                                                            key={output.url}
+                                                            className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                                                        >
+                                                            {(output.outputs.type.startsWith('image/')) && (
+                                                                <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                    <img
+                                                                        src={output.url}
+                                                                        alt={`${output.url}`}
+                                                                        className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
+                                                                    />
+                                                                </BlurFade>
+                                                            )}
+                                                            {(output.outputs.type.startsWith('video/')) && (
+                                                                <video
+                                                                    key={output.url}
+                                                                    className="max-w-full max-h-full w-auto h-auto object-contain object-contain rounded-md"
+                                                                    autoPlay
+                                                                    loop
+
+                                                                >
+                                                                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                                                                    <source src={output.url} />
+                                                                </video>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <hr className={
+                                                    `w-full py-4 
+                                                ${index !== array.length - 1 ? 'border-gray-300' : 'border-transparent'}
+                                                `}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </ScrollArea>
                     </div>
                 </main>
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
