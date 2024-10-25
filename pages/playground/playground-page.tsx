@@ -15,23 +15,24 @@ import {
 import { useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { PlaygroundForm } from "./playground-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
-import { type IViewComfyJSON, useViewComfy } from "@/app/providers/view-comfy-provider";
+import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
 import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
 import { ApiErrorHandler } from "@/lib/api-error-handler";
 import type { ResponseError } from "@/app/models/errors";
 import BlurFade from "@/components/ui/blur-fade";
 import { cn } from "@/lib/utils";
+import WorkflowSwitcher from "@/components/workflow-switchter";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 const apiErrorHandler = new ApiErrorHandler();
 
 function PlaygroundPageContent() {
-    const { viewComfyState } = useViewComfy();
-    const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
+    // const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
+    const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
 
@@ -47,7 +48,7 @@ function PlaygroundPageContent() {
                         throw responseError;
                     }
                     const data = await response.json();
-                    setFormState(data.viewComfyJSON);
+                    viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
                     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
                 } catch (error: any) {
                     if (error.errorType) {
@@ -71,25 +72,25 @@ function PlaygroundPageContent() {
             };
             fetchViewComfy();
         }
-    }, [viewMode]);
+    }, [viewMode, viewComfyStateDispatcher]);
 
     useEffect(() => {
-        if (viewComfyState?.viewComfyJSON) {
-            setFormState({ ...viewComfyState.viewComfyJSON });
+        if (viewComfyState.currentViewComfy) {
+            SetResults({});
         }
-    }, [viewComfyState?.viewComfyJSON]);
+    }, [viewComfyState.currentViewComfy]);
 
     const { doPost, loading } = usePostPlayground();
 
-    useEffect(() => {
-        if (viewComfyState?.viewComfyJSON) {
-            setFormState({ ...viewComfyState.viewComfyJSON });
-            SetResults({});
-        }
-    }, [viewComfyState?.viewComfyJSON]);
+    // useEffect(() => {
+    //     if (viewComfyState?.viewComfyJSON) {
+    //         setFormState({ ...viewComfyState.viewComfyJSON });
+    //         SetResults({});
+    //     }
+    // }, [viewComfyState?.viewComfyJSON]);
 
-    function onSubmit(data: IViewComfyJSON) {
-        setFormState(data);
+    function onSubmit(data: IViewComfyWorkflow) {
+        // setFormState(data);
         const inputs: { key: string, value: string }[] = [];
 
         for (const dataInputs of data.inputs) {
@@ -105,7 +106,7 @@ function PlaygroundPageContent() {
         }
 
         doPost({
-            viewComfy: inputs, workflow: viewComfyState?.workflowApiJSON, onSuccess: (data) => {
+            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
@@ -141,7 +142,14 @@ function PlaygroundPageContent() {
         };
     }, []);
 
-    if (!formState) {
+    const onSelectChange = (data: IViewComfy) => {
+        return viewComfyStateDispatcher({
+            type: ActionType.UPDATE_CURRENT_VIEW_COMFY,
+            payload: { ...data }
+        });
+    }
+
+    if (!viewComfyState.currentViewComfy) {
         return <>
             <div className="flex flex-col h-screen">
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
@@ -167,13 +175,17 @@ function PlaygroundPageContent() {
                                     Configure the settings for the model and messages.
                                 </DrawerDescription>
                             </DrawerHeader>
-                            <PlaygroundForm viewComfyJSON={formState} onSubmit={onSubmit} loading={loading} />
+                            <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />
                         </DrawerContent>
                     </Drawer>
                 </Header>
-                <main className="grid overflow-hidden flex-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+                <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
-                        <PlaygroundForm viewComfyJSON={formState} onSubmit={onSubmit} loading={loading} />
+                        {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
+                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                        )}
+                        {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
+
                     </div>
                     <div className="relative h-full min-h-[50vh] rounded-xl bg-muted/50 px-1 lg:col-span-2">
                         <ScrollArea className="relative flex h-full w-full flex-col">
@@ -214,7 +226,7 @@ function PlaygroundPageContent() {
                                                             {(output.outputs.type.startsWith('video/')) && (
                                                                 <video
                                                                     key={output.url}
-                                                                    className="max-w-full max-h-full w-auto h-auto object-contain object-contain rounded-md"
+                                                                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
                                                                     autoPlay
                                                                     loop
 

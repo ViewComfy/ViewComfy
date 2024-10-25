@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { FileUp } from 'lucide-react';
 
 // Define the props expected by the Dropzone component
 interface DropzoneProps {
@@ -54,7 +55,7 @@ export function Dropzone({
 
         // Check file extension
         if (fileExtensions && !fileExtensions.some(fileExtension => uploadedFile.name.endsWith(fileExtension))) {
-        // if (fileExtensions && !uploadedFile.name.endsWith(`${fileExtension}`)) {
+            // if (fileExtensions && !uploadedFile.name.endsWith(`${fileExtension}`)) {
             setError(`Invalid file type. Expected: ${fileExtensions.join(', ')}`);
             return;
         }
@@ -80,14 +81,22 @@ export function Dropzone({
             onClick={handleButtonClick}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-
         >
             <CardContent
-                className="flex flex-col items-center justify-center space-y-2 px-2 py-4 text-medium"
-
+                className="flex flex-col items-center justify-center space-y-4 px-2 py-4 text-medium"
             >
-                <div className="flex items-center justify-center  text-center text-muted-foreground">
-                    <span className="font-medium ml-2 mr-2">{inputPlaceholder || "Drag Files to Upload"}</span>
+                <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
+                    {inputPlaceholder ? (
+                        <>
+                            <span className="font-medium">{inputPlaceholder}</span>
+                            <FileUp className="size-8 mt-2" />
+                        </>
+                    ) : (
+                        <div className="flex items-center">
+                            <span className="font-medium mr-2">Drag Files to Upload</span>
+                            <FileUp className="size-6" />
+                        </div>
+                    )}
                     <input
                         ref={fileInputRef}
                         type="file"

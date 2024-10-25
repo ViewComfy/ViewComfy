@@ -1,8 +1,9 @@
-import { IViewComfyJSON } from "@/app/providers/view-comfy-provider";
+import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 
 export interface IInputField {
     title: string;
     placeholder: string;
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     value: any;
     workflowPath: string[];
     helpText?: string;
@@ -19,6 +20,7 @@ export interface IMultiValueInput {
 
 export interface WorkflowApiJSON {
     [key: string]: {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         inputs: { [key: string]: any };
         class_type: string;
         _meta: { title: string };
@@ -26,7 +28,7 @@ export interface WorkflowApiJSON {
 }
 
 
-export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON {
+export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase {
     let basicInputs: IMultiValueInput[] = [];
     let advancedInputs: IMultiValueInput[] = [];
 
@@ -97,6 +99,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyJSON 
 
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function parseInputField(args: { node: { key: string, value: any }, path: string[] }): IInputField | undefined {
     const { node, path } = args;
     let input: IInputField | undefined = undefined;
@@ -132,6 +135,7 @@ function parseInputField(args: { node: { key: string, value: any }, path: string
 
 export type InputValueType = "string" | "number" | "bigint" | "boolean" | "float" | "image";
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function parseValueType(value: any): InputValueType {
     switch (typeof value) {
         case 'string':
