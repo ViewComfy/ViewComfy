@@ -45,10 +45,10 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                 if (inputs.length > 0) {
                     const input = inputs[0];
                     input.valueType = "long-text";
-                    input.title = value._meta.title;
-                    input.placeholder = value._meta.title;
+                    input.title = getTitleFromValue(value.class_type, value);
+                    input.placeholder = getTitleFromValue(value.class_type, value);
                     basicInputs.push({
-                        title: value._meta.title,
+                        title: getTitleFromValue(value.class_type, value),
                         inputs: inputs,
                         key: `${key}-${value.class_type}`
                     });
@@ -58,11 +58,11 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                 if (uploadInput) {
                     const input = inputs[0];
                     input.valueType = "image";
-                    input.title = value._meta.title;
-                    input.placeholder = value._meta.title;
+                    input.title = getTitleFromValue(value.class_type, value);
+                    input.placeholder = getTitleFromValue(value.class_type, value);
                     input.value = null;
                     basicInputs.push({
-                        title: value._meta.title,
+                        title: getTitleFromValue(value.class_type, value),
                         inputs: [input],
                         key: `${key}-${value.class_type}`
                     });
@@ -74,13 +74,13 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                     inputs[uploadInputIndex].value = null
                 }
                 basicInputs.push({
-                    title: value._meta.title,
+                    title: getTitleFromValue(value.class_type, value),
                     inputs: inputs,
                     key: `${key}-${value.class_type}`
                 });
             } else if (inputs.length > 0) {
                 advancedInputs.push({
-                    title: value._meta.title,
+                    title: getTitleFromValue(value.class_type, value),
                     inputs: inputs,
                     key: `${key}-${value.class_type}`
                 });
@@ -156,4 +156,8 @@ function parseValueType(value: any): InputValueType {
 
 function capitalize(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function getTitleFromValue(class_type: string, value: { _meta?: { title: string } }): string {
+    return value._meta?.title || class_type;
 }
