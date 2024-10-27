@@ -48,7 +48,7 @@ export class ComfyUIAPIService {
         this.httpBaseUrl = this.secure ? "https://" : "http://";
         this.wsBaseUrl = this.secure ? "wss://" : "ws://";
         this.baseUrl = process.env.COMFYUI_BASE_URL || "127.0.0.1";
-        this.port = process.env.COMFYUI_PORT || "8188";
+        this.port = process.env.COMFYUI_PORT || "";
         this.clientId = clientId;
         try {
             this.ws = new WebSocket(`${this.getUrl("ws")}/ws?clientId=${this.clientId}`);
@@ -62,11 +62,10 @@ export class ComfyUIAPIService {
         this.outputFiles = [];
     }
 
-    private getUrl(protocol: "http" | "ws") {
-        if (protocol === "http") {
-            return `${this.httpBaseUrl}${this.baseUrl}:${this.port}`;
-        }
-        return `${this.wsBaseUrl}${this.baseUrl}:${this.port}`;
+    private getUrl(protocol: "http" | "ws"): string {
+        const baseUrlWithPort = `${this.baseUrl}${this.port ? `:${this.port}` : ""}`;
+        const protocolStr = protocol === "http" ? this.httpBaseUrl : this.wsBaseUrl;
+        return `${protocolStr}${baseUrlWithPort}`;
     }
 
     private async connect() {
