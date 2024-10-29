@@ -159,7 +159,7 @@ function PlaygroundPageContent() {
 
     return (
         <>
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-full">
                 <Header title="Playground">
                     <Drawer>
                         <DrawerTrigger asChild>
