@@ -1,3 +1,4 @@
+import React from "react";
 import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
     Form,
@@ -20,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2 } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
+import { AutosizeTextarea } from "../ui/autosize-text-area"
 import {
     Collapsible,
     CollapsibleContent,
@@ -361,6 +363,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
+
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -376,7 +379,7 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                 )}
             </FormLabel>
             <FormControl>
-                <Textarea
+                <AutosizeTextarea
                     placeholder={input.placeholder}
                     className={TEXT_AREA_STYLE}
                     {...field}
