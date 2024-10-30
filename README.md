@@ -9,7 +9,7 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 
 ## Demo
 
-https://github.com/user-attachments/assets/7830118a-0a79-4cf8-ad54-3cca3f969e69
+<https://github.com/user-attachments/assets/7830118a-0a79-4cf8-ad54-3cca3f969e69>
 
 ## Form Editor
 
@@ -26,7 +26,7 @@ Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
 Clone the repo
 
 ```bash
-git cone https://github.com/ViewComfy/ViewComfy.git
+git clone https://github.com/ViewComfy/ViewComfy.git
 ```
 
 Install dependencies and start the dev server  
@@ -68,7 +68,7 @@ e.g with the command line:
 VIEW_COMFY_FILE_NAME="view_comfy.json" NEXT_PUBLIC_VIEW_MODE="true" npm run dev
 ```
 
-For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: https://www.viewcomfy.com/blog/blog-post-title-one-d2cy8
+For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
 
 ## Form Editor Advanced
 
