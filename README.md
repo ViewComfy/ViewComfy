@@ -72,7 +72,7 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 ## Form Editor Advanced
 
-You can also drop a view_comfy.json directly in the form editor to edit it without the need for the workflow_api.json. But be aware that if you're using the view_comfy.json directly, you will still need to have the original workflow_api.json in the project's root.
+You can also drop a view_comfy.json directly in the form editor to edit it without needing the workflow_api.json.
 
 Feel free to contribute with feedback, suggestions, issues or pull requests.
 
