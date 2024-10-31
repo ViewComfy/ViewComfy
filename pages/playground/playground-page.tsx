@@ -207,9 +207,10 @@ function PlaygroundPageContent() {
                                 <div className="flex-1 h-full p-4 flex overflow-y-auto">
                                     <div className="flex flex-col w-full h-full">
                                         {Object.entries(results).map(([timestamp, generation], index, array) => (
-                                            <div className="flex flex-col gap-4" key={timestamp}>
-                                                <div className="flex flex-wrap w-full gap-4">
+                                            <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
+                                                <div className="flex flex-wrap w-full h-full gap-4">
                                                     {generation.map((output) => (
+                                                        <>
                                                         <div
                                                             key={output.url}
                                                             className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
@@ -236,6 +237,20 @@ function PlaygroundPageContent() {
                                                                 </video>
                                                             )}
                                                         </div>
+                                                        {(output.outputs.type.startsWith('text/')) && (
+                                                            <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
+                                                                {URL.createObjectURL(output.outputs) && (
+                                                                    <object
+                                                                        data={output.url}
+                                                                        type={output.outputs.type}
+                                                                        className="w-full"
+                                                                    >
+                                                                        Unable to display text content
+                                                                    </object>
+                                                                )}
+                                                            </pre>
+                                                        )}
+                                                        </>
                                                     ))}
                                                 </div>
                                                 <hr className={
