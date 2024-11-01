@@ -10,10 +10,10 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 
 ## Installation and demo
 
-### Demo video going through the installation
+### Installation
+Demo going through the installation
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
-### Installation
 Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
 
 Clone the repo
