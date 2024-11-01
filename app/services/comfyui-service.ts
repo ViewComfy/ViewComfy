@@ -4,7 +4,7 @@ import { ComfyWorkflow } from "@/app/models/comfy-workflow";
 import fs from "node:fs/promises";
 import { ComfyErrorHandler } from "@/app/helpers/comfy-error-handler";
 import { ComfyError, ComfyWorkflowError } from "@/app/models/errors";
-import { missingWorkflowApiFileError, workflowApiFileName } from "@/app/constants";
+import { missingViewComfyFileError, viewComfyFileName } from "@/app/constants";
 import { ComfyUIAPIService } from "@/app/services/comfyui-api-service";
 import mime from 'mime-types';
 
@@ -95,13 +95,13 @@ export class ComfyUIService {
     private async getLocalWorkflow(): Promise<object> {
         const missingWorkflowError = new ComfyError({
             message: "Failed to launch ComfyUI",
-            errors: [missingWorkflowApiFileError],
+            errors: [missingViewComfyFileError],
         });
 
         let workflow = undefined;
 
         try {
-            const filePath = path.join(process.cwd(), workflowApiFileName);
+            const filePath = path.join(process.cwd(), viewComfyFileName);
             const fileContent = await fs.readFile(filePath, "utf8");
             workflow = JSON.parse(fileContent);
         } catch (error) {
