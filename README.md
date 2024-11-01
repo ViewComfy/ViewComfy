@@ -9,22 +9,10 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 
 ## Installation and demo
 
-**Demo video and installation guide**
+### Demo video going through the installation
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
-For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
-
-# Usage
-## Form Editor
-
-You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
-
-## Playground
-
-The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
-
-### How to use it
-
+### Installation
 Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
 
 Clone the repo
@@ -41,9 +29,21 @@ npm install
 npm run dev
 ```
 
+### Detailed blog
+For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
+
+# Usage
+## Form Editor
+
+You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
+
+## Playground
+
+The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
+
 ## ViewMode
 
-ViewMode only loads the playground page and can easily be turned into a web app. This is convenient if you want to share your workflow with someone without sharing the workflow_api.json, and without them having to install ComfyUI.
+ViewMode will only load the playground page and can easily be turned into a web app. This is convenient if you want to share your workflow with someone without sharing the workflow_api.json, and without them having to install ComfyUI.
 
 To use ViewMode you need to download the view_comfy.json that is generated when you use the form editor and place it in the root of the project along with the workflow_api.json.
 
@@ -81,7 +81,7 @@ Feel free to contribute with feedback, suggestions, issues or pull requests.
 
 ## Roadmap
 
-- [ ]  Build a solution to deploy ViewComfy apps on the cloud
+- [x]  Build a solution to deploy ViewComfy apps on the cloud
 - [x]  Enable video inputs and outputs
 - [ ]  Randomize the seed by default at every generation
 - [ ]  Enable adding parameters back to the form editor after deletion
