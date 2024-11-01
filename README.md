@@ -7,9 +7,9 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 
 ![Group 21](https://github.com/user-attachments/assets/ad9a98e6-6c4c-4bf5-85db-4d03ab682f9b)
 
-## Demo
+## Installation and demo
 
-Demo video and installation guide
+#Demo video and installation guide
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
 For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
