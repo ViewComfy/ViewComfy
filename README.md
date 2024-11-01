@@ -9,18 +9,19 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 
 ## Installation and demo
 
-#Demo video and installation guide
+**Demo video and installation guide**
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
 For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
 
+# Usage
 ## Form Editor
 
 You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
 
 ## Playground
 
-The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok.
+The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
 
 ### How to use it
 
@@ -35,6 +36,7 @@ git clone https://github.com/ViewComfy/ViewComfy.git
 Install dependencies and start the dev server  
 
 ```bash
+cd ViewComfy
 npm install
 npm run dev
 ```
