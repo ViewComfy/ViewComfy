@@ -5,11 +5,11 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 [![Discord](https://img.shields.io/badge/ViewComfy-Discord-%235865F2.svg)](https://discord.gg/DXubrz5R7E)
 [![Website](https://img.shields.io/badge/ViewComfy%20-%20green?label=Website&color=4D7D85)](https://www.viewcomfy.com/)
 
-![Group 9](https://github.com/user-attachments/assets/b4987b5e-c3a4-4a24-bc27-e9c9d4940cfe)
+![Group 21](https://github.com/user-attachments/assets/ad9a98e6-6c4c-4bf5-85db-4d03ab682f9b)
 
 ## Demo
 
-<https://github.com/user-attachments/assets/7830118a-0a79-4cf8-ad54-3cca3f969e69>
+[![Installation Guide](https://img.youtube.com/vi/sG2elA1bdrg/0.jpg)](https://youtu.be/sG2elA1bdrg)
 
 ## Form Editor
 
