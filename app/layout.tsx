@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/theme-provider"
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export default function RootLayout({ children }: any) {
   return (
     <>
@@ -41,20 +42,3 @@ export default function RootLayout({ children }: any) {
     </>
   )
 }
-
-
-// export default function RootLayout({
-//   children,
-// }: Readonly<{
-//   children: React.ReactNode;
-// }>) {
-//   return (
-//     <html lang="en">
-//       <body
-//         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-//       >
-//         {children}
-//       </body>
-//     </html>
-//   );
-// }

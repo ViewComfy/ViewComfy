@@ -1,4 +1,5 @@
-import { useFieldArray, UseFieldArrayRemove, UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
+import React from "react";
+import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
     Form,
     FormControl,
@@ -10,9 +11,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
-import { IViewComfyJSON } from "@/app/providers/view-comfy-provider";
-import { IInputField } from "@/lib/workflow-api-parser";
-import { parseWorkflowApiTypeToInputHtmlType } from "@/pages/workflow-api/view-comfy";
+import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
+import type { IInputField } from "@/lib/workflow-api-parser";
+import { parseWorkflowApiTypeToInputHtmlType } from "@/pages/view-comfy/view-comfy-form-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -20,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2 } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
+import { AutosizeTextarea } from "../ui/autosize-text-area"
 import {
     Collapsible,
     CollapsibleContent,
@@ -32,7 +34,9 @@ interface IInputForm extends IInputField {
 }
 
 export function ViewComfyForm(args: {
-    form: UseFormReturn<IViewComfyJSON, any, undefined>, onSubmit: (data: any) => void,
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    form: UseFormReturn<IViewComfyBase, any, undefined>, onSubmit: (data: any) => void,
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
     children?: React.ReactNode,
@@ -41,7 +45,7 @@ export function ViewComfyForm(args: {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
     return (<>
         <ScrollArea className="w-full flex-1 rounded-md px-[5px]">
-            <div className='relative hidden flex-col items-start gap-2 md:flex'>
+            <div className='relative hidden flex-col items-start gap-2 md:flex mr-1'>
                 <div id="inputs-form" className="grid w-full items-start gap-2">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
@@ -88,41 +92,42 @@ export function ViewComfyForm(args: {
                                 </div>
                             )}
                             <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
-                                {/* <legend className="-ml-1 px-1 text-sm font-medium">
-                                    Basic Inputs
-                                </legend> */}
+                                {editMode && (
+                                    <legend className="-ml-1 px-1 text-sm font-medium">
+                                        Basic Inputs
+                                    </legend>
+                                )}
                                 {inputFieldArray.fields.map((field, index) => {
                                     // @ts-ignore
                                     if (field.inputs.length > 0) {
                                         if (editMode) {
                                             return (
                                                 <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                                        <legend className="-ml-1 px-1 text-sm font-medium">
-                                                            {
-                                                                // @ts-ignore
-                                                                field.title
-                                                            }
-                                                            
-                                                                <Button
-                                                                    size="icon"
-                                                                    variant="ghost"
-                                                                    className="text-muted-foreground"
-                                                                    onClick={() => inputFieldArray.remove(index)}
-                                                                >
-                                                                    <Trash2 className="size-5" />
-                                                                </Button>
-                                                        </legend>
+                                                    <legend className="-ml-1 px-1 text-sm font-medium">
+                                                        {
+                                                            // @ts-ignore
+                                                            field.title
+                                                        }
+
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="text-muted-foreground"
+                                                            onClick={() => inputFieldArray.remove(index)}
+                                                        >
+                                                            <Trash2 className="size-5" />
+                                                        </Button>
+                                                    </legend>
                                                     <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
                                                 </fieldset>
                                             )
                                         }
-                                        else {
-                                            return (
-                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4 p-1">
-                                                    <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                                </fieldset>
-                                            )
-                                        }
+
+                                        return (
+                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
+                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                            </fieldset>
+                                        )
                                     }
                                     return undefined;
                                 })}
@@ -140,14 +145,15 @@ export function ViewComfyForm(args: {
     </>)
 }
 
-function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<any>, form: UseFormReturn<IViewComfyJSON, any, undefined>, editMode: boolean, isLoading: boolean }) {
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<any>, form: UseFormReturn<IViewComfyBase, any, undefined>, editMode: boolean, isLoading: boolean }) {
     const { advancedFieldArray, form, editMode, isLoading } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
             open={isOpen}
             onOpenChange={setIsOpen}
-            className="space-y-2"
+            className="space-y-2 mb-2"
         >
             {!editMode && (<div className="flex items-center space-x-4 px-4">
                 <CollapsibleTrigger asChild>
@@ -160,9 +166,11 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
             )}
             <CollapsibleContent className="space-y-2">
                 <fieldset className="grid gap-2 rounded-lg p-1">
-                    {/* <legend className="-ml-1 px-1 text-sm font-medium">
-                        Advanced Inputs
-                    </legend> */}
+                    {editMode && (
+                        <legend className="-ml-1 px-1 text-sm font-medium">
+                            Advanced Inputs
+                        </legend>
+                    )}
                     {advancedFieldArray.fields.map((advancedField, index) => (
                         <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
                             <legend className="-ml-1 px-1 text-sm font-medium">
@@ -190,7 +198,8 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
     </>)
 }
 
-function NestedInputField(args: { form: UseFormReturn<IViewComfyJSON, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string }) {
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string }) {
     const { form, nestedIndex, editMode, formFieldName } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
@@ -219,36 +228,42 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyJSON, any, undef
     )
 }
 
-
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
+
     if (input.valueType === "long-text") {
         return (
             <FormTextAreaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
-    } else if (input.valueType === "boolean") {
+    }
+
+    if (input.valueType === "boolean") {
         return (
             <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
-    } else if (input.valueType === "video" || input.valueType === "image") {
+    }
+
+    if (input.valueType === "video" || input.valueType === "image") {
         return (
             <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
-    } else {
-        return (
-            <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
-        )
     }
+
+    return (
+        <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+    )
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
     });
-    
-    let fileExtensions:string[] = []
+
+    let fileExtensions: string[] = []
     if (input.valueType === "image") {
         fileExtensions = ['png', 'jpg', 'jpeg']
     } else if (input.valueType === "video") {
@@ -301,52 +316,54 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                 )}
             </FormLabel>
             <FormControl>
-                <>
-                    {media.src ? (
-                        <div key={input.id} className="flex flex-col items-center gap-2">
-                            <div className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md">
-                                {(input.valueType === "image") && (
-                                    <img
-                                        src={media.src}
-                                        alt={media.name}
-                                        className="max-w-full max-h-full object-contain"
-                                    />
-                                )}
-                                {(input.valueType === "video") && (
-                                    <video 
-                                        className="max-w-full max-h-full object-contain"
-                                        autoPlay
-                                        loop    
-                                    >
-                                        <source src={media.src} />                                 
-                                    </video>
-                                )}
-                            </div>
-                            <Button
-                                variant="secondary"
-                                className="border-2 text-muted-foreground"
-                                onClick={onDelete}
-                            >
-                                <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
-                            </Button>
+                {media.src ? (
+                    <div key={input.id} className="flex flex-col items-center gap-2">
+                        <div className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md">
+                            {(input.valueType === "image") && (
+                                <img
+                                    src={media.src}
+                                    alt={media.name}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            )}
+                            {(input.valueType === "video") && (
+                                <video
+                                    className="max-w-full max-h-full object-contain"
+                                    autoPlay
+                                    loop
+
+                                >
+                                    <track default kind="captions" srcLang="en" src="" />
+                                    <source src={media.src} />
+                                </video>
+                            )}
                         </div>
-                    ) : (
-                        <Dropzone
-                            key={input.id}
-                            onChange={field.onChange}
-                            fileExtensions={fileExtensions}
-                            className="form-dropzone"
-                            inputPlaceholder={field.value?.name}
-                        />
-                    )}
-                </>
+                        <Button
+                            variant="secondary"
+                            className="border-2 text-muted-foreground"
+                            onClick={onDelete}
+                        >
+                            <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
+                        </Button>
+                    </div>
+                ) : (
+                    <Dropzone
+                        key={input.id}
+                        onChange={field.onChange}
+                        fileExtensions={fileExtensions}
+                        className="form-dropzone"
+                        inputPlaceholder={field.value?.name}
+                    />
+                )}
             </FormControl>
         </FormItem>
     )
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
+
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -362,13 +379,13 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                 )}
             </FormLabel>
             <FormControl>
-                <Textarea
+                <AutosizeTextarea
                     placeholder={input.placeholder}
                     className={TEXT_AREA_STYLE}
                     {...field}
                 />
             </FormControl>
-            {(input.helpText != "Helper Text") && (
+            {(input.helpText !== "Helper Text") && (
                 <FormDescription>
                     {input.helpText}
                 </FormDescription>
@@ -377,6 +394,7 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
     )
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     return (
@@ -409,6 +427,7 @@ function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boo
     )
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     return (
@@ -428,7 +447,7 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
             <FormControl>
                 <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} />
             </FormControl>
-            {(input.helpText != "Helper Text") && (
+            {(input.helpText !== "Helper Text") && (
                 <FormDescription>
                     {input.helpText}
                 </FormDescription>

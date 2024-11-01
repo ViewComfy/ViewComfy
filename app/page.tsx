@@ -1,9 +1,9 @@
 "use client"
 import { Sidebar, TabValue } from "@/components/sidebar";
-
+import { TopNav } from "@/components/top-nav"
 import { useState } from "react"
 import { PlaygroundPage } from "../pages/playground/playground-page"
-import { WorkflowApiPage } from "@/pages/workflow-api/workflow-api-page";
+import { ViewComfyPage } from "@/pages/view-comfy/view-comfy-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
@@ -13,21 +13,20 @@ export const description =
 
 export default function Page() {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
-
     const [currentTab, setCurrentTab] = useState(viewMode ? TabValue.Playground : TabValue.WorkflowApi);
     const [popUp, setPopUp] = useState<boolean>(false);
     const [deploymentMessage, setDeploymentMessage] = useState<boolean>(false);
 
     return (
         <ViewComfyProvider>
-            <div className="grid h-screen w-full pl-[53px]">
-                <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} popUp={popUp} onPopUp={setPopUp} />
-                <div className={`
-                flex flex-col
-                ${popUp ? 'opacity-50' : 'opacity-100'}
-                `}>
-                    {currentTab === TabValue.Playground && <PlaygroundPage />}
-                    {currentTab === TabValue.WorkflowApi && <WorkflowApiPage />}
+            <div className="flex flex-col h-screen w-full overflow-x-auto overflow-y-hidden">
+                <TopNav />
+                <div className="flex flex-1 overflow-x-auto overflow-y-hidden">
+                    <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} popUp={popUp} onPopUp={setPopUp}/>
+                    <main className="flex-1 overflow-x-auto overflow-y-hidden">
+                        {currentTab === TabValue.Playground && <PlaygroundPage />}
+                        {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
+                    </main>
                 </div>
             </div>
             {popUp && !deploymentMessage &&
