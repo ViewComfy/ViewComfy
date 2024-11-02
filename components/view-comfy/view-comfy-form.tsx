@@ -44,8 +44,8 @@ export function ViewComfyForm(args: {
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
     return (<>
-        <ScrollArea className="w-full flex-1 rounded-md px-[5px]">
-            <div className='relative hidden flex-col items-start gap-2 md:flex mr-1'>
+        <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
+            <div className='relative flex-col items-start gap-2 flex mr-1'>
                 <div id="inputs-form" className="grid w-full items-start gap-2">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">

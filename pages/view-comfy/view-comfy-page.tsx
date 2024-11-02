@@ -261,11 +261,13 @@ function JSONPreview() {
                     <Trash2 className="size-5" />
                 </Button>
             )}
-            <Label className="mb-2">Workflow API JSON</Label>
-            <ScrollArea className="flex-1 rounded-md border">
-                <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
+            <div className="h-full hidden md:block">
+                <Label className="mb-2">Workflow API JSON</Label>
+                <ScrollArea className="flex-1 rounded-md border">
+                    <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+            </div>
         </>
     )
 }

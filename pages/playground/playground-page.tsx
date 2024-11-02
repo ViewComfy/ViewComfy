@@ -168,13 +168,7 @@ function PlaygroundPageContent() {
                                 <span className="sr-only">Settings</span>
                             </Button>
                         </DrawerTrigger>
-                        <DrawerContent className="max-h-[80vh]">
-                            <DrawerHeader>
-                                <DrawerTitle>Configuration</DrawerTitle>
-                                <DrawerDescription>
-                                    Configure the settings for the model and messages.
-                                </DrawerDescription>
-                            </DrawerHeader>
+                        <DrawerContent className="max-h-[80vh] gap-4 px-4 h-full">
                             <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />
                         </DrawerContent>
                     </Drawer>
