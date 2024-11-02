@@ -72,6 +72,13 @@ export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProp
                         />
                         {/* <PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} /> */}
                         <SidebarButton
+                            icon={<SquareTerminal className="size-5" />}
+                            label="Playground"
+                            isActive={currentTab === TabValue.Playground}
+                            onClick={() => onTabChange(TabValue.Playground)}
+                            isSmallScreen={isSmallScreen}
+                        />
+                        <SidebarButton
                             icon={<Cloud className="size-5" />}
                             label="Deploy"
                             isActive={popUp === true}
@@ -99,13 +106,6 @@ export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProp
                             className={currentTab === TabValue.Settings ? 'bg-muted' : ''}
                             onClick={() => onTabChange(TabValue.Settings)}
                         /> */}
-                        <SidebarButton
-                            icon={<SquareTerminal className="size-5" />}
-                            label="Playground"
-                            isActive={currentTab === TabValue.Playground}
-                            onClick={() => onTabChange(TabValue.Playground)}
-                            isSmallScreen={isSmallScreen}
-                        />
                     </>
                 )}
             </nav>
