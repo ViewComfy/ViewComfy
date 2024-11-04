@@ -160,24 +160,27 @@ function PlaygroundPageContent() {
     return (
         <>
             <div className="flex flex-col h-full">
-                <Header title="Playground">
+                <Header title="Playground"/>
+                <div className="md:hidden w-full flex pl-4 gap-x-2">
+                    <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
                         <DrawerTrigger asChild>
-                            <Button variant="ghost" size="icon" className="md:hidden">
+                            <Button variant="ghost" size="icon" className="md:hidden self-bottom w-[85px] gap-1">
                                 <Settings className="size-4" />
-                                <span className="sr-only">Settings</span>
+                                Settings
                             </Button>
                         </DrawerTrigger>
                         <DrawerContent className="max-h-[80vh] gap-4 px-4 h-full">
-                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                             <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />
                         </DrawerContent>
                     </Drawer>
-                </Header>
+                </div>
                 <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
                         {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
-                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                            <div className="px-3 w-full">
+                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                            </div>
                         )}
                         {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
 
