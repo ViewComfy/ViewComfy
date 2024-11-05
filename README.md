@@ -30,6 +30,24 @@ npm install
 npm run dev
 ```
 
+### Installation with Docker
+Build the image
+```bash
+docker build -t viewcomfy https://github.com/ViewComfy/ViewComfy.git#main
+```
+Run the container
+```bash
+docker run -d \
+--restart unless-stopped \
+--name viewcomfy \
+-p 3000:3000 \
+-e COMFYUI_BASE_URL="192.168.1.132" \
+-e COMFYUI_PORT="8188" \
+-e NEXT_PUBLIC_VIEW_MODE="true" \
+-v /home/my_path/view_comfy.json:/app/view_comfy.json \
+viewcomfy
+```
+
 ### Detailed blog
 For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
 
