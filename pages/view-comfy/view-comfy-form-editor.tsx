@@ -70,7 +70,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
         });
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function downloadViewComfyJSON(data: any) {
         onSubmit(data);
         setDownloadJson(true);

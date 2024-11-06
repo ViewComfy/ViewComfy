@@ -7,7 +7,7 @@ export interface IUsePostPlayground {
     viewComfy: { key: string, value: string | File }[],
     workflow?: object,
     onSuccess: (outputs: Blob[]) => void,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
 }
 
@@ -18,11 +18,16 @@ export const usePostPlayground = () => {
         setLoading(true);
         try {
             const formData = new FormData();
+            const viewComfyJSON: { key: string, value: unknown }[] = [];
             for (const { key, value } of viewComfy) {
-                formData.append(key, value);
+                if (value instanceof File) {
+                    formData.append(key, value);
+                } else {
+                    viewComfyJSON.push({ key, value });
+                }
             }
             formData.append('workflow', JSON.stringify(workflow));
-
+            formData.append('viewComfy', JSON.stringify(viewComfyJSON));
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
