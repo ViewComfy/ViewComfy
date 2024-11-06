@@ -46,9 +46,19 @@ export class ComfyUIService {
                 async start(controller) {
                     for (const file of outputFiles) {
                         try {
-                            const ooutputBuffer = await comfyUIAPIService.getOutputFiles({ file });
-                            const mimeType =
-                                mime.lookup(file?.filename) || "application/octet-stream";
+                            let ooutputBuffer
+                            let mimeType
+                            if (typeof file === 'string') {
+                                    ooutputBuffer = new Blob([file], {
+                                        type: 'text/plain'
+                                    });
+                                    mimeType = 'text/plain'
+                                }
+                            else {
+                                ooutputBuffer = await comfyUIAPIService.getOutputFiles({ file });
+                                mimeType =
+                                    mime.lookup(file?.filename) || "application/octet-stream";
+                            }
                             const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                             controller.enqueue(new TextEncoder().encode(mimeInfo));
                             controller.enqueue(
@@ -65,7 +75,6 @@ export class ComfyUIService {
                     controller.close();
                 },
             });
-
             return stream;
 
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
