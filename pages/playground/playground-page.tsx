@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
     Settings
 } from "lucide-react"
@@ -7,9 +8,6 @@ import { Button } from "@/components/ui/button"
 import {
     Drawer,
     DrawerContent,
-    DrawerDescription,
-    DrawerHeader,
-    DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
 import { useEffect, useState } from "react";
@@ -30,7 +28,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const apiErrorHandler = new ApiErrorHandler();
 
 function PlaygroundPageContent() {
-    // const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
@@ -49,7 +46,7 @@ function PlaygroundPageContent() {
                     }
                     const data = await response.json();
                     viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
-                    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (error: any) {
                     if (error.errorType) {
                         const responseError =
@@ -131,7 +128,6 @@ function PlaygroundPageContent() {
         }));
     };
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         return () => {
             for (const generation of Object.values(results)) {
@@ -140,6 +136,7 @@ function PlaygroundPageContent() {
                 }
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onSelectChange = (data: IViewComfy) => {
@@ -160,7 +157,7 @@ function PlaygroundPageContent() {
     return (
         <>
             <div className="flex flex-col h-full">
-                <Header title="Playground"/>
+                <Header title="Playground" />
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
@@ -209,45 +206,45 @@ function PlaygroundPageContent() {
                                                 <div className="flex flex-wrap w-full h-full gap-4">
                                                     {generation.map((output) => (
                                                         <>
-                                                        <div
-                                                            key={output.url}
-                                                            className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
-                                                        >
-                                                            {(output.outputs.type.startsWith('image/')) && (
-                                                                <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                    <img
-                                                                        src={output.url}
-                                                                        alt={`${output.url}`}
-                                                                        className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
-                                                                    />
-                                                                </BlurFade>
-                                                            )}
-                                                            {(output.outputs.type.startsWith('video/')) && (
-                                                                <video
-                                                                    key={output.url}
-                                                                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
-                                                                    autoPlay
-                                                                    loop
-
-                                                                >
-                                                                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
-                                                                    <source src={output.url} />
-                                                                </video>
-                                                            )}
-                                                        </div>
-                                                        {(output.outputs.type.startsWith('text/')) && (
-                                                            <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
-                                                                {URL.createObjectURL(output.outputs) && (
-                                                                    <object
-                                                                        data={output.url}
-                                                                        type={output.outputs.type}
-                                                                        className="w-full"
-                                                                    >
-                                                                        Unable to display text content
-                                                                    </object>
+                                                            <div
+                                                                key={output.url}
+                                                                className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                                                            >
+                                                                {(output.outputs.type.startsWith('image/')) && (
+                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                        <img
+                                                                            src={output.url}
+                                                                            alt={`${output.url}`}
+                                                                            className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
+                                                                        />
+                                                                    </BlurFade>
                                                                 )}
-                                                            </pre>
-                                                        )}
+                                                                {(output.outputs.type.startsWith('video/')) && (
+                                                                    <video
+                                                                        key={output.url}
+                                                                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
+                                                                        autoPlay
+                                                                        loop
+
+                                                                    >
+                                                                        <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                                                                        <source src={output.url} />
+                                                                    </video>
+                                                                )}
+                                                            </div>
+                                                            {(output.outputs.type.startsWith('text/')) && (
+                                                                <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
+                                                                    {URL.createObjectURL(output.outputs) && (
+                                                                        <object
+                                                                            data={output.url}
+                                                                            type={output.outputs.type}
+                                                                            className="w-full"
+                                                                        >
+                                                                            Unable to display text content
+                                                                        </object>
+                                                                    )}
+                                                                </pre>
+                                                            )}
                                                         </>
                                                     ))}
                                                 </div>

@@ -7,7 +7,7 @@ export interface IUsePostPlayground {
     viewComfy: { key: string, value: string | File }[],
     workflow?: object,
     onSuccess: (outputs: Blob[]) => void,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
 }
 

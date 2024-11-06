@@ -3,7 +3,7 @@ export class ErrorBase {
     public errors: string[];
     public errorType: ErrorTypes;
 
-    constructor(args: { message: string, errorType: ErrorTypes, errors?: string[]  }) {
+    constructor(args: { message: string, errorType: ErrorTypes, errors?: string[] }) {
         this.message = args.message;
         this.errorType = args.errorType;
         this.errors = args.errors || [];
@@ -40,14 +40,14 @@ export class ResponseError {
 }
 
 export class ErrorResponseFactory {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public getErrorResponse(error: any): ResponseError {
         if (error.errorType) {
             return new ResponseError({
                 errorMsg: error.message,
                 error: error.errors,
                 errorType: error.errorType
-            }); 
+            });
         }
 
         return new ResponseError({

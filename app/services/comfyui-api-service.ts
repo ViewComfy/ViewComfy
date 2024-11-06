@@ -199,7 +199,7 @@ export class ComfyUIAPIService {
             }
             return { outputFiles: this.outputFiles, promptId: this.promptId };
 
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error(error);
             if (error?.cause?.code === "ECONNREFUSED") {
@@ -232,7 +232,7 @@ export class ComfyUIAPIService {
 
             return await response.blob();
 
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error(error);
             if (error?.cause?.code === "ECONNREFUSED") {
@@ -252,7 +252,7 @@ export class ComfyUIAPIService {
 
         const output = data.output as { [key: string]: unknown } | undefined;
         for (const key in output) {
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             for (const dict of output[key] as any[]) {
                 if (dict.type !== "temp") {
                     this.outputFiles.push(dict)

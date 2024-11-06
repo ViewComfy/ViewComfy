@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             }
         });
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    } catch (error: any) {
+    } catch (error: unknown) {
         const responseError = errorResponseFactory.getErrorResponse(error);
 
         return NextResponse.json(responseError, {
