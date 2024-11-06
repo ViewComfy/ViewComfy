@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
@@ -34,9 +35,9 @@ interface IInputForm extends IInputField {
 }
 
 export function ViewComfyForm(args: {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<IViewComfyBase, any, undefined>, onSubmit: (data: any) => void,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
     children?: React.ReactNode,
@@ -44,8 +45,8 @@ export function ViewComfyForm(args: {
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
     return (<>
-        <ScrollArea className="w-full flex-1 rounded-md px-[5px]">
-            <div className='relative hidden flex-col items-start gap-2 md:flex mr-1'>
+        <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
+            <div className='relative flex-col items-start gap-2 flex mr-1'>
                 <div id="inputs-form" className="grid w-full items-start gap-2">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
@@ -98,6 +99,7 @@ export function ViewComfyForm(args: {
                                     </legend>
                                 )}
                                 {inputFieldArray.fields.map((field, index) => {
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                     // @ts-ignore
                                     if (field.inputs.length > 0) {
                                         if (editMode) {
@@ -105,6 +107,7 @@ export function ViewComfyForm(args: {
                                                 <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
                                                     <legend className="-ml-1 px-1 text-sm font-medium">
                                                         {
+                                                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                                             // @ts-ignore
                                                             field.title
                                                         }
@@ -145,7 +148,7 @@ export function ViewComfyForm(args: {
     </>)
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<any>, form: UseFormReturn<IViewComfyBase, any, undefined>, editMode: boolean, isLoading: boolean }) {
     const { advancedFieldArray, form, editMode, isLoading } = args;
     const [isOpen, setIsOpen] = useState(editMode);
@@ -175,6 +178,7 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
                         <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
                             <legend className="-ml-1 px-1 text-sm font-medium">
                                 {
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                     // @ts-ignore
                                     advancedField.title
                                 }
@@ -198,11 +202,12 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
     </>)
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string }) {
     const { form, nestedIndex, editMode, formFieldName } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
@@ -214,6 +219,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                     <FormField
                         key={input.id}
                         control={form.control}
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         render={({ field }) => (
@@ -228,7 +234,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
     )
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
 
@@ -255,7 +261,7 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
     )
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     const [media, setMedia] = useState({
@@ -360,7 +366,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
     )
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
 
@@ -394,7 +400,7 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
     )
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     return (
@@ -427,7 +433,7 @@ function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boo
     )
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     return (

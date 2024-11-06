@@ -6,6 +6,7 @@ import { ErrorBase, ErrorResponseFactory, ErrorTypes } from '@/app/models/errors
 
 const errorResponseFactory = new ErrorResponseFactory();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
     const viewComfyPath = path.join(process.cwd(), viewComfyFileName);
     try {

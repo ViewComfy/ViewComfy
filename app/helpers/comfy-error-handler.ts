@@ -13,7 +13,8 @@ interface WorkflowNodeError {
 type ErrorDict = Record<string, WorkflowNodeError>;
 
 export class ComfyErrorHandler {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public tryToParseWorkflowError(error: any): ComfyWorkflowError | undefined {
         try {
             if (error.node_errors) {
@@ -35,7 +36,7 @@ export class ComfyErrorHandler {
     private extractErrors(errorDict: ErrorDict): string[] {
         const errorMessages: string[] = [];
 
-        for (const [_, nodeError] of Object.entries(errorDict)) {
+        for (const [, nodeError] of Object.entries(errorDict)) {
             let errorMsgs = "";
             for (const error of nodeError.errors) {
                 errorMsgs += `${error.details}: ${error.message}, `;

@@ -4,7 +4,6 @@ import * as React from "react"
 import {
     CaretSortIcon,
     CheckIcon,
-    PlusCircledIcon,
 } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
@@ -25,22 +24,12 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import type { IViewComfy } from "@/app/providers/view-comfy-provider";
 import { useEffect } from "react"
 
@@ -78,13 +67,13 @@ export default function WorkflowSwitcher({ className, currentViewComfy, viewComf
                         role="combobox"
                         aria-expanded={open}
                         aria-label="Select a team"
-                        className={cn("w-[300px] justify-between", className)}
+                        className={cn("w-full max-w-[300px] justify-between", className)}
                     >
                         {currentWorkflow.viewComfyJSON.title}
                         <CaretSortIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
+                <PopoverContent className="w-full p-0">
                     <Command>
                         <CommandInput placeholder="Search team..." />
                         <CommandList>

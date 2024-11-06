@@ -7,7 +7,7 @@ const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
 
 export class ComfyWorkflow {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private workflow: { [key: string]: any };
     private workflowFileName: string;
     private workflowFilePath: string;
@@ -23,7 +23,7 @@ export class ComfyWorkflow {
     public async setViewComfy(viewComfy: IInput[]) {
         for (const input of viewComfy) {
             const path = input.key.split("-");
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let obj: any = this.workflow;
             for (let i = 0; i < path.length - 1; i++) {
                 if (i === path.length - 1) {
