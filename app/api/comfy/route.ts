@@ -10,11 +10,17 @@ export async function POST(request: NextRequest) {
     if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
         workflow = JSON.parse(formData.get('workflow') as string);
     }
-    const viewComfy: { key: string, value: string | File }[] = [];
+
+    let viewComfy: { key: string, value: unknown }[] = [];
+    if (formData.get('viewComfy') && formData.get('viewComfy') !== 'undefined') {
+        viewComfy = JSON.parse(formData.get('viewComfy') as string);
+    }
 
     for (const [key, value] of Array.from(formData.entries())) {
         if (key !== 'workflow') {
-            viewComfy.push({ key, value: value as string | File });
+            if (value instanceof File) {
+                viewComfy.push({ key, value });
+            }
         }
     }
 
