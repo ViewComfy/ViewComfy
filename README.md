@@ -5,6 +5,7 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 [![Discord](https://img.shields.io/badge/ViewComfy-Discord-%235865F2.svg)](https://discord.gg/DXubrz5R7E)
 [![Website](https://img.shields.io/badge/ViewComfy%20-%20green?label=Website&color=4D7D85)](https://www.viewcomfy.com/)
 
+
 ![Group 21](https://github.com/user-attachments/assets/ad9a98e6-6c4c-4bf5-85db-4d03ab682f9b)
 It can support image, video and text outputs and is optimised to work well on desktop and mobile.
 
