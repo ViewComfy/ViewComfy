@@ -81,13 +81,13 @@ You can also drop a view_comfy.json directly in the form editor to edit it witho
 
 Feel free to contribute with feedback, suggestions, issues or pull requests.
 
-## Roadmap
-
-- [x]  Build a solution to deploy ViewComfy apps on the cloud
-- [x]  Enable video inputs and outputs
-- [ ]  Randomize the seed by default at every generation
-- [ ]  Enable adding parameters back to the form editor after deletion
 
 ### Tech
 
 ViewComfy is a Next.js app - [Next.js Documentation](https://nextjs.org/docs)
+
+
+### Cloud deployment
+
+If you need to deploy a ViewComfy app or a ComfyUI workflow, you can do it directly on our [website](https://playground.viewcomfy.com/deploy). 
+
