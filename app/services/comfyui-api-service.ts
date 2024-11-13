@@ -32,7 +32,6 @@ export class ComfyImageOutputFile {
 
 export class ComfyUIAPIService {
     private baseUrl: string;
-    private port: string;
     private ws: WebSocket;
     private clientId: string;
     private promptId: string | undefined = undefined;
@@ -47,8 +46,7 @@ export class ComfyUIAPIService {
         this.secure = process.env.COMFYUI_SECURE === "true";
         this.httpBaseUrl = this.secure ? "https://" : "http://";
         this.wsBaseUrl = this.secure ? "wss://" : "ws://";
-        this.baseUrl = process.env.COMFYUI_BASE_URL || "127.0.0.1";
-        this.port = process.env.COMFYUI_PORT || "8188";
+        this.baseUrl = process.env.COMFYUI_API_URL || "127.0.0.1:8188";
         this.clientId = clientId;
         try {
             this.ws = new WebSocket(`${this.getUrl("ws")}/ws?clientId=${this.clientId}`);
@@ -64,9 +62,9 @@ export class ComfyUIAPIService {
 
     private getUrl(protocol: "http" | "ws") {
         if (protocol === "http") {
-            return `${this.httpBaseUrl}${this.baseUrl}:${this.port}`;
+            return `${this.httpBaseUrl}${this.baseUrl}`;
         }
-        return `${this.wsBaseUrl}${this.baseUrl}:${this.port}`;
+        return `${this.wsBaseUrl}${this.baseUrl}`;
     }
 
     private async connect() {
