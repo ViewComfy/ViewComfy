@@ -1,6 +1,9 @@
 # Use a Node.js image as the base
 FROM node:23-alpine3.19
 
+# Install socat
+RUN apk add --no-cache socat
+
 # Set the working directory
 WORKDIR /app
 
@@ -24,5 +27,5 @@ RUN npm install && mkdir -p /app/output
 # Expose port 3000 for the Next.js application
 EXPOSE 3000
 
-# Command to start the application in development mode
-CMD ["npm", "run", "dev"]
+# Start socat in the background to forward traffic from 0.0.0.0:9999 to 127.0.0.1:9229
+CMD socat TCP-LISTEN:9999,fork,reuseaddr TCP:127.0.0.1:9229 & npm run dev
