@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import type { IInput } from "../interfaces/input";
+import { ComfyUIService } from '@/app/services/comfyui-service';
 
 const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
@@ -32,8 +33,14 @@ export class ComfyWorkflow {
                 obj = obj[path[i]];
             }
             if (input.value instanceof File) {
-                const filePath = await this.createFileFromInput(input.value);
-                obj[path[path.length - 1]] = filePath;
+               /** write file locally */
+//                const filePath = await this.createFileFromInput(input.value);
+//                obj[path[path.length - 1]] = filePath;
+
+                /** upload file to comfyui API */
+                const comfyUIService = new ComfyUIService();
+                const filename = await comfyUIService.uploadFile(input.value);
+                obj[path[path.length - 1]] = filename;
             } else {
                 obj[path[path.length - 1]] = input.value;
             }
