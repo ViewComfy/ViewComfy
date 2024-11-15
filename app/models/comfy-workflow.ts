@@ -38,10 +38,26 @@ export class ComfyWorkflow {
                 obj[path[path.length - 1]] = input.value;
             }
         }
+
+        const newSeed = this.getNewSeed();
+
         for (const key in this.workflow) {
-            if (this.workflow[key].class_type === "SaveImage" || this.workflow[key].class_type === "VHS_VideoCombine") {
-                this.workflow[key].inputs.filename_prefix = this.getFileNamePrefix();
-            }
+            let node = this.workflow[key];
+            switch(node.class_type) {
+                case "SaveImage":
+                case "VHS_VideoCombine":
+                    node.inputs.filename_prefix = this.getFileNamePrefix();
+                    break;
+                    
+                case "KSampler":
+                case "RandomNoise":
+                default:
+                    Object.keys(node.inputs).forEach((key) => {
+                        if(["seed", "noise_seed", "rand_seed"].includes(key)) {
+                            node.inputs[key] = newSeed; 
+                        }                        
+                    });
+            }            
         }
     }
 
@@ -59,6 +75,12 @@ export class ComfyWorkflow {
 
     public getFileNamePrefix() {
         return `${this.id}_`;
+    }
+
+    public getNewSeed() {
+        const minCeiled = Math.ceil(0);
+        const maxFloored = Math.floor(2**32);
+        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
     }
 
     private async createFileFromInput(file: File) {
