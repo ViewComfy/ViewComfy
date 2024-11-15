@@ -51,9 +51,12 @@ export class ComfyWorkflow {
                     
                 default:
                     Object.keys(node.inputs).forEach((key) => {
-                        if(["seed", "noise_seed", "rand_seed"].includes(key)) {
+                        if(
+                            ["seed", "noise_seed", "rand_seed"].includes(key) 
+                            && typeof node.inputs[key] === 'string'
+                            && node.inputs[key]?.replace(/\s/g, "").toLowerCase() == 'randomize') {
                             node.inputs[key] = newSeed; 
-                        }                        
+                        }                    
                     });
             }            
         }
