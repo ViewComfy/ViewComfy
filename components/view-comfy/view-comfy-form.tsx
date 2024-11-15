@@ -29,6 +29,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
+import { RefreshCw } from "lucide-react";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -255,10 +256,96 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
             <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
     }
+    
+    if (input.valueType === "seed" ) {
+        return (
+            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+        )
+    }
 
     return (
         <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
     )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+    const { input, field, editMode, remove, index } = args;
+
+    const [isRandomized, setIsRandomized] = useState(false); // State to manage checkbox behavior
+    const [storedValue, setStoredValue] = useState(field.value); // State to preserve input value
+
+    const toggleRandomize = () => {
+        const newValue = !isRandomized;
+        setIsRandomized(newValue);
+        if (newValue) {
+            // Save the current input value before disabling it
+            setStoredValue(field.value);
+            field.onChange("randomize");
+        } else {
+            // Restore the saved value when reactivating the input
+            field.onChange(storedValue);
+        }
+    };
+
+    return (
+        <FormItem key={input.id}>
+            <FormLabel className={FORM_STYLE.label}>
+                {input.title}
+                {editMode && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={remove ? () => remove(index) : undefined}
+                    >
+                        <Trash2 className="size-5" />
+                    </Button>
+                )}
+            </FormLabel>
+            <FormControl>
+                <div className="flex items-center space-x-2">
+                    <Input
+                        placeholder={input.placeholder}
+                        {...field}
+                        type="number"
+                        disabled={isRandomized} // Disable input if checkbox is checked
+                        value={isRandomized ? "randomize" : field.value} // Display "randomize" if checkbox is checked
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isRandomized) {
+                                setStoredValue(value); // Update stored value when input changes
+                                field.onChange(value);
+                            }
+                        }}
+                        className="flex-1"
+                    />
+                    {/* Hidden checkbox */}
+                    <Checkbox
+                        className="hidden"
+                        checked={isRandomized}
+                        onCheckedChange={() => {}}
+                    />
+                    {/* Randomize button */}
+                    <button
+                        type="button"
+                        title={isRandomized ? "Disable randomization" : "Enable randomization"}
+                        onClick={toggleRandomize}
+                        className={`p-2 rounded-md ${
+                            isRandomized ? "text-blue-500" : "text-gray-400"
+                        } hover:text-blue-600`}
+                    >
+                        <RefreshCw className="w-5 h-5" />
+                    </button>
+                </div>
+            </FormControl>
+            {input.helpText !== "Helper Text" && (
+                <FormDescription>
+                    {input.helpText}
+                </FormDescription>
+            )}
+        </FormItem>
+    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
