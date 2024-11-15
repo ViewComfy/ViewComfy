@@ -41,50 +41,75 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
             }
         }
         try {
-            if (value.class_type === 'CLIPTextEncode') {
-                if (inputs.length > 0) {
-                    const input = inputs[0];
-                    input.valueType = "long-text";
-                    input.title = getTitleFromValue(value.class_type, value);
-                    input.placeholder = getTitleFromValue(value.class_type, value);
+            
+            switch (value.class_type) {
+
+                case 'CLIPTextEncode':
+                    if (inputs.length > 0) {
+                        const input = inputs[0];
+                        input.valueType = "long-text";
+                        input.title = getTitleFromValue(value.class_type, value);
+                        input.placeholder = getTitleFromValue(value.class_type, value);
+                        basicInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: inputs,
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
+                    
+                case "LoadImage":
+                case "LoadImageMask":
+                    const uploadInput = inputs.find(input => input.title === "Upload");
+                    if (uploadInput) {
+                        const input = inputs[0];
+                        input.valueType = "image";
+                        input.title = getTitleFromValue(value.class_type, value);
+                        input.placeholder = getTitleFromValue(value.class_type, value);
+                        input.value = null;
+                        basicInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: [input],
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
+
+                case "VHS_LoadVideo":
+                    const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
+                    if (typeof uploadInputIndex !== "undefined") {
+                        inputs[uploadInputIndex].valueType = "video"
+                        inputs[uploadInputIndex].value = null
+                    }
                     basicInputs.push({
                         title: getTitleFromValue(value.class_type, value),
                         inputs: inputs,
                         key: `${key}-${value.class_type}`
                     });
-                }
-            } else if (value.class_type === "LoadImage" || value.class_type === "LoadImageMask") {
-                const uploadInput = inputs.find(input => input.title === "Upload");
-                if (uploadInput) {
-                    const input = inputs[0];
-                    input.valueType = "image";
-                    input.title = getTitleFromValue(value.class_type, value);
-                    input.placeholder = getTitleFromValue(value.class_type, value);
-                    input.value = null;
-                    basicInputs.push({
-                        title: getTitleFromValue(value.class_type, value),
-                        inputs: [input],
-                        key: `${key}-${value.class_type}`
+                    break;
+
+                default:
+
+                    Object.keys(inputs).forEach((key) => {
+                        switch(inputs[key].title.toLowerCase()) {
+                            case "seed":
+                            case "noise_seed":
+                            case "rand_seed":
+                                inputs[key].valueType = "seed";
+                                break;
+                        }
                     });
-                }
-            } else if (value.class_type === "VHS_LoadVideo") {
-                const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
-                if (typeof uploadInputIndex !== "undefined") {
-                    inputs[uploadInputIndex].valueType = "video"
-                    inputs[uploadInputIndex].value = null
-                }
-                basicInputs.push({
-                    title: getTitleFromValue(value.class_type, value),
-                    inputs: inputs,
-                    key: `${key}-${value.class_type}`
-                });
-            } else if (inputs.length > 0) {
-                advancedInputs.push({
-                    title: getTitleFromValue(value.class_type, value),
-                    inputs: inputs,
-                    key: `${key}-${value.class_type}`
-                });
-            }
+                   
+                    if (inputs.length > 0) {
+                        advancedInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: inputs,
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
+            }            
+
         } catch (e) {
             console.log("Error", e);
         }
