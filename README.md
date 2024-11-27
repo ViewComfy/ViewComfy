@@ -16,7 +16,7 @@ It can support image, video and text outputs and is optimised to work well on de
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
 ### Installation
-Install [Node.js 18.18](https://nodejs.org/) or later (recommended v20.17)
+Install [Node.js v20.18](https://nodejs.org/) or later (recommended v20.18)
 
 Clone the repo
 
