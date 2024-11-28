@@ -10,7 +10,7 @@ import {
     DrawerContent,
     DrawerTrigger,
 } from "@/components/ui/drawer"
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Header } from "@/components/header";
 import { PlaygroundForm } from "./playground-form";
 import { Loader } from "@/components/loader";
@@ -203,9 +203,9 @@ function PlaygroundPageContent() {
                                     <div className="flex flex-col w-full h-full">
                                         {Object.entries(results).map(([timestamp, generation], index, array) => (
                                             <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
-                                                <div className="flex flex-wrap w-full h-full gap-4">
+                                                <div className="flex flex-wrap w-full h-full gap-4" key={timestamp}>
                                                     {generation.map((output) => (
-                                                        <>
+                                                        <Fragment key={output.url}>
                                                             <div
                                                                 key={output.url}
                                                                 className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
@@ -245,7 +245,7 @@ function PlaygroundPageContent() {
                                                                     )}
                                                                 </pre>
                                                             )}
-                                                        </>
+                                                        </Fragment>
                                                     ))}
                                                 </div>
                                                 <hr className={
@@ -273,3 +273,5 @@ export function PlaygroundPage() {
         <PlaygroundPageContent />
     );
 }
+
+

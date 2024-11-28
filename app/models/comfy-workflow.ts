@@ -1,7 +1,9 @@
 import path from "node:path";
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
-import type { IInput } from "../interfaces/input";
+import type { IInput } from "@/app/interfaces/input";
+import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
+import { getComfyUIRandomSeed } from "@/lib/utils";
 
 const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
@@ -38,9 +40,25 @@ export class ComfyWorkflow {
                 obj[path[path.length - 1]] = input.value;
             }
         }
+
         for (const key in this.workflow) {
-            if (this.workflow[key].class_type === "SaveImage" || this.workflow[key].class_type === "VHS_VideoCombine") {
-                this.workflow[key].inputs.filename_prefix = this.getFileNamePrefix();
+            const node = this.workflow[key];
+            switch (node.class_type) {
+                case "SaveImage":
+                case "VHS_VideoCombine":
+                    node.inputs.filename_prefix = this.getFileNamePrefix();
+                    break;
+
+                default:
+                    Object.keys(node.inputs).forEach((key) => {
+                        if (
+                            SEED_LIKE_INPUT_VALUES.includes(key)
+                            && node.inputs[key] === Number.MIN_VALUE
+                        ) {
+                            const newSeed = this.getNewSeed();
+                            node.inputs[key] = newSeed;
+                        }
+                    });
             }
         }
     }
@@ -59,6 +77,10 @@ export class ComfyWorkflow {
 
     public getFileNamePrefix() {
         return `${this.id}_`;
+    }
+
+    public getNewSeed() {
+        return getComfyUIRandomSeed();
     }
 
     private async createFileFromInput(file: File) {

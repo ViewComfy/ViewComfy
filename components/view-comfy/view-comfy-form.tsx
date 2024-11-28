@@ -29,6 +29,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
+import { getComfyUIRandomSeed } from "@/lib/utils";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -256,9 +257,88 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
         )
     }
 
+    if (input.valueType === "seed" || input.valueType === "noise_seed" || input.valueType === "rand_seed") {
+        return (
+            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+        )
+    }
+
     return (
         <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
     )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+    const { input, field, editMode, remove, index } = args;
+    // The Number.MIN_VALUE is used to indicate that the input has been randomized
+    const [isRandomized, setIsRandomized] = useState(field.value === Number.MIN_VALUE);
+    const [storedValue] = useState(field.value);
+
+    const toggleRandomize = () => {
+        const newValue = !isRandomized;
+        setIsRandomized(newValue);
+        if (newValue) {
+            field.onChange(Number.MIN_VALUE);
+        } else {
+            // Restore the saved value when reactivating the input
+            if (storedValue === Number.MIN_VALUE) {
+                field.onChange(getComfyUIRandomSeed());
+            } else {
+                field.onChange(storedValue);
+            }
+        }
+    };
+
+    return (
+        <FormItem key={input.id}>
+            <FormLabel className={FORM_STYLE.label}>
+                {input.title}
+                {editMode && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={remove ? () => remove(index) : undefined}
+                    >
+                        <Trash2 className="size-5" />
+                    </Button>
+                )}
+            </FormLabel>
+            <FormControl>
+                <div className="flex items-center space-x-2">
+                    <Input
+                        placeholder={input.placeholder}
+                        {...field}
+                        type="number"
+                        disabled={isRandomized} // Disable input if checkbox is checked
+                        value={isRandomized ? "" : field.value} // Display "randomize" if checkbox is checked
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isRandomized) {
+                                field.onChange(value);
+                            }
+                        }}
+                        className="flex-1"
+                    />
+                    <Checkbox
+                        checked={isRandomized}
+                        onCheckedChange={toggleRandomize}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <FormLabel className={CHECKBOX_STYLE.checkBoxLabel}>
+                            Randomize
+                        </FormLabel>
+                    </div>
+                </div>
+            </FormControl>
+            {input.helpText !== "Helper Text" && (
+                <FormDescription>
+                    {input.helpText}
+                </FormDescription>
+            )}
+        </FormItem>
+    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

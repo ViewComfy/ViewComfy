@@ -1,3 +1,4 @@
+import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 
 export interface IInputField {
@@ -7,7 +8,7 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text" | "video";
+    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed";
     validations: { required: boolean };
     key: string;
 }
@@ -41,50 +42,71 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
             }
         }
         try {
-            if (value.class_type === 'CLIPTextEncode') {
-                if (inputs.length > 0) {
-                    const input = inputs[0];
-                    input.valueType = "long-text";
-                    input.title = getTitleFromValue(value.class_type, value);
-                    input.placeholder = getTitleFromValue(value.class_type, value);
+
+            switch (value.class_type) {
+
+                case 'CLIPTextEncode':
+                    if (inputs.length > 0) {
+                        const input = inputs[0];
+                        input.valueType = "long-text";
+                        input.title = getTitleFromValue(value.class_type, value);
+                        input.placeholder = getTitleFromValue(value.class_type, value);
+                        basicInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: inputs,
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
+
+                case "LoadImage":
+                case "LoadImageMask":
+                    const uploadInput = inputs.find(input => input.title === "Upload");
+                    if (uploadInput) {
+                        const input = inputs[0];
+                        input.valueType = "image";
+                        input.title = getTitleFromValue(value.class_type, value);
+                        input.placeholder = getTitleFromValue(value.class_type, value);
+                        input.value = null;
+                        basicInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: [input],
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
+
+                case "VHS_LoadVideo":
+                    const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
+                    if (typeof uploadInputIndex !== "undefined") {
+                        inputs[uploadInputIndex].valueType = "video"
+                        inputs[uploadInputIndex].value = null
+                    }
                     basicInputs.push({
                         title: getTitleFromValue(value.class_type, value),
                         inputs: inputs,
                         key: `${key}-${value.class_type}`
                     });
-                }
-            } else if (value.class_type === "LoadImage" || value.class_type === "LoadImageMask") {
-                const uploadInput = inputs.find(input => input.title === "Upload");
-                if (uploadInput) {
-                    const input = inputs[0];
-                    input.valueType = "image";
-                    input.title = getTitleFromValue(value.class_type, value);
-                    input.placeholder = getTitleFromValue(value.class_type, value);
-                    input.value = null;
-                    basicInputs.push({
-                        title: getTitleFromValue(value.class_type, value),
-                        inputs: [input],
-                        key: `${key}-${value.class_type}`
-                    });
-                }
-            } else if (value.class_type === "VHS_LoadVideo") {
-                const uploadInputIndex = inputs.findIndex(input => input.title === "Video");
-                if (typeof uploadInputIndex !== "undefined") {
-                    inputs[uploadInputIndex].valueType = "video"
-                    inputs[uploadInputIndex].value = null
-                }
-                basicInputs.push({
-                    title: getTitleFromValue(value.class_type, value),
-                    inputs: inputs,
-                    key: `${key}-${value.class_type}`
-                });
-            } else if (inputs.length > 0) {
-                advancedInputs.push({
-                    title: getTitleFromValue(value.class_type, value),
-                    inputs: inputs,
-                    key: `${key}-${value.class_type}`
-                });
+                    break;
+
+                default:
+
+                    for (const input of inputs) {
+                        if (SEED_LIKE_INPUT_VALUES.includes(input.title.toLowerCase())) {
+                            input.valueType = "seed";
+                        }
+                    }
+
+                    if (inputs.length > 0) {
+                        advancedInputs.push({
+                            title: getTitleFromValue(value.class_type, value),
+                            inputs: inputs,
+                            key: `${key}-${value.class_type}`
+                        });
+                    }
+                    break;
             }
+
         } catch (e) {
             console.log("Error", e);
         }
