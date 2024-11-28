@@ -1,7 +1,9 @@
 import path from "node:path";
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
-import type { IInput } from "../interfaces/input";
+import type { IInput } from "@/app/interfaces/input";
+import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
+import { getComfyUIRandomSeed } from "@/lib/utils";
 
 const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
@@ -39,26 +41,25 @@ export class ComfyWorkflow {
             }
         }
 
-        const newSeed = this.getNewSeed();
-
         for (const key in this.workflow) {
-            let node = this.workflow[key];
-            switch(node.class_type) {
+            const node = this.workflow[key];
+            switch (node.class_type) {
                 case "SaveImage":
                 case "VHS_VideoCombine":
                     node.inputs.filename_prefix = this.getFileNamePrefix();
                     break;
-                    
+
                 default:
                     Object.keys(node.inputs).forEach((key) => {
-                        if(
-                            ["seed", "noise_seed", "rand_seed"].includes(key) 
-                            && typeof node.inputs[key] === 'string'
-                            && node.inputs[key]?.replace(/\s/g, "").toLowerCase() == 'randomize') {
-                            node.inputs[key] = newSeed; 
-                        }                    
+                        if (
+                            SEED_LIKE_INPUT_VALUES.includes(key)
+                            && node.inputs[key] === Number.MIN_VALUE
+                        ) {
+                            const newSeed = this.getNewSeed();
+                            node.inputs[key] = newSeed;
+                        }
                     });
-            }            
+            }
         }
     }
 
@@ -79,9 +80,7 @@ export class ComfyWorkflow {
     }
 
     public getNewSeed() {
-        const minCeiled = Math.ceil(0);
-        const maxFloored = Math.floor(2**32);
-        return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
+        return getComfyUIRandomSeed();
     }
 
     private async createFileFromInput(file: File) {

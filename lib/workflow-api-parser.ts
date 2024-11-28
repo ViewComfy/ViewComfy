@@ -1,3 +1,4 @@
+import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 
 export interface IInputField {
@@ -7,7 +8,7 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text" | "video";
+    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed";
     validations: { required: boolean };
     key: string;
 }
@@ -41,7 +42,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
             }
         }
         try {
-            
+
             switch (value.class_type) {
 
                 case 'CLIPTextEncode':
@@ -57,7 +58,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                         });
                     }
                     break;
-                    
+
                 case "LoadImage":
                 case "LoadImageMask":
                     const uploadInput = inputs.find(input => input.title === "Upload");
@@ -90,16 +91,12 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
 
                 default:
 
-                    Object.keys(inputs).forEach((key) => {
-                        switch(inputs[key].title.toLowerCase()) {
-                            case "seed":
-                            case "noise_seed":
-                            case "rand_seed":
-                                inputs[key].valueType = "seed";
-                                break;
+                    for (const input of inputs) {
+                        if (SEED_LIKE_INPUT_VALUES.includes(input.title.toLowerCase())) {
+                            input.valueType = "seed";
                         }
-                    });
-                   
+                    }
+
                     if (inputs.length > 0) {
                         advancedInputs.push({
                             title: getTitleFromValue(value.class_type, value),
@@ -108,7 +105,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                         });
                     }
                     break;
-            }            
+            }
 
         } catch (e) {
             console.log("Error", e);
