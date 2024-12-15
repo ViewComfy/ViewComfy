@@ -29,7 +29,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
-import { getComfyUIRandomSeed } from "@/lib/utils";
+import { getComfyUIRandomSeed, cn } from "@/lib/utils";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -41,16 +41,18 @@ export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
+    downloadViewComfyJSON: (data: IViewComfyBase) => void,
     children?: React.ReactNode,
     isLoading?: boolean
 }) {
-    const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
+    const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row gap-x-4 h-full w-full">
-                    <div className='flex-col items-start gap-4 flex mr-1 min-h-0 w-1/2'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
+                <div className="flex flex-row gap-x-2 flex-1 min-h-0">
+                    <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
-                            <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
+                            <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
                                 {editMode && (
                                     <>
                                         <FormField
@@ -144,11 +146,24 @@ export function ViewComfyForm(args: {
                             </ScrollArea >
                         </div>
                     </div>
-                    <ScrollArea className="w-1/2 h-full flex-1 rounded-md px-[5px]">
-                        <div className="">
-                            <PreviewImagesInput form={form} />
-                        </div>
-                    </ScrollArea>
+                    {editMode && (
+                        <ScrollArea className="h-full flex-1 rounded-md px-[5px] pr-4">
+                            <div className="">
+                                <PreviewImagesInput form={form} />
+                            </div>
+                        </ScrollArea>
+                    )}
+                </div>
+                {editMode && (
+                    <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
+                        <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
+                            Save Changes
+                        </Button>
+                        <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                            Download as ViewComfy JSON
+                        </Button>
+                    </div>
+                )}
             </form>
         </Form>
         
@@ -208,7 +223,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                             <img
                                                 src={field.value}
                                                 alt={`Preview ${index + 1}`}
-                                                className="w-full h-40 object-cover rounded-md"
+                                                className="w-full object-cover rounded-md"
                                             />
                                             <Button
                                                 variant="secondary"
