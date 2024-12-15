@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { cn } from "@/lib/utils";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import type { IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
 
@@ -11,9 +11,9 @@ export function PreviewOutputsImageGallery({
     viewComfyJSON: IViewComfyWorkflow
 }) {
 
-    const image1= viewComfyJSON.preview_images[0] ? viewComfyJSON.preview_images[0] : null
-    const image2=viewComfyJSON.preview_images[1] ? viewComfyJSON.preview_images[1] : null
-    const image3=viewComfyJSON.preview_images[2] ? viewComfyJSON.preview_images[2] : null
+    const [image1, setImage1] = useState<string | null>(viewComfyJSON.preview_images[0] ? viewComfyJSON.preview_images[0] : null);
+    const [image2, setImage2] = useState<string | null>(viewComfyJSON.preview_images[1] ? viewComfyJSON.preview_images[1] : null);
+    const [image3, setImage3] = useState<string | null>(viewComfyJSON.preview_images[2] ? viewComfyJSON.preview_images[2] : null);
 
     const first = {
         initial: {
@@ -52,6 +52,9 @@ export function PreviewOutputsImageGallery({
                             src={image1}
                             alt="avatar"
                             className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                            onError={() => {
+                                setImage1(null);
+                            }}
                         />
                     </motion.div>
                 )}
@@ -63,6 +66,9 @@ export function PreviewOutputsImageGallery({
                             src={image2}
                             alt="avatar"
                             className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                            onError={() => {
+                                setImage2(null);
+                            }}
                         />
                     </motion.div>
                 )}
@@ -75,6 +81,9 @@ export function PreviewOutputsImageGallery({
                             src={image3}
                             alt="avatar"
                             className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                            onError={() => {
+                                setImage3(null);
+                            }}
                         />
                     </motion.div>
                 )}

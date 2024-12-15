@@ -171,6 +171,7 @@ export function ViewComfyForm(args: {
 }
 
 function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
+
     const save_image = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
         if (file) {
             try {
@@ -223,7 +224,10 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                             <img
                                                 src={field.value}
                                                 alt={`Preview ${index + 1}`}
-                                                className="w-full object-cover rounded-md"
+                                                className="w-full object-contain rounded-md max-h-[300px]"
+                                                onError={() => {
+                                                    field.onChange("");
+                                                }}
                                             />
                                             <Button
                                                 variant="secondary"
