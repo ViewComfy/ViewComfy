@@ -111,7 +111,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <ViewComfyForm form={form} onSubmit={submitOnCLick} inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} editMode={true}>
-                <div className={cn("sticky bottom-0 p-4 bg-background w-full rounded-md")}>
+                <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
                     <Button type="submit" className="w-full mb-2">
                         Save Changes
                     </Button>

@@ -11,7 +11,6 @@ export const config = {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    console.log('uploading')
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
@@ -36,7 +35,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Copy file to public/uploads
     const rawData = fs.readFileSync(file.filepath)
-    console.log(file.filepath, publicPath, fileName)
     fs.writeFileSync(path.join(publicPath, fileName), rawData)
 
     // Return the public URL
