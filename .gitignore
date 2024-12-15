@@ -38,3 +38,4 @@ powershell_venv
 *.tsbuildinfo
 next-env.d.ts
 *.Identifier
+/public/uploads

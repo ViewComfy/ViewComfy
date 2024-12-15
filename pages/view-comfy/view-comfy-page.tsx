@@ -161,7 +161,7 @@ export function ViewComfyPage() {
                 )}
 
                 {!showDropZone() && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <>
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
                                 <div className="w-full flex flex-wrap items-center gap-4 mb-4">
@@ -194,7 +194,7 @@ export function ViewComfyPage() {
                                 <JSONPreview />
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
             </main>
             <ErrorAlertDialog

@@ -47,9 +47,8 @@ export function ViewComfyForm(args: {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
-                <>
-                    <div className='relative flex-col items-start gap-2 flex mr-1 h-[calc(100vh-100px)]'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row h-full w-full">
+                    <div className='flex-col items-start gap-4 flex mr-1 min-h-0 w-1/2'>
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
                             <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
                                 {editMode && (
@@ -145,13 +144,11 @@ export function ViewComfyForm(args: {
                             </ScrollArea >
                         </div>
                     </div>
-                    <ScrollArea className="w-1/3 h-full flex-1 rounded-md px-[5px]">
-                        <div className="p-4">
-                            <h3 className="text-lg font-semibold mb-4">Preview Images</h3>
+                    <ScrollArea className="w-1/2 h-full flex-1 rounded-md px-[5px]">
+                        <div className="">
                             <PreviewImagesInput form={form} />
                         </div>
                     </ScrollArea>
-                </>
             </form>
         </Form>
         
@@ -176,16 +173,52 @@ function PreviewImagesInput({
                             <FormLabel>Preview Image {index + 1}</FormLabel>
                             <FormControl>
                                 <div className="space-y-2">
-                                    <Input
-                                        type="url"
-                                        placeholder="Enter image URL"
-                                        {...field}
-                                    />
-                                    {field.value && (
-                                        <img
-                                            src={field.value}
-                                            alt={`Preview ${index + 1}`}
-                                            className="w-full h-40 object-cover rounded-md"
+                                    {field.value ? (
+                                        <div className="flex flex-col gap-2">
+                                            <img
+                                                src={field.value}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-40 object-cover rounded-md"
+                                            />
+                                            <Button
+                                                variant="secondary"
+                                                className="border-2 text-muted-foreground"
+                                                onClick={() => field.onChange("")}
+                                            >
+                                                <Trash2 className="size-5 mr-2" /> Remove image
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Dropzone
+                                            onChange={async (file) => {
+                                                if (file) {
+                                                    try {
+                                                        // Create FormData
+                                                        const formData = new FormData()
+                                                        formData.append('file', file)
+
+                                                        // Upload file to API
+                                                        const response = await fetch('/api/image_upload', {
+                                                            method: 'POST',
+                                                            body: formData,
+                                                        })
+
+                                                        if (!response.ok) {
+                                                            throw new Error('Upload failed')
+                                                        }
+
+                                                        const data = await response.json()
+                                                        // Update form with the public URL
+                                                        field.onChange(data.url)
+                                                    } catch (error) {
+                                                        console.error('Error uploading file:', error)
+                                                        // Handle error (show toast notification, etc.)
+                                                    }
+                                                }
+                                            }}
+                                            fileExtensions={['png', 'jpg', 'jpeg']}
+                                            className="form-dropzone"
+                                            inputPlaceholder="Drop an image or paste a URL"
                                         />
                                     )}
                                 </div>
