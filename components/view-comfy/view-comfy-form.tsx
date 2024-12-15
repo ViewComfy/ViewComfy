@@ -45,108 +45,158 @@ export function ViewComfyForm(args: {
     isLoading?: boolean
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
-    return (<>
-        <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
-            <div className='relative flex-col items-start gap-2 flex mr-1'>
-                <div id="inputs-form" className="grid w-full items-start gap-2">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
-                            {editMode && (
-                                <>
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem key="title" className="ml-0.5">
-                                                <FormLabel>Title</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="The name of your workflow" {...field} />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    The title of your workflow.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="description"
-                                        render={({ field }) => (
-                                            <FormItem key="description" className="ml-0.5">
-                                                <FormLabel>Description</FormLabel>
-                                                <FormControl>
-                                                    <Textarea placeholder="The description of your workflow" {...field} />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    The description of your workflow.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </>
-                            )}
-                            {!editMode && (
-                                <div id="workflow-title-description">
-                                    <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                    <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
-                                </div>
-                            )}
-                            <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
+                <>
+                    <div className='relative flex-col items-start gap-2 flex mr-1 h-[calc(100vh-100px)]'>
+                        <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
+                            <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
                                 {editMode && (
-                                    <legend className="-ml-1 px-1 text-sm font-medium">
-                                        Basic Inputs
-                                    </legend>
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="title"
+                                            render={({ field }) => (
+                                                <FormItem key="title" className="ml-0.5">
+                                                    <FormLabel>Title</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="The name of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The title of your workflow.
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem key="description" className="ml-0.5">
+                                                    <FormLabel>Description</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea placeholder="The description of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The description of your workflow.
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </>
                                 )}
-                                {inputFieldArray.fields.map((field, index) => {
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    if (field.inputs.length > 0) {
-                                        if (editMode) {
-                                            return (
-                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                                    <legend className="-ml-1 px-1 text-sm font-medium">
-                                                        {
-                                                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                            // @ts-ignore
-                                                            field.title
-                                                        }
+                                {!editMode && (
+                                    <div id="workflow-title-description">
+                                        <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
+                                        <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                    </div>
+                                )}
+                                <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+                                    {editMode && (
+                                        <legend className="-ml-1 px-1 text-sm font-medium">
+                                            Basic Inputs
+                                        </legend>
+                                    )}
+                                    {inputFieldArray.fields.map((field, index) => {
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        if (field.inputs.length > 0) {
+                                            if (editMode) {
+                                                return (
+                                                    <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                                        <legend className="-ml-1 px-1 text-sm font-medium">
+                                                            {
+                                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                                // @ts-ignore
+                                                                field.title
+                                                            }
 
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="text-muted-foreground"
-                                                            onClick={() => inputFieldArray.remove(index)}
-                                                        >
-                                                            <Trash2 className="size-5" />
-                                                        </Button>
-                                                    </legend>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="text-muted-foreground"
+                                                                onClick={() => inputFieldArray.remove(index)}
+                                                            >
+                                                                <Trash2 className="size-5" />
+                                                            </Button>
+                                                        </legend>
+                                                        <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                    </fieldset>
+                                                )
+                                            }
+
+                                            return (
+                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
                                                     <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
                                                 </fieldset>
                                             )
                                         }
+                                        return undefined;
+                                    })}
+                                    {!editMode && (args.children)}
+                                </fieldset>
+                                {advancedFieldArray.fields.length > 0 && (
+                                    <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
+                                )}
+                                {editMode && (args.children)}
+                            </ScrollArea >
+                        </div>
+                    </div>
+                    <ScrollArea className="w-1/3 h-full flex-1 rounded-md px-[5px]">
+                        <div className="p-4">
+                            <h3 className="text-lg font-semibold mb-4">Preview Images</h3>
+                            <PreviewImagesInput form={form} />
+                        </div>
+                    </ScrollArea>
+                </>
+            </form>
+        </Form>
+        
+    )
+}
 
-                                        return (
-                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                            </fieldset>
-                                        )
-                                    }
-                                    return undefined;
-                                })}
-                                {!editMode && (args.children)}
-                            </fieldset>
-                            {advancedFieldArray.fields.length > 0 && (
-                                <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
-                            )}
-                            {editMode && (args.children)}
-                        </form>
-                    </Form>
-                </div>
-            </div>
-        </ScrollArea >
-    </>)
+function PreviewImagesInput({ 
+    form 
+}: { 
+    form: UseFormReturn<IViewComfyBase> 
+}) {
+    console.log(form)
+    return (
+        <div className="grid gap-4">
+            {[0, 1, 2].map((index) => (
+                <FormField
+                    key={index}
+                    control={form.control}
+                    name={`preview_images.${index}`}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Preview Image {index + 1}</FormLabel>
+                            <FormControl>
+                                <div className="space-y-2">
+                                    <Input
+                                        type="url"
+                                        placeholder="Enter image URL"
+                                        {...field}
+                                    />
+                                    {field.value && (
+                                        <img
+                                            src={field.value}
+                                            alt={`Preview ${index + 1}`}
+                                            className="w-full h-40 object-cover rounded-md"
+                                        />
+                                    )}
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            ))}
+        </div>
+    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

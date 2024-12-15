@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, type ReactNode, type Disp
 export interface IViewComfyBase {
     title: string;
     description: string;
+    preview_images: string[];
     inputs: IMultiValueInput[];
     advancedInputs: IMultiValueInput[];
 }

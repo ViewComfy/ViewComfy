@@ -29,6 +29,7 @@ export function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
+    const [viewJSON, setViewJSON] =useState<boolean>(false);
 
     useEffect(() => {
         if (file) {
@@ -188,21 +189,11 @@ export function ViewComfyPage() {
                                 </div>
                             </div>
                         )}
-                        <div className="flex flex-col h-full overflow-hidden">
-                            <JSONPreview />
-                            {/* <Tabs defaultValue="output" className="">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="output">Output</TabsTrigger>
-                                    <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="output">
-                                    <BentoGridThirdDemo />
-                                </TabsContent>
-                                <TabsContent value="workflow">
-                                    <JSONPreview />
-                                </TabsContent>
-                            </Tabs> */}
-                        </div>
+                        {(viewJSON) && (
+                            <div className="flex flex-col h-full overflow-hidden">
+                                <JSONPreview />
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

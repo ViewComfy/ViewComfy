@@ -25,6 +25,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
     const defaultValues: IViewComfyBase = {
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
+        preview_images: viewComfyJSON.preview_images,
         inputs: viewComfyJSON.inputs,
         advancedInputs: viewComfyJSON.advancedInputs,
     }
@@ -48,6 +49,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
             form.reset({
                 title: viewComfyJSON.title,
                 description: viewComfyJSON.description,
+                preview_images: viewComfyJSON.preview_images,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
             });

@@ -3,8 +3,17 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 import { motion } from "framer-motion";
+import type { IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
 
-export function BentoGridThirdDemo() {
+export function PreviewOutputsImageGallery({
+    viewComfyJSON
+}: {
+    viewComfyJSON: IViewComfyWorkflow
+}) {
+
+    const image1= viewComfyJSON.preview_images[0] ? viewComfyJSON.preview_images[0] : null
+    const image2=viewComfyJSON.preview_images[1] ? viewComfyJSON.preview_images[1] : null
+    const image3=viewComfyJSON.preview_images[2] ? viewComfyJSON.preview_images[2] : null
 
     const first = {
         initial: {
@@ -27,41 +36,56 @@ export function BentoGridThirdDemo() {
         },
     };
     return (
-        <motion.div
-            initial="initial"
-            animate="animate"
-            whileHover="hover"
-            className="flex w-full min-h-[6rem] dark:bg-dot-white/[0.2] bg-dot-black/[0.2] flex-row space-x-2 items-center justify-center p-4"
-        >
+        <>
             <motion.div
-                variants={first}
-                className="rounded-md bg-white dark:bg-black dark:border-white/[0.1] flex items-center justify-center overflow-hidden"
-            >
-                <img
-                    src="/view_comfy_logo.svg"
-                    alt="avatar"
-                    className={cn("w-auto h-auto max-w-[300px] max-h-[300px] object-contain rounded-md transition-all hover:scale-105")}
-                />
+                initial="initial"
+                animate="animate"
+                whileHover="hover"
+                className="flex w-full min-h-[6rem] dark:bg-dot-white/[0.2] bg-dot-black/[0.2] flex-row space-x-2 items-center justify-center p-4"
+            >   
+                {(image1) && (
+                    <motion.div
+                        variants={first}
+                        className="rounded-md flex items-center justify-center overflow-hidden"
+                    >
+                        <img
+                            src={image1}
+                            alt="avatar"
+                            className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                        />
+                    </motion.div>
+                )}
+                {(image2) && (
+                    <motion.div
+                        className="relative z-20 rounded-md flex items-center justify-center overflow-hidden"
+                    >
+                        <img
+                            src={image2}
+                            alt="avatar"
+                            className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                        />
+                    </motion.div>
+                )}
+                {(image3) && (
+                    <motion.div
+                        variants={second}
+                        className="rounded-md flex items-center justify-center overflow-hidden"
+                    >
+                        <img
+                            src={image3}
+                            alt="avatar"
+                            className={cn("max-h-[500px] aspect-square object-cover rounded-md transition-all hover:scale-105")}
+                        />
+                    </motion.div>
+                )}
             </motion.div>
-            <motion.div 
-                className="relative z-20 rounded-md bg-white dark:bg-black dark:border-white/[0.1] borde flex items-center justify-center overflow-hidden"
-            >
-                <img
-                    src="/view_comfy_logo.svg"
-                    alt="avatar"
-                    className={cn("w-auto h-auto max-w-[300px] max-h-[300px] object-contain rounded-md transition-all hover:scale-105")}
-                />
-            </motion.div>
-            <motion.div
-                variants={second}
-                className="rounded-md bg-white dark:bg-black dark:border-white/[0.1] borderflex items-center justify-center overflow-hidden"
-            >
-                <img
-                    src="/view_comfy_logo.svg"
-                    alt="avatar"
-                    className={cn("w-auto h-auto max-w-[300px] max-h-[300px] object-contain rounded-md transition-all hover:scale-105")}
-                />
-            </motion.div>
-        </motion.div>
+        {!(image1 ?? image2 ?? image3) && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full text-center">
+                <span className="text-lg">
+                    Click the Generate button to start.
+                </span>
+            </div>
+        )}
+        </>
     );
 };
