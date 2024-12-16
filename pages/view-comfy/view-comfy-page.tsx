@@ -31,6 +31,11 @@ export function ViewComfyPage() {
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
     const [viewJSON, setViewJSON] =useState<boolean>(false);
 
+    // add back this functionality with a button at one point
+    if (false) {
+        setViewJSON(false);
+    }
+
     useEffect(() => {
         if (file) {
             const reader = new FileReader();

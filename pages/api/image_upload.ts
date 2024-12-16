@@ -18,8 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const form = formidable({})
   
   try {
-    const [fields, files] = await form.parse(req)
-    const file = files.file?.[0]
+    // const [fields, files] = await form.parse(req)
+    const response = await form.parse(req)
+    const file = response[1].file?.[0]
     
     if (!file) {
       return res.status(400).json({ message: 'No file uploaded' })
