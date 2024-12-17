@@ -32,6 +32,9 @@ function PlaygroundPageContent() {
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+    
+    const textOutputEnabled = viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled ? viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled : false; 
+    console.log("viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled", viewComfyState.currentViewComfy?.viewComfyJSON)
 
     useEffect(() => {
         if (viewMode) {
@@ -153,7 +156,7 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-
+    console.log(viewComfyState);
     return (
         <>
             <div className="flex flex-col h-full">
@@ -173,6 +176,11 @@ function PlaygroundPageContent() {
                     </Drawer>
                 </div>
                 <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
+                    {(textOutputEnabled) && (
+                        <div className="absolute top-0 left-0 bg-red-800">
+                            enabled
+                        </div>
+                    )}
                     <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
                         {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                             <div className="px-3 w-full">
@@ -232,7 +240,7 @@ function PlaygroundPageContent() {
                                                                     </video>
                                                                 )}
                                                             </div>
-                                                            {(output.outputs.type.startsWith('text/')) && (
+                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
                                                                 <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
                                                                     {URL.createObjectURL(output.outputs) && (
                                                                         <object
