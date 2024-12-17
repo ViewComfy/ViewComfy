@@ -45,6 +45,14 @@ export function ViewComfyForm(args: {
     isLoading?: boolean
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
+    const [textOutputEnabled, setTextOutputEnabled] = useState(form.getValues("textOutputEnabled"));
+
+    const toggleTextOutputEnabled = () => {
+        const new_value = !textOutputEnabled;
+        setTextOutputEnabled(new_value);
+        form.setValue("textOutputEnabled", new_value);
+    }
+
     return (<>
         <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
             <div className='relative flex-col items-start gap-2 flex mr-1'>
@@ -62,9 +70,6 @@ export function ViewComfyForm(args: {
                                                 <FormControl>
                                                     <Input placeholder="The name of your workflow" {...field} />
                                                 </FormControl>
-                                                <FormDescription>
-                                                    The title of your workflow.
-                                                </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -78,13 +83,22 @@ export function ViewComfyForm(args: {
                                                 <FormControl>
                                                     <Textarea placeholder="The description of your workflow" {...field} />
                                                 </FormControl>
-                                                <FormDescription>
-                                                    The description of your workflow.
-                                                </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
+                                    <div className="flex ml-0.5 space-x-2 pt-2">
+                                        <FormLabel>Enable text output</FormLabel>
+                                        <Checkbox
+                                            checked={textOutputEnabled}
+                                            onCheckedChange={toggleTextOutputEnabled}
+                                        />
+                                    </div>
+                                    {textOutputEnabled && (
+                                        <FormDescription className="pb-2">
+                                            Text output is in beta and can lead to unexpected text being rendered
+                                        </FormDescription>
+                                    )}
                                 </>
                             )}
                             {!editMode && (

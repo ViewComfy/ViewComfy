@@ -32,6 +32,7 @@ function PlaygroundPageContent() {
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     useEffect(() => {
         if (viewMode) {
@@ -75,6 +76,7 @@ function PlaygroundPageContent() {
         if (viewComfyState.currentViewComfy) {
             SetResults({});
         }
+        setTextOutputEnabled(viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled ?? false)
     }, [viewComfyState.currentViewComfy]);
 
     const { doPost, loading } = usePostPlayground();
@@ -153,7 +155,7 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-
+    console.log(viewComfyState);
     return (
         <>
             <div className="flex flex-col h-full">
@@ -232,7 +234,7 @@ function PlaygroundPageContent() {
                                                                     </video>
                                                                 )}
                                                             </div>
-                                                            {(output.outputs.type.startsWith('text/')) && (
+                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
                                                                 <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
                                                                     {URL.createObjectURL(output.outputs) && (
                                                                         <object
