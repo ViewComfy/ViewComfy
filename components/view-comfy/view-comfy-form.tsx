@@ -177,7 +177,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             try {
                 const formData = new FormData()
                 formData.append('file', file)
-                const response = await fetch('/api/image_upload', {
+                const response = await fetch('/api/playground/preview_images', {
                     method: 'POST',
                     body: formData,
                 })
@@ -193,9 +193,8 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
     }
 
     const deleteImage = async (imageUrl: string) => {
-        console.log("image to delete",imageUrl)
         try {
-            const response = await fetch('/api/delete_image', {
+            const response = await fetch('/api/playground/preview_images', {
                 method: 'DELETE',
                 body: JSON.stringify({ url: imageUrl }), // Send the image URL or identifier
             });
@@ -206,7 +205,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             console.error('Error deleting image:', error);
         }
     };
-    
+
     return (
         <div className="grid gap-4">
             {[0, 1, 2].map((index) => (
