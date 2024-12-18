@@ -7,3 +7,5 @@ export const ComfyUIConnRefusedError = (comfyUrl: string) => {
 }
 
 export const SEED_LIKE_INPUT_VALUES = ["seed", "noise_seed", "rand_seed"];
+
+export const UPLOAD_PREVIEW_IMAGES_PATH = "preview_images";

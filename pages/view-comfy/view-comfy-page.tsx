@@ -29,6 +29,12 @@ export function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
+    const [viewJSON, setViewJSON] =useState<boolean>(false);
+
+    // add back this functionality with a button at one point
+    if (false) {
+        setViewJSON(false);
+    }
 
     useEffect(() => {
         if (file) {
@@ -160,7 +166,7 @@ export function ViewComfyPage() {
                 )}
 
                 {!showDropZone() && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <>
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
                                 <div className="w-full flex flex-wrap items-center gap-4 mb-4">
@@ -188,22 +194,12 @@ export function ViewComfyPage() {
                                 </div>
                             </div>
                         )}
-                        <div className="flex flex-col h-full overflow-hidden">
-                            <JSONPreview />
-                            {/* <Tabs defaultValue="output" className="">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="output">Output</TabsTrigger>
-                                    <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="output">
-                                    <BentoGridThirdDemo />
-                                </TabsContent>
-                                <TabsContent value="workflow">
-                                    <JSONPreview />
-                                </TabsContent>
-                            </Tabs> */}
-                        </div>
-                    </div>
+                        {(viewJSON) && (
+                            <div className="flex flex-col h-full overflow-hidden">
+                                <JSONPreview />
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
             <ErrorAlertDialog
