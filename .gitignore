@@ -37,8 +37,4 @@ powershell_venv
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-<<<<<<< Updated upstream
 *.Identifier
-=======
->>>>>>> Stashed changes
-/public/uploads
