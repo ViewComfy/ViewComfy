@@ -45,13 +45,17 @@ export function ViewComfyForm(args: {
     isLoading?: boolean
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
-    const [textOutputEnabled, setTextOutputEnabled] = useState(form.getValues("textOutputEnabled"));
+    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     const toggleTextOutputEnabled = () => {
         const new_value = !textOutputEnabled;
         setTextOutputEnabled(new_value);
         form.setValue("textOutputEnabled", new_value);
     }
+
+    useEffect(() => {
+        setTextOutputEnabled(form.getValues("textOutputEnabled") ?? false);
+    }, [form.getValues("textOutputEnabled")]);
 
     return (<>
         <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">

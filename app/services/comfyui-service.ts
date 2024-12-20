@@ -21,6 +21,7 @@ export class ComfyUIService {
 
     async runWorkflow(args: IComfyInput) {
         let workflow = args.workflow;
+        let textOutputEnabled = args.generationMetaData.textOutputEnabled;
 
         if (!workflow) {
             workflow = await this.getLocalWorkflow();
@@ -48,7 +49,7 @@ export class ComfyUIService {
                         try {
                             let ooutputBuffer
                             let mimeType
-                            if (typeof file === 'string') {
+                            if (typeof file === 'string' && textOutputEnabled) {
                                     ooutputBuffer = new Blob([file], {
                                         type: 'text/plain'
                                     });

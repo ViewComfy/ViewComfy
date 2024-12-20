@@ -27,12 +27,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const apiErrorHandler = new ApiErrorHandler();
 
+interface GenerationMetaData {
+    textOutputEnabled: boolean;
+}
+
 function PlaygroundPageContent() {
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
-    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
+    const [generationMetaData, setGenerationMetaData] = useState<GenerationMetaData>({ textOutputEnabled: false }) 
 
     useEffect(() => {
         if (viewMode) {
@@ -76,7 +80,10 @@ function PlaygroundPageContent() {
         if (viewComfyState.currentViewComfy) {
             SetResults({});
         }
-        setTextOutputEnabled(viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled ?? false)
+        setGenerationMetaData({
+            ...generationMetaData,
+            textOutputEnabled: viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled ?? false
+        });
     }, [viewComfyState.currentViewComfy]);
 
     const { doPost, loading } = usePostPlayground();
@@ -105,7 +112,7 @@ function PlaygroundPageContent() {
         }
 
         doPost({
-            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, onSuccess: (data) => {
+            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, generationMetaData: generationMetaData, onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
@@ -155,7 +162,6 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-    console.log(viewComfyState);
     return (
         <>
             <div className="flex flex-col h-full">
@@ -234,7 +240,7 @@ function PlaygroundPageContent() {
                                                                     </video>
                                                                 )}
                                                             </div>
-                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
+                                                            {(output.outputs.type.startsWith('text/')) && (
                                                                 <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
                                                                     {URL.createObjectURL(output.outputs) && (
                                                                         <object

@@ -6,6 +6,7 @@ const url = "/api/comfy"
 export interface IUsePostPlayground {
     viewComfy: { key: string, value: string | File }[],
     workflow?: object,
+    generationMetaData:{textOutputEnabled:boolean},
     onSuccess: (outputs: Blob[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
@@ -14,7 +15,7 @@ export interface IUsePostPlayground {
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
-    const doPost = useCallback(async ({ viewComfy, workflow, onSuccess, onError }: IUsePostPlayground) => {
+    const doPost = useCallback(async ({ viewComfy, workflow, generationMetaData, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
             const formData = new FormData();
@@ -28,6 +29,7 @@ export const usePostPlayground = () => {
             }
             formData.append('workflow', JSON.stringify(workflow));
             formData.append('viewComfy', JSON.stringify(viewComfyJSON));
+            formData.append('generationMetaData', JSON.stringify(generationMetaData))
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,

@@ -16,6 +16,11 @@ export async function POST(request: NextRequest) {
         viewComfy = JSON.parse(formData.get('viewComfy') as string);
     }
 
+    let generationMetaData: {textOutputEnabled:boolean} = { textOutputEnabled: false };
+    if (formData.get('generationMetaData') && formData.get('generationMetaData') !== 'undefined') {
+        generationMetaData = JSON.parse(formData.get('generationMetaData') as string);
+    }
+
     for (const [key, value] of Array.from(formData.entries())) {
         if (key !== 'workflow') {
             if (value instanceof File) {
@@ -30,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const comfyUIService = new ComfyUIService();
-        const stream = await comfyUIService.runWorkflow({ workflow, viewComfy });
+        const stream = await comfyUIService.runWorkflow({ workflow, viewComfy, generationMetaData});
 
         return new NextResponse<ReadableStream<Uint8Array>>(stream, {
             headers: {
