@@ -27,16 +27,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const apiErrorHandler = new ApiErrorHandler();
 
-interface GenerationMetaData {
-    textOutputEnabled: boolean;
-}
-
 function PlaygroundPageContent() {
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
-    const [generationMetaData, setGenerationMetaData] = useState<GenerationMetaData>({ textOutputEnabled: false }) 
+    // const [generationMetaData, setGenerationMetaData] = useState<GenerationMetaData>({ textOutputEnabled: false }) 
 
     useEffect(() => {
         if (viewMode) {
@@ -76,16 +72,6 @@ function PlaygroundPageContent() {
         }
     }, [viewMode, viewComfyStateDispatcher]);
 
-    useEffect(() => {
-        if (viewComfyState.currentViewComfy) {
-            SetResults({});
-        }
-        setGenerationMetaData({
-            ...generationMetaData,
-            textOutputEnabled: viewComfyState.currentViewComfy?.viewComfyJSON.textOutputEnabled ?? false
-        });
-    }, [viewComfyState.currentViewComfy]);
-
     const { doPost, loading } = usePostPlayground();
 
     // useEffect(() => {
@@ -112,7 +98,10 @@ function PlaygroundPageContent() {
         }
 
         doPost({
-            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, generationMetaData: generationMetaData, onSuccess: (data) => {
+            viewComfyInputs: inputs, 
+            workflow: viewComfyState.currentViewComfy?.workflowApiJSON, 
+            viewComfyJSON: viewComfyState.currentViewComfy?.viewComfyJSON,
+            onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);

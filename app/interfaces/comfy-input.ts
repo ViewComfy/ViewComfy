@@ -1,7 +1,10 @@
 import type { IInput } from "./input";
 
 export interface IComfyInput {
-    viewComfy: IInput[];
+    viewComfyInputs: IInput[];
     workflow?: object;
-    generationMetaData: { textOutputEnabled: boolean };
+    viewComfyJSON: {
+        textOutputEnabled?: boolean;
+        [key: string]: any;
+    };
 }

@@ -4,9 +4,9 @@ import { useState, useCallback } from "react"
 const url = "/api/comfy"
 
 export interface IUsePostPlayground {
-    viewComfy: { key: string, value: string | File }[],
+    viewComfyInputs: { key: string, value: string | File }[],
     workflow?: object,
-    generationMetaData:{textOutputEnabled:boolean},
+    viewComfyJSON?: object,
     onSuccess: (outputs: Blob[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
@@ -15,21 +15,21 @@ export interface IUsePostPlayground {
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
-    const doPost = useCallback(async ({ viewComfy, workflow, generationMetaData, onSuccess, onError }: IUsePostPlayground) => {
+    const doPost = useCallback(async ({ viewComfyInputs, workflow, viewComfyJSON, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
             const formData = new FormData();
-            const viewComfyJSON: { key: string, value: unknown }[] = [];
-            for (const { key, value } of viewComfy) {
+            const viewComfyInputJSON: { key: string, value: unknown }[] = [];
+            for (const { key, value } of viewComfyInputs) {
                 if (value instanceof File) {
                     formData.append(key, value);
                 } else {
-                    viewComfyJSON.push({ key, value });
+                    viewComfyInputJSON.push({ key, value });
                 }
             }
             formData.append('workflow', JSON.stringify(workflow));
-            formData.append('viewComfy', JSON.stringify(viewComfyJSON));
-            formData.append('generationMetaData', JSON.stringify(generationMetaData))
+            formData.append('viewComfyInputs', JSON.stringify(viewComfyInputJSON));
+            formData.append('viewComfyJSON', JSON.stringify(viewComfyJSON))
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,

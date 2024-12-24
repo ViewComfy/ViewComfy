@@ -11,31 +11,31 @@ export async function POST(request: NextRequest) {
         workflow = JSON.parse(formData.get('workflow') as string);
     }
 
-    let viewComfy: { key: string, value: unknown }[] = [];
-    if (formData.get('viewComfy') && formData.get('viewComfy') !== 'undefined') {
-        viewComfy = JSON.parse(formData.get('viewComfy') as string);
+    let viewComfyInputs: { key: string, value: unknown }[] = [];
+    if (formData.get('viewComfyInputs') && formData.get('viewComfyInputs') !== 'undefined') {
+        viewComfyInputs = JSON.parse(formData.get('viewComfyInputs') as string);
     }
 
-    let generationMetaData: {textOutputEnabled:boolean} = { textOutputEnabled: false };
-    if (formData.get('generationMetaData') && formData.get('generationMetaData') !== 'undefined') {
-        generationMetaData = JSON.parse(formData.get('generationMetaData') as string);
+    let viewComfyJSON = undefined;
+    if (formData.get('viewComfyJSON') && formData.get('viewComfyJSON') !== 'undefined') {
+        viewComfyJSON = JSON.parse(formData.get('viewComfyJSON') as string);
     }
 
     for (const [key, value] of Array.from(formData.entries())) {
         if (key !== 'workflow') {
             if (value instanceof File) {
-                viewComfy.push({ key, value });
+                viewComfyInputs.push({ key, value });
             }
         }
     }
 
-    if (!viewComfy) {
-        return new NextResponse("ViewComfy is required", { status: 400 });
+    if (!viewComfyInputs) {
+        return new NextResponse("viewComfyInputs are required", { status: 400 });
     }
 
     try {
         const comfyUIService = new ComfyUIService();
-        const stream = await comfyUIService.runWorkflow({ workflow, viewComfy, generationMetaData});
+        const stream = await comfyUIService.runWorkflow({ workflow, viewComfyInputs, viewComfyJSON});
 
         return new NextResponse<ReadableStream<Uint8Array>>(stream, {
             headers: {
