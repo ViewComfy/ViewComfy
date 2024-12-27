@@ -36,9 +36,9 @@ npm run dev
 For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
 
 
-## Deployment
+## Deploy your own
 
-If you need to deploy a ViewComfy app or a ComfyUI workflow, you can do it directly on our [website](https://playground.viewcomfy.com/deploy). 
+You can deploy your own ViewComfy app, or ComfyUI workflow, to ViewComfy cloud with one click: [website](https://playground.viewcomfy.com/deploy). 
 
 
 ## Usage
