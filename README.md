@@ -42,7 +42,7 @@ If you need to deploy a ViewComfy app or a ComfyUI workflow, you can do it direc
 
 
 ## Usage
-## Form Editor
+### Form Editor
 
 You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
 
