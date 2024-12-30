@@ -32,20 +32,27 @@ npm install
 npm run dev
 ```
 
-### Detailed blog
+### Detailed installation guide
 For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
 
 
-# Usage
-## Form Editor
+## Deployment
+
+You can deploy your own app, or ComfyUI workflow, to ViewComfy cloud with one click.
+
+[![Deploy](https://img.shields.io/badge/Deploy-4D7D85)](https://playground.viewcomfy.com/deploy)
+
+
+## Usage
+### Form Editor
 
 You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
 
-## Playground
+### Playground
 
 The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
 
-## ViewMode
+### ViewMode
 
 ViewMode will only load the playground page and can easily be turned into a web app. This is convenient if you want to share your workflow with someone without sharing the workflow_api.json, and without them having to install ComfyUI.
 
@@ -77,19 +84,13 @@ e.g with the command line:
 VIEW_COMFY_FILE_NAME="view_comfy.json" NEXT_PUBLIC_VIEW_MODE="true" npm run dev
 ```
 
-## Form Editor Advanced
+### Form Editor Advanced
 
 You can also drop a view_comfy.json directly in the form editor to edit it without needing the workflow_api.json.
 
 Feel free to contribute with feedback, suggestions, issues or pull requests.
 
 
-### Tech
+## Tech
 
 ViewComfy is a Next.js app - [Next.js Documentation](https://nextjs.org/docs)
-
-
-### Cloud deployment
-
-If you need to deploy a ViewComfy app or a ComfyUI workflow, you can do it directly on our [website](https://playground.viewcomfy.com/deploy). 
-

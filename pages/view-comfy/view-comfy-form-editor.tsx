@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import 'react18-json-view/src/style.css'
 import { useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import { useForm, useFieldArray } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { ViewComfyForm } from '@/components/view-comfy/view-comfy-form';
 import { ToastAction } from "@/components/ui/toast"
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +24,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
         textOutputEnabled: viewComfyJSON.textOutputEnabled,
+        preview_images: viewComfyJSON.preview_images,
         inputs: viewComfyJSON.inputs,
         advancedInputs: viewComfyJSON.advancedInputs,
     }
@@ -50,6 +49,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
                 title: viewComfyJSON.title,
                 description: viewComfyJSON.description,
                 textOutputEnabled: viewComfyJSON.textOutputEnabled,
+                preview_images: viewComfyJSON.preview_images,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
             });
@@ -110,15 +110,22 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <ViewComfyForm form={form} onSubmit={submitOnCLick} inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} editMode={true}>
-                <div className={cn("sticky bottom-0 p-4 bg-background w-full rounded-md")}>
+            <ViewComfyForm 
+                form={form} 
+                onSubmit={submitOnCLick} 
+                inputFieldArray={inputFieldArray} 
+                advancedFieldArray={advancedFieldArray} 
+                editMode={true}
+                downloadViewComfyJSON={downloadViewComfyJSON}
+                >
+                {/* <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
                     <Button type="submit" className="w-full mb-2">
                         Save Changes
                     </Button>
                     <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
                         Download as ViewComfy JSON
                     </Button>
-                </div>
+                </div> */}
             </ViewComfyForm>
         </div>
     )

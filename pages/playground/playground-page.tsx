@@ -23,7 +23,7 @@ import BlurFade from "@/components/ui/blur-fade";
 import { cn } from "@/lib/utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import {PreviewOutputsImageGallery} from "@/components/images-preview"
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -185,10 +185,9 @@ function PlaygroundPageContent() {
                     <div className="relative h-full min-h-[50vh] rounded-xl bg-muted/50 px-1 lg:col-span-2">
                         <ScrollArea className="relative flex h-full w-full flex-col">
                             {(Object.keys(results).length === 0) && !loading && (
-                                <>
-                                    <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
-                                        Click the Generate button to start.
-                                    </span>
+                                <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
+                                        <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
+                                    </div>
                                     <Badge variant="outline" className="absolute right-3 top-3">
                                         Output
                                     </Badge>

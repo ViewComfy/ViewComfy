@@ -29,7 +29,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
-import { getComfyUIRandomSeed } from "@/lib/utils";
+import { getComfyUIRandomSeed, cn } from "@/lib/utils";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -41,10 +41,13 @@ export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
+    downloadViewComfyJSON: (data: IViewComfyBase) => void,
     children?: React.ReactNode,
     isLoading?: boolean
+    
 }) {
-    const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false } = args;
+    const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
+
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     const toggleTextOutputEnabled = () => {
@@ -56,13 +59,14 @@ export function ViewComfyForm(args: {
     useEffect(() => {
         setTextOutputEnabled(form.getValues("textOutputEnabled") ?? false);
     }, [form.getValues("textOutputEnabled")]);
-
-    return (<>
-        <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px]">
-            <div className='relative flex-col items-start gap-2 flex mr-1'>
-                <div id="inputs-form" className="grid w-full items-start gap-2">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="grid w-full items-start gap-2">
+    
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
+                <div className="flex flex-row gap-x-2 flex-1 min-h-0">
+                    <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
+                        <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
+                            <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
                             {editMode && (
                                 <>
                                     <FormField
@@ -111,60 +115,167 @@ export function ViewComfyForm(args: {
                                     <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
                                 </div>
                             )}
-                            <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
-                                {editMode && (
-                                    <legend className="-ml-1 px-1 text-sm font-medium">
-                                        Basic Inputs
-                                    </legend>
-                                )}
-                                {inputFieldArray.fields.map((field, index) => {
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    if (field.inputs.length > 0) {
-                                        if (editMode) {
-                                            return (
-                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                                    <legend className="-ml-1 px-1 text-sm font-medium">
-                                                        {
-                                                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                            // @ts-ignore
-                                                            field.title
-                                                        }
+                                <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+                                    {editMode && (
+                                        <legend className="-ml-1 px-1 text-sm font-medium">
+                                            Basic Inputs
+                                        </legend>
+                                    )}
+                                    {inputFieldArray.fields.map((field, index) => {
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        if (field.inputs.length > 0) {
+                                            if (editMode) {
+                                                return (
+                                                    <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                                        <legend className="-ml-1 px-1 text-sm font-medium">
+                                                            {
+                                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                                // @ts-ignore
+                                                                field.title
+                                                            }
 
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="text-muted-foreground"
-                                                            onClick={() => inputFieldArray.remove(index)}
-                                                        >
-                                                            <Trash2 className="size-5" />
-                                                        </Button>
-                                                    </legend>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="text-muted-foreground"
+                                                                onClick={() => inputFieldArray.remove(index)}
+                                                            >
+                                                                <Trash2 className="size-5" />
+                                                            </Button>
+                                                        </legend>
+                                                        <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                    </fieldset>
+                                                )
+                                            }
+
+                                            return (
+                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
                                                     <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
                                                 </fieldset>
                                             )
                                         }
-
-                                        return (
-                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                            </fieldset>
-                                        )
-                                    }
-                                    return undefined;
-                                })}
-                                {!editMode && (args.children)}
-                            </fieldset>
-                            {advancedFieldArray.fields.length > 0 && (
-                                <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
-                            )}
-                            {editMode && (args.children)}
-                        </form>
-                    </Form>
+                                        return undefined;
+                                    })}
+                                    {!editMode && (args.children)}
+                                </fieldset>
+                                {advancedFieldArray.fields.length > 0 && (
+                                    <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
+                                )}
+                                {editMode && (args.children)}
+                            </ScrollArea >
+                        </div>
+                    </div>
+                    {editMode && (
+                        <ScrollArea className="h-full flex-1 rounded-md px-[5px] pr-4">
+                            <div className="">
+                                <PreviewImagesInput form={form} />
+                            </div>
+                        </ScrollArea>
+                    )}
                 </div>
-            </div>
-        </ScrollArea >
-    </>)
+                {editMode && (
+                    <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
+                        <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
+                            Save Changes
+                        </Button>
+                        <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                            Download as ViewComfy JSON
+                        </Button>
+                    </div>
+                )}
+            </form>
+        </Form>
+        
+    )
+}
+
+function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
+
+    const save_image = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
+        if (file) {
+            try {
+                const formData = new FormData()
+                formData.append('file', file)
+                const response = await fetch('/api/playground/preview_images', {
+                    method: 'POST',
+                    body: formData,
+                })
+                if (!response.ok) {
+                    throw new Error('Upload failed')
+                }
+                const data = await response.json()
+                onChange(data.url)
+            } catch (error) {
+                console.error('Error uploading file:', error)
+            }
+        }
+    }
+
+    const deleteImage = async (imageUrl: string) => {
+        try {
+            const response = await fetch('/api/playground/preview_images', {
+                method: 'DELETE',
+                body: JSON.stringify({ url: imageUrl }), // Send the image URL or identifier
+            });
+            if (!response.ok) {
+                throw new Error('Image deletion failed');
+            }
+        } catch (error) {
+            console.error('Error deleting image:', error);
+        }
+    };
+
+    return (
+        <div className="grid gap-4">
+            {[0, 1, 2].map((index) => (
+                <FormField
+                    key={index}
+                    control={form.control}
+                    name={`preview_images.${index}`}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Preview Image {index + 1}</FormLabel>
+                            <FormControl>
+                                <div className="space-y-2">
+                                    {field.value ? (
+                                        <div className="flex flex-col gap-2">
+                                            <img
+                                                src={field.value}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full object-contain rounded-md max-h-[300px]"
+                                                onError={() => {
+                                                    field.onChange("");
+                                                }}
+                                            />
+                                            <Button
+                                                variant="secondary"
+                                                className="border-2 text-muted-foreground"
+                                                onClick={() => {
+                                                    deleteImage(field.value);
+                                                    field.onChange("")
+                                                }}
+                                            >
+                                                <Trash2 className="size-5 mr-2" /> Remove image
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Dropzone
+                                            onChange={(file) => save_image(file, field.onChange)}
+                                            fileExtensions={['png', 'jpg', 'jpeg']}
+                                            className="form-dropzone"
+                                            inputPlaceholder="Drop an image"
+                                        />
+                                    )}
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            ))}
+        </div>
+    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
