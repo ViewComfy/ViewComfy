@@ -51,15 +51,15 @@ export function ViewComfyForm(args: {
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     const toggleTextOutputEnabled = () => {
-        const new_value = !textOutputEnabled;
-        setTextOutputEnabled(new_value);
-        form.setValue("textOutputEnabled", new_value);
+        const newValue = !textOutputEnabled;
+        setTextOutputEnabled(newValue);
+        form.setValue("textOutputEnabled", newValue);
     }
 
     useEffect(() => {
         setTextOutputEnabled(form.getValues("textOutputEnabled") ?? false);
     }, [form.getValues("textOutputEnabled")]);
-    
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
@@ -194,12 +194,12 @@ export function ViewComfyForm(args: {
 
 function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 
-    const save_image = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
+    const saveImage = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
         if (file) {
             try {
                 const formData = new FormData()
                 formData.append('file', file)
-                const response = await fetch('/api/playground/preview_images', {
+                const response = await fetch('/api/playground/preview-images', {
                     method: 'POST',
                     body: formData,
                 })
@@ -216,7 +216,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 
     const deleteImage = async (imageUrl: string) => {
         try {
-            const response = await fetch('/api/playground/preview_images', {
+            const response = await fetch('/api/playground/preview-images', {
                 method: 'DELETE',
                 body: JSON.stringify({ url: imageUrl }), // Send the image URL or identifier
             });
@@ -234,7 +234,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                 <FormField
                     key={index}
                     control={form.control}
-                    name={`preview_images.${index}`}
+                    name={`previewImages.${index}`}
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Preview Image {index + 1}</FormLabel>
@@ -263,7 +263,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                         </div>
                                     ) : (
                                         <Dropzone
-                                            onChange={(file) => save_image(file, field.onChange)}
+                                            onChange={(file) => saveImage(file, field.onChange)}
                                             fileExtensions={['png', 'jpg', 'jpeg']}
                                             className="form-dropzone"
                                             inputPlaceholder="Drop an image"

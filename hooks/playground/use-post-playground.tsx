@@ -1,12 +1,12 @@
+import { IViewComfy } from "@/app/interfaces/comfy-input";
 import type { ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react"
 
 const url = "/api/comfy"
 
 export interface IUsePostPlayground {
-    viewComfy: { inputs: { key: string, value: string | File }[], textOutputEnabled: boolean },
+    viewComfy: IViewComfy,
     workflow?: object,
-    // viewComfyJSON?: object,
     onSuccess: (outputs: Blob[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
@@ -19,9 +19,9 @@ export const usePostPlayground = () => {
         setLoading(true);
         try {
             const formData = new FormData();
-            const viewComfyJSON: { inputs: { key: string, value: unknown }[], textOutputEnabled: boolean } = { 
+            const viewComfyJSON: IViewComfy = { 
                     inputs:[],
-                    textOutputEnabled: viewComfy.textOutputEnabled
+                    textOutputEnabled: viewComfy.textOutputEnabled ?? false
                 };
             for (const { key, value } of viewComfy.inputs) {
                 if (value instanceof File) {
@@ -30,10 +30,9 @@ export const usePostPlayground = () => {
                     viewComfyJSON.inputs.push({ key, value });
                 }
             }
-            viewComfy 
+
             formData.append('workflow', JSON.stringify(workflow));
             formData.append('viewComfy', JSON.stringify(viewComfyJSON));
-            // formData.append('viewComfyJSON', JSON.stringify(viewComfyJSON))
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,

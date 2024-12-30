@@ -24,7 +24,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
         textOutputEnabled: viewComfyJSON.textOutputEnabled,
-        preview_images: viewComfyJSON.preview_images,
+        previewImages: viewComfyJSON.previewImages,
         inputs: viewComfyJSON.inputs,
         advancedInputs: viewComfyJSON.advancedInputs,
     }
@@ -49,7 +49,7 @@ export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEd
                 title: viewComfyJSON.title,
                 description: viewComfyJSON.description,
                 textOutputEnabled: viewComfyJSON.textOutputEnabled,
-                preview_images: viewComfyJSON.preview_images,
+                previewImages: viewComfyJSON.previewImages,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
             });
