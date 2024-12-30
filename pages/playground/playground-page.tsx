@@ -32,7 +32,6 @@ function PlaygroundPageContent() {
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
-    // const [generationMetaData, setGenerationMetaData] = useState<GenerationMetaData>({ textOutputEnabled: false }) 
 
     useEffect(() => {
         if (viewMode) {
@@ -97,10 +96,14 @@ function PlaygroundPageContent() {
             }
         }
 
+        const generationData = { 
+            inputs: inputs,
+            textOutputEnabled: data.textOutputEnabled ?? false
+        };
+
         doPost({
-            viewComfyInputs: inputs, 
+            viewComfy: generationData, 
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON, 
-            viewComfyJSON: viewComfyState.currentViewComfy?.viewComfyJSON,
             onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {

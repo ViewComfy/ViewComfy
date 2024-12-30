@@ -21,14 +21,14 @@ export class ComfyUIService {
 
     async runWorkflow(args: IComfyInput) {
         let workflow = args.workflow;
-        let textOutputEnabled = args.viewComfyJSON.textOutputEnabled ?? false;
+        let textOutputEnabled = args.viewComfy.textOutputEnabled;
 
         if (!workflow) {
             workflow = await this.getLocalWorkflow();
         }
 
         const comfyWorkflow = new ComfyWorkflow(workflow);
-        await comfyWorkflow.setViewComfy(args.viewComfyInputs);
+        await comfyWorkflow.setViewComfy(args.viewComfy.inputs);
 
         try {
 

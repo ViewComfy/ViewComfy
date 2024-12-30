@@ -4,9 +4,9 @@ import { useState, useCallback } from "react"
 const url = "/api/comfy"
 
 export interface IUsePostPlayground {
-    viewComfyInputs: { key: string, value: string | File }[],
+    viewComfy: { inputs: { key: string, value: string | File }[], textOutputEnabled: boolean },
     workflow?: object,
-    viewComfyJSON?: object,
+    // viewComfyJSON?: object,
     onSuccess: (outputs: Blob[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
@@ -15,21 +15,25 @@ export interface IUsePostPlayground {
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
-    const doPost = useCallback(async ({ viewComfyInputs, workflow, viewComfyJSON, onSuccess, onError }: IUsePostPlayground) => {
+    const doPost = useCallback(async ({ viewComfy, workflow, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
             const formData = new FormData();
-            const viewComfyInputJSON: { key: string, value: unknown }[] = [];
-            for (const { key, value } of viewComfyInputs) {
+            const viewComfyJSON: { inputs: { key: string, value: unknown }[], textOutputEnabled: boolean } = { 
+                    inputs:[],
+                    textOutputEnabled: viewComfy.textOutputEnabled
+                };
+            for (const { key, value } of viewComfy.inputs) {
                 if (value instanceof File) {
                     formData.append(key, value);
                 } else {
-                    viewComfyInputJSON.push({ key, value });
+                    viewComfyJSON.inputs.push({ key, value });
                 }
             }
+            viewComfy 
             formData.append('workflow', JSON.stringify(workflow));
-            formData.append('viewComfyInputs', JSON.stringify(viewComfyInputJSON));
-            formData.append('viewComfyJSON', JSON.stringify(viewComfyJSON))
+            formData.append('viewComfy', JSON.stringify(viewComfyJSON));
+            // formData.append('viewComfyJSON', JSON.stringify(viewComfyJSON))
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
