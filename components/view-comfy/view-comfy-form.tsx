@@ -95,7 +95,9 @@ export function ViewComfyForm(args: {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="flex ml-0.5 space-x-2 pt-2">
+                                    <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                            textOutputEnabled ? "" : "pb-2"
+                                         )}>
                                         <FormLabel>Enable text output</FormLabel>
                                         <Checkbox
                                             checked={textOutputEnabled}
