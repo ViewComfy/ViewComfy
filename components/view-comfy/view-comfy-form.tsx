@@ -41,7 +41,7 @@ export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
-    downloadViewComfyJSON: (data: IViewComfyBase) => void,
+    downloadViewComfyJSON?: (data: IViewComfyBase) => void,
     children?: React.ReactNode,
     isLoading?: boolean
     
@@ -181,9 +181,11 @@ export function ViewComfyForm(args: {
                         <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
                             Save Changes
                         </Button>
-                        <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
-                            Download as ViewComfy JSON
-                        </Button>
+                        {downloadViewComfyJSON && (
+                            <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                                Download as ViewComfy JSON
+                            </Button>
+                        )}
                     </div>
                 )}
             </form>
