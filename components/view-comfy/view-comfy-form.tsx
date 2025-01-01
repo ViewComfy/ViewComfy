@@ -56,10 +56,6 @@ export function ViewComfyForm(args: {
         form.setValue("textOutputEnabled", newValue);
     }
 
-    useEffect(() => {
-        setTextOutputEnabled(form.getValues("textOutputEnabled") ?? false);
-    }, [form.getValues("textOutputEnabled")]);
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
@@ -95,20 +91,30 @@ export function ViewComfyForm(args: {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
-                                            textOutputEnabled ? "" : "pb-2"
-                                         )}>
-                                        <FormLabel>Enable text output</FormLabel>
-                                        <Checkbox
-                                            checked={textOutputEnabled}
-                                            onCheckedChange={toggleTextOutputEnabled}
-                                        />
-                                    </div>
-                                    {textOutputEnabled && (
-                                        <FormDescription className="pb-2">
-                                            Text output is in beta and can lead to unexpected text being rendered
-                                        </FormDescription>
-                                    )}
+                                    <FormField
+                                        control={form.control}
+                                        name="textOutputEnabled"
+                                        render={({field}) => (
+                                            <FormItem key="textOutputEnabled" className="">
+                                                <FormControl>
+                                                    <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                                        (field.value) ? "mb-[-5px]" : "pb-2"
+                                                    )}>
+                                                        <FormLabel>Enable text output</FormLabel>
+                                                        <Checkbox
+                                                            checked={field.value}
+                                                            onCheckedChange={field.onChange}
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                {(field.value) && (
+                                                    <FormDescription className="pb-2">
+                                                        Text output is in beta and can lead to unexpected text being rendered
+                                                    </FormDescription>
+                                                )}
+                                            </FormItem>
+                                        )}
+                                    />
                                 </>
                             )}
                             {!editMode && (
