@@ -47,15 +47,6 @@ export function ViewComfyForm(args: {
     
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
-
-    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
-
-    const toggleTextOutputEnabled = () => {
-        const newValue = !textOutputEnabled;
-        setTextOutputEnabled(newValue);
-        form.setValue("textOutputEnabled", newValue);
-    }
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
