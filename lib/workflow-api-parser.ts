@@ -117,7 +117,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
         advancedInputs = [];
     }
 
-    return { inputs: basicInputs, advancedInputs, title: "", description: "", preview_images: [] };
+    return { inputs: basicInputs, advancedInputs, title: "", description: "", previewImages: [] };
 
 }
 

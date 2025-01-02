@@ -1,6 +1,6 @@
 import { useFieldArray, useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button";
-import type { IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
+import type { IViewComfyBase, IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
 import { cn } from "@/lib/utils";
 import { ViewComfyForm } from "@/components/view-comfy/view-comfy-form";
 import { WandSparkles } from "lucide-react";
@@ -15,11 +15,12 @@ export function PlaygroundForm(props: {
     const defaultValues = {
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
+        textOutputEnabled: viewComfyJSON.textOutputEnabled ?? false,
         inputs: viewComfyJSON.inputs,
         advancedInputs: viewComfyJSON.advancedInputs,
     }
 
-    const form = useForm({
+    const form = useForm<IViewComfyBase>({
         defaultValues
     });
 
@@ -39,6 +40,7 @@ export function PlaygroundForm(props: {
             form.reset({
                 title: viewComfyJSON.title,
                 description: viewComfyJSON.description,
+                textOutputEnabled: viewComfyJSON.textOutputEnabled ?? false,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
             });

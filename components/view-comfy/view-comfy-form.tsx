@@ -41,9 +41,10 @@ export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
-    downloadViewComfyJSON: (data: IViewComfyBase) => void,
+    downloadViewComfyJSON?: (data: IViewComfyBase) => void,
     children?: React.ReactNode,
     isLoading?: boolean
+    
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     return (
@@ -53,48 +54,66 @@ export function ViewComfyForm(args: {
                     <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
                             <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
-                                {editMode && (
-                                    <>
-                                        <FormField
-                                            control={form.control}
-                                            name="title"
-                                            render={({ field }) => (
-                                                <FormItem key="title" className="ml-0.5">
-                                                    <FormLabel>Title</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="The name of your workflow" {...field} />
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                        The title of your workflow.
+                            {editMode && (
+                                <>
+                                    <FormField
+                                        control={form.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem key="title" className="ml-0.5">
+                                                <FormLabel>Title</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="The name of your workflow" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem key="description" className="ml-0.5">
+                                                <FormLabel>Description</FormLabel>
+                                                <FormControl>
+                                                    <Textarea placeholder="The description of your workflow" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="textOutputEnabled"
+                                        render={({field}) => (
+                                            <FormItem key="textOutputEnabled" className="">
+                                                <FormControl>
+                                                    <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                                        (field.value) ? "mb-[-5px]" : "pb-2"
+                                                    )}>
+                                                        <FormLabel>Enable text output</FormLabel>
+                                                        <Checkbox
+                                                            checked={field.value}
+                                                            onCheckedChange={field.onChange}
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                {(field.value) && (
+                                                    <FormDescription className="pb-2">
+                                                        Text output is in beta and can lead to unexpected text being rendered
                                                     </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="description"
-                                            render={({ field }) => (
-                                                <FormItem key="description" className="ml-0.5">
-                                                    <FormLabel>Description</FormLabel>
-                                                    <FormControl>
-                                                        <Textarea placeholder="The description of your workflow" {...field} />
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                        The description of your workflow.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </>
-                                )}
-                                {!editMode && (
-                                    <div id="workflow-title-description">
-                                        <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                        <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
-                                    </div>
-                                )}
+                                                )}
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
+                            )}
+                            {!editMode && (
+                                <div id="workflow-title-description">
+                                    <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
+                                    <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                </div>
+                            )}
                                 <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
                                     {editMode && (
                                         <legend className="-ml-1 px-1 text-sm font-medium">
@@ -159,9 +178,11 @@ export function ViewComfyForm(args: {
                         <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
                             Save Changes
                         </Button>
-                        <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
-                            Download as ViewComfy JSON
-                        </Button>
+                        {downloadViewComfyJSON && (
+                            <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                                Download as ViewComfy JSON
+                            </Button>
+                        )}
                     </div>
                 )}
             </form>
@@ -172,12 +193,12 @@ export function ViewComfyForm(args: {
 
 function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 
-    const save_image = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
+    const saveImage = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
         if (file) {
             try {
                 const formData = new FormData()
                 formData.append('file', file)
-                const response = await fetch('/api/playground/preview_images', {
+                const response = await fetch('/api/playground/preview-images', {
                     method: 'POST',
                     body: formData,
                 })
@@ -194,7 +215,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 
     const deleteImage = async (imageUrl: string) => {
         try {
-            const response = await fetch('/api/playground/preview_images', {
+            const response = await fetch('/api/playground/preview-images', {
                 method: 'DELETE',
                 body: JSON.stringify({ url: imageUrl }), // Send the image URL or identifier
             });
@@ -212,7 +233,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                 <FormField
                     key={index}
                     control={form.control}
-                    name={`preview_images.${index}`}
+                    name={`previewImages.${index}`}
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Preview Image {index + 1}</FormLabel>
@@ -241,7 +262,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                         </div>
                                     ) : (
                                         <Dropzone
-                                            onChange={(file) => save_image(file, field.onChange)}
+                                            onChange={(file) => saveImage(file, field.onChange)}
                                             fileExtensions={['png', 'jpg', 'jpeg']}
                                             className="form-dropzone"
                                             inputPlaceholder="Drop an image"

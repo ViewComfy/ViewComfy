@@ -71,12 +71,6 @@ function PlaygroundPageContent() {
         }
     }, [viewMode, viewComfyStateDispatcher]);
 
-    useEffect(() => {
-        if (viewComfyState.currentViewComfy) {
-            SetResults({});
-        }
-    }, [viewComfyState.currentViewComfy]);
-
     const { doPost, loading } = usePostPlayground();
 
     // useEffect(() => {
@@ -102,8 +96,15 @@ function PlaygroundPageContent() {
             }
         }
 
+        const generationData = { 
+            inputs: inputs,
+            textOutputEnabled: data.textOutputEnabled ?? false
+        };
+
         doPost({
-            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, onSuccess: (data) => {
+            viewComfy: generationData, 
+            workflow: viewComfyState.currentViewComfy?.workflowApiJSON, 
+            onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
@@ -153,7 +154,6 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-
     return (
         <>
             <div className="flex flex-col h-full">

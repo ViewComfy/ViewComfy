@@ -11,9 +11,15 @@ export function PreviewOutputsImageGallery({
     viewComfyJSON: IViewComfyWorkflow
 }) {
 
-    const [image1, setImage1] = useState<string | null>(viewComfyJSON.preview_images[0] ? viewComfyJSON.preview_images[0] : null);
-    const [image2, setImage2] = useState<string | null>(viewComfyJSON.preview_images[1] ? viewComfyJSON.preview_images[1] : null);
-    const [image3, setImage3] = useState<string | null>(viewComfyJSON.preview_images[2] ? viewComfyJSON.preview_images[2] : null);
+    const [image1, setImage1] = useState<string | null>(
+        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[0]) ? viewComfyJSON.previewImages[0] : null
+    );
+    const [image2, setImage2] = useState<string | null>(
+        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[1]) ? viewComfyJSON.previewImages[1] : null
+    );
+    const [image3, setImage3] = useState<string | null>(
+        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[2]) ? viewComfyJSON.previewImages[2] : null
+    );
 
     const first = {
         initial: {

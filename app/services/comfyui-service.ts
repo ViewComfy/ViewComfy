@@ -21,13 +21,14 @@ export class ComfyUIService {
 
     async runWorkflow(args: IComfyInput) {
         let workflow = args.workflow;
+        const textOutputEnabled = args.viewComfy.textOutputEnabled ?? false;
 
         if (!workflow) {
             workflow = await this.getLocalWorkflow();
         }
 
         const comfyWorkflow = new ComfyWorkflow(workflow);
-        await comfyWorkflow.setViewComfy(args.viewComfy);
+        await comfyWorkflow.setViewComfy(args.viewComfy.inputs);
 
         try {
 
@@ -46,23 +47,23 @@ export class ComfyUIService {
                 async start(controller) {
                     for (const file of outputFiles) {
                         try {
-                            let ooutputBuffer
-                            let mimeType
-                            if (typeof file === 'string') {
-                                    ooutputBuffer = new Blob([file], {
+                            let outputBuffer: Blob;
+                            let mimeType: string;
+                            if (typeof file === 'string' && textOutputEnabled) {
+                                    outputBuffer = new Blob([file], {
                                         type: 'text/plain'
                                     });
                                     mimeType = 'text/plain'
                                 }
                             else {
-                                ooutputBuffer = await comfyUIAPIService.getOutputFiles({ file });
+                                outputBuffer = await comfyUIAPIService.getOutputFiles({ file });
                                 mimeType =
                                     mime.lookup(file?.filename) || "application/octet-stream";
                             }
                             const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                             controller.enqueue(new TextEncoder().encode(mimeInfo));
                             controller.enqueue(
-                                new Uint8Array(await ooutputBuffer.arrayBuffer()),
+                                new Uint8Array(await outputBuffer.arrayBuffer()),
                             );
                             controller.enqueue(
                                 new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"),
