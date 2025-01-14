@@ -90,6 +90,19 @@ You can also drop a view_comfy.json directly in the form editor to edit it witho
 
 Feel free to contribute with feedback, suggestions, issues or pull requests.
 
+## Docker
+
+Build docker image
+
+```bash
+docker build -t viewcomfy .
+```
+
+Run docker image
+
+```bash
+docker run -it --name viewcomfy-container -p 3000:3000 viewcomfy
+```
 
 ## Tech
 
