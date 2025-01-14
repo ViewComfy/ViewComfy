@@ -7,7 +7,7 @@ import { WandSparkles } from "lucide-react";
 import "./PlaygroundForm.css";
 import { useEffect } from "react";
 
-export function PlaygroundForm(props: {
+export default function PlaygroundForm(props: {
     viewComfyJSON: IViewComfyWorkflow, onSubmit: (data: IViewComfyWorkflow) => void, loading: boolean
 }) {
     const { viewComfyJSON, onSubmit, loading } = props;

@@ -2,13 +2,13 @@
 import { Sidebar, TabValue } from "@/components/sidebar";
 import { TopNav } from "@/components/top-nav"
 import { useState } from "react"
-import { PlaygroundPage } from "../pages/playground/playground-page"
-import { ViewComfyPage } from "@/pages/view-comfy/view-comfy-page";
+import PlaygroundPage from "@/components/pages/playground/playground-page";
+import ViewComfyPage from "@/components/pages/view-comfy/view-comfy-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
 
-export const description =
-    "An AI playground with a sidebar navigation and a main content area. The playground has a header with a settings drawer and a share button. The sidebar has navigation links and a user menu. The main content area shows a form to configure the model and messages."
+// export const description =
+//     "An AI playground with a sidebar navigation and a main content area. The playground has a header with a settings drawer and a share button. The sidebar has navigation links and a user menu. The main content area shows a form to configure the model and messages."
 
 export default function Page() {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";

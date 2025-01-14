@@ -13,7 +13,7 @@ interface ViewComfyFormEditorProps {
 }
 
 
-export function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEditorProps) {
+export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEditorProps) {
 
     const { viewComfyState } = useViewComfy();
     const { toast } = useToast();
