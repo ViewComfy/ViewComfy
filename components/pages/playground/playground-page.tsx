@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/drawer"
 import { Fragment, useEffect, useState } from "react";
 import { Header } from "@/components/header";
-import { PlaygroundForm } from "./playground-form";
+import PlaygroundForm from "./playground-form";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
@@ -23,7 +23,7 @@ import BlurFade from "@/components/ui/blur-fade";
 import { cn } from "@/lib/utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {PreviewOutputsImageGallery} from "@/components/images-preview"
+import { PreviewOutputsImageGallery } from "@/components/images-preview"
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -96,14 +96,14 @@ function PlaygroundPageContent() {
             }
         }
 
-        const generationData = { 
+        const generationData = {
             inputs: inputs,
             textOutputEnabled: data.textOutputEnabled ?? false
         };
 
         doPost({
-            viewComfy: generationData, 
-            workflow: viewComfyState.currentViewComfy?.workflowApiJSON, 
+            viewComfy: generationData,
+            workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
             onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
@@ -186,8 +186,8 @@ function PlaygroundPageContent() {
                         <ScrollArea className="relative flex h-full w-full flex-col">
                             {(Object.keys(results).length === 0) && !loading && (
                                 <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
-                                        <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
-                                    </div>
+                                    <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
+                                </div>
                                     <Badge variant="outline" className="absolute right-3 top-3">
                                         Output
                                     </Badge>
@@ -266,11 +266,9 @@ function PlaygroundPageContent() {
     )
 }
 
-export function PlaygroundPage() {
+export default function PlaygroundPage() {
     return (
 
         <PlaygroundPageContent />
     );
 }
-
-

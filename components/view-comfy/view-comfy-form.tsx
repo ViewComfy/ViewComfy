@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import type { IInputField } from "@/lib/workflow-api-parser";
-import { parseWorkflowApiTypeToInputHtmlType } from "@/pages/view-comfy/view-comfy-form-editor";
+import { parseWorkflowApiTypeToInputHtmlType } from "@/components/pages/view-comfy/view-comfy-form-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -44,7 +44,7 @@ export function ViewComfyForm(args: {
     downloadViewComfyJSON?: (data: IViewComfyBase) => void,
     children?: React.ReactNode,
     isLoading?: boolean
-    
+
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     return (
@@ -54,66 +54,66 @@ export function ViewComfyForm(args: {
                     <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
                             <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
-                            {editMode && (
-                                <>
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem key="title" className="ml-0.5">
-                                                <FormLabel>Title</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="The name of your workflow" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="description"
-                                        render={({ field }) => (
-                                            <FormItem key="description" className="ml-0.5">
-                                                <FormLabel>Description</FormLabel>
-                                                <FormControl>
-                                                    <Textarea placeholder="The description of your workflow" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="textOutputEnabled"
-                                        render={({field}) => (
-                                            <FormItem key="textOutputEnabled" className="">
-                                                <FormControl>
-                                                    <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
-                                                        (field.value) ? "mb-[-5px]" : "pb-2"
-                                                    )}>
-                                                        <FormLabel>Enable text output</FormLabel>
-                                                        <Checkbox
-                                                            checked={field.value}
-                                                            onCheckedChange={field.onChange}
-                                                        />
-                                                    </div>
-                                                </FormControl>
-                                                {(field.value) && (
-                                                    <FormDescription className="pb-2">
-                                                        Text output is in beta and can lead to unexpected text being rendered
-                                                    </FormDescription>
-                                                )}
-                                            </FormItem>
-                                        )}
-                                    />
-                                </>
-                            )}
-                            {!editMode && (
-                                <div id="workflow-title-description">
-                                    <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                    <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
-                                </div>
-                            )}
+                                {editMode && (
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="title"
+                                            render={({ field }) => (
+                                                <FormItem key="title" className="ml-0.5">
+                                                    <FormLabel>Title</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="The name of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem key="description" className="ml-0.5">
+                                                    <FormLabel>Description</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea placeholder="The description of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="textOutputEnabled"
+                                            render={({ field }) => (
+                                                <FormItem key="textOutputEnabled" className="">
+                                                    <FormControl>
+                                                        <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                                            (field.value) ? "mb-[-5px]" : "pb-2"
+                                                        )}>
+                                                            <FormLabel>Enable text output</FormLabel>
+                                                            <Checkbox
+                                                                checked={field.value}
+                                                                onCheckedChange={field.onChange}
+                                                            />
+                                                        </div>
+                                                    </FormControl>
+                                                    {(field.value) && (
+                                                        <FormDescription className="pb-2">
+                                                            Text output is in beta and can lead to unexpected text being rendered
+                                                        </FormDescription>
+                                                    )}
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </>
+                                )}
+                                {!editMode && (
+                                    <div id="workflow-title-description">
+                                        <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
+                                        <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                    </div>
+                                )}
                                 <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
                                     {editMode && (
                                         <legend className="-ml-1 px-1 text-sm font-medium">
@@ -187,7 +187,7 @@ export function ViewComfyForm(args: {
                 )}
             </form>
         </Form>
-        
+
     )
 }
 

@@ -1,9 +1,8 @@
-"use client";
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/components/ui/dropzone';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { ViewComfyFormEditor } from '@/pages/view-comfy/view-comfy-form-editor';
+import ViewComfyFormEditor from '@/components/pages/view-comfy/view-comfy-form-editor';
 import { workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
 import { Trash2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
@@ -24,12 +23,12 @@ class WorkflowJSONError extends Error {
 
 
 
-export function ViewComfyPage() {
+export default function ViewComfyPage() {
 
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
-    const [viewJSON, setViewJSON] =useState<boolean>(false);
+    const [viewJSON, setViewJSON] = useState<boolean>(false);
 
     // add back this functionality with a button at one point
     if (false) {
