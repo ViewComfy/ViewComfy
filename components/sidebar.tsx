@@ -18,8 +18,8 @@ export enum TabValue {
 interface SidebarProps {
     currentTab: TabValue;
     onTabChange: (tab: TabValue) => void;
-    popUp: boolean;
-    onPopUp: (popUp: boolean) => void;
+    deployWindow: boolean;
+    onDeployWindow: (deployWindow: boolean) => void;
 }
 
 const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void, isSmallScreen: boolean }) => {
@@ -46,7 +46,7 @@ const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon
     )
 }
 
-export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProps) {
+export function Sidebar({ currentTab, onTabChange, deployWindow, onDeployWindow }: SidebarProps) {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const isSmallScreen = useMediaQuery("(max-width: 1024px)");
 
@@ -81,31 +81,10 @@ export function Sidebar({ currentTab, onTabChange, popUp, onPopUp }: SidebarProp
                         <SidebarButton
                             icon={<Cloud className="size-5" />}
                             label="Deploy"
-                            isActive={popUp === true}
-                            onClick={() => onPopUp(!popUp)}
+                            isActive={deployWindow === true}
+                            onClick={() => onDeployWindow(!deployWindow)}
                             isSmallScreen={isSmallScreen}
                         />
-                        {/* <TooltipButton
-                            icon={<Code2 className="size-5" />}
-                            label="API"
-                            tooltipContent="API"
-                            className={currentTab === TabValue.API ? 'bg-muted' : ''}
-                            onClick={() => onTabChange(TabValue.API)}
-                        />
-                        <TooltipButton
-                            icon={<Book className="size-5" />}
-                            label="Documentation"
-                            tooltipContent="Documentation"
-                            className={currentTab === TabValue.Documentation ? 'bg-muted' : ''}
-                            onClick={() => onTabChange(TabValue.Documentation)}
-                        />
-                        <TooltipButton
-                            icon={<Settings2 className="size-5" />}
-                            label="Settings"
-                            tooltipContent="Settings"
-                            className={currentTab === TabValue.Settings ? 'bg-muted' : ''}
-                            onClick={() => onTabChange(TabValue.Settings)}
-                        /> */}
                     </>
                 )}
             </nav>
