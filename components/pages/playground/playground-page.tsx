@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
     Settings
 } from "lucide-react"
@@ -7,14 +8,11 @@ import { Button } from "@/components/ui/button"
 import {
     Drawer,
     DrawerContent,
-    DrawerDescription,
-    DrawerHeader,
-    DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Header } from "@/components/header";
-import { PlaygroundForm } from "./playground-form";
+import PlaygroundForm from "./playground-form";
 import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
@@ -25,12 +23,11 @@ import BlurFade from "@/components/ui/blur-fade";
 import { cn } from "@/lib/utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { PreviewOutputsImageGallery } from "@/components/images-preview"
 
 const apiErrorHandler = new ApiErrorHandler();
 
 function PlaygroundPageContent() {
-    // const [formState, setFormState] = useState<IViewComfyJSON | undefined>(undefined);
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
@@ -49,7 +46,7 @@ function PlaygroundPageContent() {
                     }
                     const data = await response.json();
                     viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
-                    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (error: any) {
                     if (error.errorType) {
                         const responseError =
@@ -73,12 +70,6 @@ function PlaygroundPageContent() {
             fetchViewComfy();
         }
     }, [viewMode, viewComfyStateDispatcher]);
-
-    useEffect(() => {
-        if (viewComfyState.currentViewComfy) {
-            SetResults({});
-        }
-    }, [viewComfyState.currentViewComfy]);
 
     const { doPost, loading } = usePostPlayground();
 
@@ -105,8 +96,15 @@ function PlaygroundPageContent() {
             }
         }
 
+        const generationData = {
+            inputs: inputs,
+            textOutputEnabled: data.textOutputEnabled ?? false
+        };
+
         doPost({
-            viewComfy: inputs, workflow: viewComfyState.currentViewComfy?.workflowApiJSON, onSuccess: (data) => {
+            viewComfy: generationData,
+            workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
+            onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
@@ -131,7 +129,6 @@ function PlaygroundPageContent() {
         }));
     };
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         return () => {
             for (const generation of Object.values(results)) {
@@ -140,6 +137,7 @@ function PlaygroundPageContent() {
                 }
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onSelectChange = (data: IViewComfy) => {
@@ -156,33 +154,30 @@ function PlaygroundPageContent() {
             </div>
         </>;
     }
-
     return (
         <>
             <div className="flex flex-col h-full">
-                <Header title="Playground">
+                <Header title="Playground" />
+                <div className="md:hidden w-full flex pl-4 gap-x-2">
+                    <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
                         <DrawerTrigger asChild>
-                            <Button variant="ghost" size="icon" className="md:hidden">
+                            <Button variant="ghost" size="icon" className="md:hidden self-bottom w-[85px] gap-1">
                                 <Settings className="size-4" />
-                                <span className="sr-only">Settings</span>
+                                Settings
                             </Button>
                         </DrawerTrigger>
-                        <DrawerContent className="max-h-[80vh]">
-                            <DrawerHeader>
-                                <DrawerTitle>Configuration</DrawerTitle>
-                                <DrawerDescription>
-                                    Configure the settings for the model and messages.
-                                </DrawerDescription>
-                            </DrawerHeader>
+                        <DrawerContent className="max-h-[80vh] gap-4 px-4 h-full">
                             <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />
                         </DrawerContent>
                     </Drawer>
-                </Header>
+                </div>
                 <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
                         {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
-                            <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                            <div className="px-3 w-full">
+                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                            </div>
                         )}
                         {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
 
@@ -190,10 +185,9 @@ function PlaygroundPageContent() {
                     <div className="relative h-full min-h-[50vh] rounded-xl bg-muted/50 px-1 lg:col-span-2">
                         <ScrollArea className="relative flex h-full w-full flex-col">
                             {(Object.keys(results).length === 0) && !loading && (
-                                <>
-                                    <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">
-                                        Click the Generate button to start.
-                                    </span>
+                                <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
+                                    <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
+                                </div>
                                     <Badge variant="outline" className="absolute right-3 top-3">
                                         Output
                                     </Badge>
@@ -208,49 +202,49 @@ function PlaygroundPageContent() {
                                     <div className="flex flex-col w-full h-full">
                                         {Object.entries(results).map(([timestamp, generation], index, array) => (
                                             <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
-                                                <div className="flex flex-wrap w-full h-full gap-4">
+                                                <div className="flex flex-wrap w-full h-full gap-4" key={timestamp}>
                                                     {generation.map((output) => (
-                                                        <>
-                                                        <div
-                                                            key={output.url}
-                                                            className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
-                                                        >
-                                                            {(output.outputs.type.startsWith('image/')) && (
-                                                                <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                    <img
-                                                                        src={output.url}
-                                                                        alt={`${output.url}`}
-                                                                        className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
-                                                                    />
-                                                                </BlurFade>
-                                                            )}
-                                                            {(output.outputs.type.startsWith('video/')) && (
-                                                                <video
-                                                                    key={output.url}
-                                                                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
-                                                                    autoPlay
-                                                                    loop
-
-                                                                >
-                                                                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
-                                                                    <source src={output.url} />
-                                                                </video>
-                                                            )}
-                                                        </div>
-                                                        {(output.outputs.type.startsWith('text/')) && (
-                                                            <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
-                                                                {URL.createObjectURL(output.outputs) && (
-                                                                    <object
-                                                                        data={output.url}
-                                                                        type={output.outputs.type}
-                                                                        className="w-full"
-                                                                    >
-                                                                        Unable to display text content
-                                                                    </object>
+                                                        <Fragment key={output.url}>
+                                                            <div
+                                                                key={output.url}
+                                                                className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                                                            >
+                                                                {(output.outputs.type.startsWith('image/')) && (
+                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                        <img
+                                                                            src={output.url}
+                                                                            alt={`${output.url}`}
+                                                                            className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
+                                                                        />
+                                                                    </BlurFade>
                                                                 )}
-                                                            </pre>
-                                                        )}
-                                                        </>
+                                                                {(output.outputs.type.startsWith('video/')) && (
+                                                                    <video
+                                                                        key={output.url}
+                                                                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
+                                                                        autoPlay
+                                                                        loop
+
+                                                                    >
+                                                                        <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                                                                        <source src={output.url} />
+                                                                    </video>
+                                                                )}
+                                                            </div>
+                                                            {(output.outputs.type.startsWith('text/')) && (
+                                                                <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
+                                                                    {URL.createObjectURL(output.outputs) && (
+                                                                        <object
+                                                                            data={output.url}
+                                                                            type={output.outputs.type}
+                                                                            className="w-full"
+                                                                        >
+                                                                            Unable to display text content
+                                                                        </object>
+                                                                    )}
+                                                                </pre>
+                                                            )}
+                                                        </Fragment>
                                                     ))}
                                                 </div>
                                                 <hr className={
@@ -272,7 +266,7 @@ function PlaygroundPageContent() {
     )
 }
 
-export function PlaygroundPage() {
+export default function PlaygroundPage() {
     return (
 
         <PlaygroundPageContent />

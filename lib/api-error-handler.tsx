@@ -1,4 +1,4 @@
-import { ErrorTypes, type ResponseError } from "../app/models/errors"
+import { ResponseError } from "@/app/models/errors";
 
 export class ApiErrorHandler {
 
@@ -8,7 +8,6 @@ export class ApiErrorHandler {
             let description: React.ReactNode = <></>;
             if (Array.isArray(error.errorDetails)) {
                 description = error.errorDetails.map((detail, index) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     (<> <p key={index}>{detail}</p> <br /> </> as React.ReactNode)
                 ));
             } else {

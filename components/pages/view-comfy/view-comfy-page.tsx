@@ -1,9 +1,8 @@
-"use client";
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/components/ui/dropzone';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { ViewComfyFormEditor } from '@/pages/view-comfy/view-comfy-form-editor';
+import ViewComfyFormEditor from '@/components/pages/view-comfy/view-comfy-form-editor';
 import { workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
 import { Trash2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
@@ -13,8 +12,8 @@ import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, 
 import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
-import { BentoGridThirdDemo } from '@/components/images-preview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { BentoGridThirdDemo } from '@/components/images-preview';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 class WorkflowJSONError extends Error {
     constructor() {
@@ -24,11 +23,17 @@ class WorkflowJSONError extends Error {
 
 
 
-export function ViewComfyPage() {
+export default function ViewComfyPage() {
 
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
+    const [viewJSON, setViewJSON] = useState<boolean>(false);
+
+    // add back this functionality with a button at one point
+    if (false) {
+        setViewJSON(false);
+    }
 
     useEffect(() => {
         if (file) {
@@ -160,7 +165,7 @@ export function ViewComfyPage() {
                 )}
 
                 {!showDropZone() && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <>
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
                                 <div className="w-full flex flex-wrap items-center gap-4 mb-4">
@@ -188,22 +193,12 @@ export function ViewComfyPage() {
                                 </div>
                             </div>
                         )}
-                        <div className="flex flex-col h-full overflow-hidden">
-                            <JSONPreview />
-                            {/* <Tabs defaultValue="output" className="">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="output">Output</TabsTrigger>
-                                    <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="output">
-                                    <BentoGridThirdDemo />
-                                </TabsContent>
-                                <TabsContent value="workflow">
-                                    <JSONPreview />
-                                </TabsContent>
-                            </Tabs> */}
-                        </div>
-                    </div>
+                        {(viewJSON) && (
+                            <div className="flex flex-col h-full overflow-hidden">
+                                <JSONPreview />
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
             <ErrorAlertDialog
@@ -261,11 +256,13 @@ function JSONPreview() {
                     <Trash2 className="size-5" />
                 </Button>
             )}
-            <Label className="mb-2">Workflow API JSON</Label>
-            <ScrollArea className="flex-1 rounded-md border">
-                <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
+            <div className="h-full hidden md:block">
+                <Label className="mb-2">Workflow API JSON</Label>
+                <ScrollArea className="flex-1 rounded-md border">
+                    <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+            </div>
         </>
     )
 }

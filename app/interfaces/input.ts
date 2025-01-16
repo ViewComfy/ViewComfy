@@ -1,4 +1,4 @@
 export interface IInput {
-    value: string | File;
+    value: unknown;
     key: string;
 }

@@ -1,6 +1,11 @@
 import type { IInput } from "./input";
 
+export interface IViewComfy {
+    inputs: IInput[];
+    textOutputEnabled?: boolean;
+}
+
 export interface IComfyInput {
-    viewComfy: IInput[];
+    viewComfy: IViewComfy;
     workflow?: object;
 }

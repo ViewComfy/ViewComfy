@@ -1,6 +1,7 @@
 import { ComfyUIService } from '@/app/services/comfyui-service';
 import { type NextRequest, NextResponse } from 'next/server';
 import { ErrorResponseFactory } from '@/app/models/errors';
+import { IViewComfy } from '@/app/interfaces/comfy-input';
 
 const errorResponseFactory = new ErrorResponseFactory();
 
@@ -10,16 +11,22 @@ export async function POST(request: NextRequest) {
     if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
         workflow = JSON.parse(formData.get('workflow') as string);
     }
-    const viewComfy: { key: string, value: string | File }[] = [];
+
+    let viewComfy: IViewComfy = {inputs: [], textOutputEnabled: false};
+    if (formData.get('viewComfy') && formData.get('viewComfy') !== 'undefined') {
+        viewComfy = JSON.parse(formData.get('viewComfy') as string);
+    }
 
     for (const [key, value] of Array.from(formData.entries())) {
         if (key !== 'workflow') {
-            viewComfy.push({ key, value: value as string | File });
+            if (value instanceof File) {
+                viewComfy.inputs.push({ key, value });
+            }
         }
     }
 
     if (!viewComfy) {
-        return new NextResponse("ViewComfy is required", { status: 400 });
+        return new NextResponse("viewComfy is required", { status: 400 });
     }
 
     try {
@@ -33,7 +40,7 @@ export async function POST(request: NextRequest) {
             }
         });
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    } catch (error: any) {
+    } catch (error: unknown) {
         const responseError = errorResponseFactory.getErrorResponse(error);
 
         return NextResponse.json(responseError, {

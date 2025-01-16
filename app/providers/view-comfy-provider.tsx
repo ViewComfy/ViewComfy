@@ -4,6 +4,8 @@ import React, { createContext, useContext, useReducer, type ReactNode, type Disp
 export interface IViewComfyBase {
     title: string;
     description: string;
+    textOutputEnabled?: boolean;
+    previewImages: string[];
     inputs: IMultiValueInput[];
     advancedInputs: IMultiValueInput[];
 }
@@ -97,11 +99,11 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
                     workflowApiJSON: action.payload.viewComfy.workflowApiJSON,
                     file: action.payload.viewComfy.file
                 },
-                // viewComfyDraft: {
-                //     viewComfyJSON: action.payload.viewComfy.viewComfyJSON,
-                //     workflowApiJSON: action.payload.viewComfy.workflowApiJSON,
-                //     file: action.payload.viewComfy.file
-                // }
+                viewComfyDraft: {
+                    viewComfyJSON: action.payload.viewComfy.viewComfyJSON,
+                    workflowApiJSON: action.payload.viewComfy.workflowApiJSON,
+                    file: action.payload.viewComfy.file
+                }
             };
         case ActionType.REMOVE_VIEW_COMFY: {
             const data = {
