@@ -32,10 +32,19 @@ export default function Page() {
                 <div className="absolute inset-0 bg-black/50 z-10" />
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 z-20">
                     <h2 className="text-xl font-bold mb-4 text-center">Deploy your app to the cloud</h2>
-                    <p className="text-sm mb-4 text-center">Want to run your app on the hardware of your choice and give other people access via the internet? ViewComfy's deployment service is the easiest way to host your app.</p>
-                    <div className="flex justify-center">       
+                    <p className="text-sm mb-4 text-center">Want to run your app on the hardware of your choice and give other people access via the internet? ViewComfy&apos;s deployment service is the easiest way to host your app.</p>
+                    <div className="flex justify-center py-2 space-x-4">
+                    <Button 
+                            className="mt-4 px-4 w-[150px]"
+                            onClick={() => {
+                                window.open('https://youtu.be/pIODXFU9sHw', '_blank');
+                                setDeployWindow(false)
+                            }}
+                        >
+                            Deployment guide
+                        </Button>     
                         <Button 
-                            className="mt-4 px-4 py-2"
+                            className="mt-4 px-4 w-[150px]"
                             onClick={() => {
                                 window.open('https://app.viewcomfy.com/', '_blank');
                                 setDeployWindow(false)
