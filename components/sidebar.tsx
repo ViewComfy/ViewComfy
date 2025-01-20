@@ -1,4 +1,4 @@
-import { SquareTerminal, LifeBuoy, FileJson } from "lucide-react"
+import { SquareTerminal, LifeBuoy, FileJson, Cloud } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TooltipButton } from "@/components/ui/tooltip-button"
 import Link from "next/link";
@@ -18,6 +18,8 @@ export enum TabValue {
 interface SidebarProps {
     currentTab: TabValue;
     onTabChange: (tab: TabValue) => void;
+    deployWindow: boolean;
+    onDeployWindow: (deployWindow: boolean) => void;
 }
 
 const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void, isSmallScreen: boolean }) => {
@@ -44,7 +46,7 @@ const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon
     )
 }
 
-export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
+export function Sidebar({ currentTab, onTabChange, deployWindow, onDeployWindow }: SidebarProps) {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const isSmallScreen = useMediaQuery("(max-width: 1024px)");
 
@@ -68,11 +70,19 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
                             onClick={() => onTabChange(TabValue.WorkflowApi)}
                             isSmallScreen={isSmallScreen}
                         />
+                        {/* <PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} /> */}
                         <SidebarButton
                             icon={<SquareTerminal className="size-5" />}
                             label="Playground"
                             isActive={currentTab === TabValue.Playground}
                             onClick={() => onTabChange(TabValue.Playground)}
+                            isSmallScreen={isSmallScreen}
+                        />
+                        <SidebarButton
+                            icon={<Cloud className="size-5" />}
+                            label="Deploy"
+                            isActive={deployWindow === true}
+                            onClick={() => onDeployWindow(!deployWindow)}
                             isSmallScreen={isSmallScreen}
                         />
                     </>
