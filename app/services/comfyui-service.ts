@@ -122,7 +122,18 @@ export class ComfyUIService {
             throw missingWorkflowError;
         }
 
-        return workflow;
+        for (const w of workflow.workflows as { [key: string]: object }[]) {
+            for (const key in w) {
+                if (key === "workflowApiJSON") {
+                    return w[key];
+                }
+            }
+        }
+
+        throw new ComfyWorkflowError({
+            message: "Failed to find workflowApiJSON",
+            errors: ["Failed to find workflowApiJSON"],
+        });
     }
 
 }
