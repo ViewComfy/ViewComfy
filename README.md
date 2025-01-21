@@ -40,7 +40,7 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 Deloy your web app on the hardware of your choice in minutes using ViewComfy Cloud.  
 
-[![Guide](https://img.shields.io/badge/Youtebe-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
+[![Guide](https://img.shields.io/badge/Youtube-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
 [![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
 
 
