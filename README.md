@@ -3,7 +3,7 @@
 ViewComfy is an open source tool to help you create beautiful web apps from ComfyUI workflows.
 
 [![Discord](https://img.shields.io/badge/ViewComfy-Discord-%235865F2.svg)](https://discord.gg/DXubrz5R7E)
-[![Website](https://img.shields.io/badge/ViewComfy%20-%20green?label=Website&color=4D7D85)](https://www.viewcomfy.com/)
+[![Website](https://img.shields.io/badge/Website%20-%20green?label=ViewComfy&color=4D7D85)](https://www.viewcomfy.com/)
 
 
 ![Group 21](https://github.com/user-attachments/assets/ad9a98e6-6c4c-4bf5-85db-4d03ab682f9b)
@@ -40,8 +40,8 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 Deloy your web app on the hardware of your choice in minutes using ViewComfy Cloud.  
 
-[![Guide](https://img.shields.io/badge/Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
-[![Deploy](https://img.shields.io/badge/Deploy-4D7D85)](https://app.viewcomfy.com/)
+[![Guide](https://img.shields.io/badge/Youtebe-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
+[![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
 
 
 ## Usage
