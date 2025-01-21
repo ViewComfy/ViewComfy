@@ -38,8 +38,9 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 ## Deployment
 
-You can deploy your own app, or ComfyUI workflow, to ViewComfy cloud with one click.
+Deloy your web app on the hardware of your choice in minutes using ViewComfy Cloud.  
 
+[![Guide](https://img.shields.io/badge/Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
 [![Deploy](https://img.shields.io/badge/Deploy-4D7D85)](https://app.viewcomfy.com/)
 
 
