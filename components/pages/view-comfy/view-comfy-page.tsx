@@ -73,11 +73,10 @@ export default function ViewComfyPage() {
         if (!data.title) {
             data.title = `My Awesome Workflow ${viewComfyState.viewComfys.length + 1}`;
         }
-        
         const fileName = `${data.title.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}.json`;
         
         try {
-            await fetch('/api/comfy/json', {
+            const response = await fetch('/api/comfy/json', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -90,8 +89,20 @@ export default function ViewComfyPage() {
                     }
                 }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save file');
+            }
+
+            return true;
         } catch (error) {
             console.error('Error saving JSON:', error);
+            setErrorDialog({
+                open: true,
+                error: error instanceof Error ? error : new Error('Failed to save workflow')
+            });
+            return false;
         }
     };
 
@@ -119,7 +130,7 @@ export default function ViewComfyPage() {
 
     useEffect(() => {
         loadSavedJsons();
-    }, []);
+    }, [loadSavedJsons]);
 
     const getDropZoneText = () => {
         if (viewComfyState.viewComfyDraft?.viewComfyJSON) {
@@ -141,41 +152,47 @@ export default function ViewComfyPage() {
             try {
                 // Find the file name in local storage that matches this workflow
                 const response = await fetch('/api/comfy/json');
-                if (response.ok) {
-                    const files = await response.json();
-                    const fileToDelete = files.find((file: any) => 
-                        file.content.viewComfyJSON.id === viewComfyState.currentViewComfy?.viewComfyJSON.id
-                    );
+                if (!response.ok) {
+                    throw new Error('Failed to fetch files');
+                }
+
+                const files = await response.json();
+                const fileToDelete = files.find((file: any) => 
+                    file.content.viewComfyJSON.id === viewComfyState.currentViewComfy?.viewComfyJSON.id
+                );
+                
+                if (fileToDelete) {
+                    // Delete the file
+                    const deleteResponse = await fetch('/api/comfy/json', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            fileName: fileToDelete.name
+                        }),
+                    });
                     
-                    if (fileToDelete) {
-                        // Delete the file
-                        const deleteResponse = await fetch('/api/comfy/json', {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                fileName: fileToDelete.name
-                            }),
-                        });
-                        
-                        if (!deleteResponse.ok) {
-                            throw new Error('Failed to delete file');
-                        }
+                    if (!deleteResponse.ok) {
+                        const errorData = await deleteResponse.json();
+                        throw new Error(errorData.error || 'Failed to delete file');
                     }
+
+                    // Only update state if delete was successful
+                    viewComfyStateDispatcher({
+                        type: ActionType.REMOVE_VIEW_COMFY,
+                        payload: viewComfyState.currentViewComfy,
+                    });
                 }
             } catch (error) {
                 console.error('Error deleting JSON file:', error);
-                // Continue with state update even if file deletion fails
-            } finally {
-                // Always update the state regardless of file deletion success
-                viewComfyStateDispatcher({
-                    type: ActionType.REMOVE_VIEW_COMFY,
-                    payload: viewComfyState.currentViewComfy,
+                setErrorDialog({
+                    open: true,
+                    error: error instanceof Error ? error : new Error('Failed to delete workflow')
                 });
             }
         }
-    }
+    };
 
     const showDropZone = () => {
         return !viewComfyState.viewComfyDraft
@@ -183,37 +200,40 @@ export default function ViewComfyPage() {
 
     const getOnSubmit = async (data: IViewComfyBase) => {
         if (viewComfyState.currentViewComfy) {
-            viewComfyStateDispatcher({
-                type: ActionType.UPDATE_VIEW_COMFY,
-                payload: {
-                    id: viewComfyState.currentViewComfy.viewComfyJSON
-                        .id,
-                    viewComfy: {
-                        viewComfyJSON: {
-                            ...data,
-                            id: viewComfyState.currentViewComfy
-                                .viewComfyJSON.id,
+            // For existing workflow - save first, then update state
+            const saved = await saveToLocalStorage(data);
+            if (saved) {
+                viewComfyStateDispatcher({
+                    type: ActionType.UPDATE_VIEW_COMFY,
+                    payload: {
+                        id: viewComfyState.currentViewComfy.viewComfyJSON.id,
+                        viewComfy: {
+                            viewComfyJSON: { ...data, id: viewComfyState.currentViewComfy.viewComfyJSON.id },
+                            file: viewComfyState.viewComfyDraft?.file,
+                            workflowApiJSON: viewComfyState.viewComfyDraft?.workflowApiJSON,
                         },
-                        file: viewComfyState.viewComfyDraft?.file,
-                        workflowApiJSON:
-                            viewComfyState.viewComfyDraft
-                                ?.workflowApiJSON,
                     },
-                },
-            });
-            await saveToLocalStorage(data);
-        } else {
-            await saveToLocalStorage(data);
-            if (data.title === "") {
-                data.title = `My Awesome Workflow ${viewComfyState.viewComfys.length + 1}`;
+                });
             }
+        } else {
+            // For new workflow - save first, then add to state
+            const saved = await saveToLocalStorage(data);
+            if (saved) {
+                if (data.title === "") {
+                    data.title = `My Awesome Workflow ${viewComfyState.viewComfys.length + 1}`;
+                }
 
-            viewComfyStateDispatcher({
-                type: ActionType.ADD_VIEW_COMFY,
-                payload: { viewComfyJSON: { ...data, id: Math.random().toString(16).slice(2) }, file: viewComfyState.viewComfyDraft?.file, workflowApiJSON: viewComfyState.viewComfyDraft?.workflowApiJSON }
-            });
+                viewComfyStateDispatcher({
+                    type: ActionType.ADD_VIEW_COMFY,
+                    payload: {
+                        viewComfyJSON: { ...data, id: Math.random().toString(16).slice(2) },
+                        file: viewComfyState.viewComfyDraft?.file,
+                        workflowApiJSON: viewComfyState.viewComfyDraft?.workflowApiJSON
+                    }
+                });
+            }
         }
-    }
+    };
 
     const onSelectChange = (data: IViewComfy) => {
         return viewComfyStateDispatcher({
