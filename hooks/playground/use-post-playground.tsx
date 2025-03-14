@@ -2,7 +2,8 @@ import { IViewComfy } from "@/app/interfaces/comfy-input";
 import type { ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react"
 
-const url = "/api/comfy"
+// const url = "/api/comfy"
+const url = "/api/viewcomfy"
 
 export interface IUsePostPlayground {
     viewComfy: IViewComfy,
@@ -33,46 +34,19 @@ export const usePostPlayground = () => {
 
             formData.append('workflow', JSON.stringify(workflow));
             formData.append('viewComfy', JSON.stringify(viewComfyJSON));
+
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
             });
-
+            
             if (!response.ok) {
-                const responseError: ResponseError = await response.json();
-                throw responseError;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            
+            const blob = await response.blob();
+            const output: Blob[] = [blob];
 
-            if (!response.body) {
-                throw new Error("No response body");
-            }
-
-            const reader = response.body.getReader();
-            let buffer = new Uint8Array(0);
-            const output: Blob[] = [];
-            const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer = concatUint8Arrays(buffer, value);
-
-                let separatorIndex: number;
-                // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-                while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
-                    const outputPart = buffer.slice(0, separatorIndex);
-                    buffer = buffer.slice(separatorIndex + separator.length);
-
-                    const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
-                    if (mimeEndIndex !== -1) {
-                        const mimeType = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex)).split(': ')[1];
-                        const outputData = outputPart.slice(mimeEndIndex + 4);
-                        const blob = new Blob([outputData], { type: mimeType });
-                        output.push(blob);
-                    }
-                }
-            }
 
             onSuccess(output);
         } catch (error) {
