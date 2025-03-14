@@ -48,6 +48,13 @@ export class ErrorResponseFactory {
                 error: error.errors,
                 errorType: error.errorType
             });
+        } else if (error.cause.code) {
+            // TODO: make proper error handling for ViewComfy API requests
+            return new ResponseError({
+                errorMsg: error.message,
+                error: error.message,
+                errorType: ErrorTypes.UNKNOWN
+            }); 
         }
 
         return new ResponseError({

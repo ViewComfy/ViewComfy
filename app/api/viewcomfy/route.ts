@@ -2,36 +2,44 @@ import { promises as fs } from "fs";
 import * as path from "path";
 import { infer, inferWithLogsStream } from "@/app/services/viewcomfy-api-services";
 import { type NextRequest, NextResponse } from 'next/server';
+import { IViewComfy } from "@/app/interfaces/comfy-input";
+import { ErrorResponseFactory } from "@/app/models/errors";
 
-// import { workflowApiParametersCreator } from "../../workflows/flux-consistent-characters/node-typescript/workflow_api_parameters_creator";
+const errorResponseFactory = new ErrorResponseFactory();
 
-const viewComfyUrl = "";
-const clientId = "";
-const clientSecret = "";
+const clientId = process.env.VIEWCOMFY_CLIENT_ID || "";
+const clientSecret = process.env.VIEWCOMFY_CLIENT_SECRET || "";
 
 // Move your main function logic into a route handler
 export async function POST(request: NextRequest) {
     try {
-        const override_workflow_api_path = null;
-
-        const params = {};
-
-        params["6-inputs-text"] = "A cat sorcerer"
-
-        // const inputImage = await loadImageFile("<path to image>");
-        // params["52-inputs-image"] = inputImage;
-
-        // params["3-inputs-steps"] = 1
-
-
-        let override_workflow_api = null;
-        if (override_workflow_api_path) {
-            try {
-                const fileContent = await fs.readFile(override_workflow_api_path, "utf-8");
-                override_workflow_api = JSON.parse(fileContent);
-            } catch (error) {
-                console.error("Override workflow API path does not exist");
+        const formData = await request.formData();
+        let override_workflow_api = undefined;
+        if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
+            override_workflow_api = JSON.parse(formData.get('workflow') as string);
+        }
+    
+        let viewComfy: IViewComfy = {inputs: [], textOutputEnabled: false};
+        if (formData.get('viewComfy') && formData.get('viewComfy') !== 'undefined') {
+            viewComfy = JSON.parse(formData.get('viewComfy') as string);
+        }
+        
+        const params: Record<string, any> = {};
+        for (const [key, value] of Array.from(formData.entries())) {
+            if (key !== 'workflow') {
+                if (value instanceof File) {
+                    params[key] = value;
+                } else if (key === "viewComfy") {
+                    for (const input of viewComfy.inputs) {
+                        params[input.key] = input.value;
+                    }
+                }
             }
+        }
+        const viewComfyUrl = formData.get('viewcomfyEndpoint') as string;
+    
+        if (!viewComfy) {
+            return new NextResponse("viewComfy is required", { status: 400 });
         }
 
         // Call the API and wait for the results
@@ -40,6 +48,7 @@ export async function POST(request: NextRequest) {
             params,
             clientId,
             clientSecret,
+            override_workflow_api: override_workflow_api
         });
 
         // Call the API and get the logs of the execution in real time
@@ -62,22 +71,12 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // return new NextResponse(result, {
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // });
+    } catch (error: unknown) {
+        const responseError = errorResponseFactory.getErrorResponse(error);
 
-        // const urls = [];
-        // if (result) {
-        //     for (const file of result.outputs) {
-        //         await saveBlob(file, file.name);
-        //     }
-        // }
-
-        // return { success: true, urls };
-    } catch (error: any) {
-        console.error("Error:", error);
+        return NextResponse.json(responseError, {
+            status: 500,
+        });
     }
 };
 

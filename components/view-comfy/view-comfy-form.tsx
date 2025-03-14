@@ -37,7 +37,8 @@ interface IInputForm extends IInputField {
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>, onSubmit: (data: any) => void,
+    form: UseFormReturn<IViewComfyBase, any, undefined>, 
+    onSubmit: (data: any) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
@@ -46,7 +47,7 @@ export function ViewComfyForm(args: {
     isLoading?: boolean
 
 }) {
-    const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
+    const { form, onSubmit, inputFieldArray, advancedFieldArray,  editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
@@ -55,7 +56,7 @@ export function ViewComfyForm(args: {
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
                             <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
                                 {editMode && (
-                                    <>
+                                    <div className="grid gap-2">
                                         <FormField
                                             control={form.control}
                                             name="title"
@@ -77,6 +78,19 @@ export function ViewComfyForm(args: {
                                                     <FormLabel>Description</FormLabel>
                                                     <FormControl>
                                                         <Textarea placeholder="The description of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="viewcomfyEndpoint"
+                                            render={({ field }) => (
+                                                <FormItem key="viewcomfyEndpoint" className="">
+                                                    <FormLabel>ViewComfy Endpoint (optional)</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ViewComfy deployment endpoint" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -106,7 +120,7 @@ export function ViewComfyForm(args: {
                                                 </FormItem>
                                             )}
                                         />
-                                    </>
+                                    </div>
                                 )}
                                 {!editMode && (
                                     <div id="workflow-title-description">
