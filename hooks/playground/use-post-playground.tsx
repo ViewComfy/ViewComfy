@@ -51,35 +51,29 @@ export const usePostPlayground = () => {
                 throw new Error("No response body");
             }
 
-            if (viewcomfyEndpoint) {
-                const blob = await response.blob();
-                const output: Blob[] = [blob];
-                onSuccess(output);
-            } else {
-                const reader = response.body.getReader();
-                let buffer: Uint8Array = new Uint8Array(0);
-                const output: Blob[] = [];
-                const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
-    
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-    
-                    buffer = concatUint8Arrays(buffer, value);
-    
-                    let separatorIndex: number;
-                    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-                    while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
-                        const outputPart = buffer.slice(0, separatorIndex);
-                        buffer = buffer.slice(separatorIndex + separator.length);
-    
-                        const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
-                        if (mimeEndIndex !== -1) {
-                            const mimeType = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex)).split(': ')[1];
-                            const outputData = outputPart.slice(mimeEndIndex + 4);
-                            const blob = new Blob([outputData], { type: mimeType });
-                            output.push(blob);
-                        }
+            const reader = response.body.getReader();
+            let buffer: Uint8Array = new Uint8Array(0);
+            const output: Blob[] = [];
+            const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer = concatUint8Arrays(buffer, value);
+
+                let separatorIndex: number;
+                // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+                while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
+                    const outputPart = buffer.slice(0, separatorIndex);
+                    buffer = buffer.slice(separatorIndex + separator.length);
+
+                    const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
+                    if (mimeEndIndex !== -1) {
+                        const mimeType = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex)).split(': ')[1];
+                        const outputData = outputPart.slice(mimeEndIndex + 4);
+                        const blob = new Blob([outputData], { type: mimeType });
+                        output.push(blob);
                     }
                 }
     

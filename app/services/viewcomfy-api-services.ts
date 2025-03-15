@@ -1,3 +1,6 @@
+import { ComfyErrorHandler } from "../helpers/comfy-error-handler";
+import { ComfyWorkflowError } from "../models/errors";
+
 function buildFormData(data: {
     logs: boolean;
     params: Record<string, any>;
@@ -5,7 +8,7 @@ function buildFormData(data: {
 }): FormData {
     const { params, override_workflow_api, logs } = data;
     const formData = new FormData();
-    let params_str = {};
+    let params_str: Record<string, any> = {};
     for (const key in params) {
         const value = params[key];
         if (value instanceof File) {
@@ -54,14 +57,16 @@ export const infer = async ({
     clientSecret,
 }: Infer) => {
     if (!apiUrl) {
-        throw new Error("viewComfyUrl is not set");
+        throw new Error("viewComfyUrl is not set. Please get the right endpoint from your dashboard.");
     }
     if (!clientId) {
-        throw new Error("clientId is not set");
+        throw new Error("Client ID is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
     if (!clientSecret) {
-        throw new Error("clientSecret is not set");
+        throw new Error("c=Client Secret is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
+
+    const comfyErrorHandler = new ComfyErrorHandler();
 
     try {
         const formData = buildFormData({
@@ -89,9 +94,74 @@ export const infer = async ({
         }
 
         const data = await response.json();
-        return new PromptResult(data);
-    } catch (error) {
-        throw error;
+        const outputFiles = data.outputs;
+
+        if (outputFiles.length === 0) {
+            throw new ComfyWorkflowError({
+                message: "No output files found",
+                errors: ["No output files found"],
+            });
+        }
+
+        const stream = new ReadableStream<Uint8Array>({
+            async start(controller) {
+                for (const file of outputFiles) {
+                    try {
+                        let outputBuffer: Blob;
+                        let mimeType: string;
+
+                                        // Convert base64 data to Blob
+                        const binaryData = atob(file.data);
+                        const arrayBuffer = new ArrayBuffer(binaryData.length);
+                        const uint8Array = new Uint8Array(arrayBuffer);
+
+                        for (let i = 0; i < binaryData.length; i++) {
+                            uint8Array[i] = binaryData.charCodeAt(i);
+                        }
+
+                        outputBuffer = new Blob([arrayBuffer], { type: file.content_type });
+                        mimeType = file.content_type;
+
+                        const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
+                        controller.enqueue(new TextEncoder().encode(mimeInfo));
+                        controller.enqueue(new Uint8Array(await outputBuffer.arrayBuffer()));
+                        controller.enqueue(
+                            new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"),
+                        );
+                    } catch (error) {
+                        console.error("Failed to get output file");
+                        console.error(error);
+                    }
+                }
+                controller.close();
+            },
+        });
+        return stream;
+
+    } catch (error: unknown) {
+        console.error("Failed to run the workflow");
+        console.error({ error });
+
+        if (error instanceof Error && error.cause) {
+            throw error;
+        }
+
+        if (error instanceof ComfyWorkflowError) {
+            throw error;
+        }
+
+        const comfyError =
+            comfyErrorHandler.tryToParseWorkflowError(error);
+        if (comfyError) {
+            throw comfyError;
+        }
+
+        throw new ComfyWorkflowError({
+            message: "Error running workflow",
+            errors: [
+                "Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. Make sure that you can run this workflow on your deployment.",
+            ],
+        });
     }
 };
 

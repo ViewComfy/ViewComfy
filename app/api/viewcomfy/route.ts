@@ -1,6 +1,4 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { infer, inferWithLogsStream } from "@/app/services/viewcomfy-api-services";
+import { infer } from "@/app/services/viewcomfy-api-services";
 import { type NextRequest, NextResponse } from 'next/server';
 import { IViewComfy } from "@/app/interfaces/comfy-input";
 import { ErrorResponseFactory } from "@/app/models/errors";
@@ -37,18 +35,27 @@ export async function POST(request: NextRequest) {
             }
         }
         const viewComfyUrl = formData.get('viewcomfyEndpoint') as string;
+        
     
         if (!viewComfy) {
             return new NextResponse("viewComfy is required", { status: 400 });
         }
 
         // Call the API and wait for the results
-        const result = await infer({
+        const stream = await infer({
             apiUrl: viewComfyUrl,
             params,
             clientId,
             clientSecret,
             override_workflow_api: override_workflow_api
+        });
+        
+
+        return new NextResponse<ReadableStream<Uint8Array>>(stream, {
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': 'attachment; filename="generated_images.bin"'
+            }
         });
 
         // Call the API and get the logs of the execution in real time
@@ -62,14 +69,15 @@ export async function POST(request: NextRequest) {
         //     clientSecret,
         // });
 
-        const firstOutput = result.outputs[0];
+        // const firstOutput = result.outputs[0];
+
         
-        return new NextResponse(firstOutput, {
-            headers: {
-                'Content-Type': firstOutput.type,
-                'Content-Disposition': `inline; filename="${firstOutput.name}"`
-            }
-        });
+        // return new NextResponse(firstOutput, {
+        //     headers: {
+        //         'Content-Type': firstOutput.type,
+        //         'Content-Disposition': `inline; filename="${firstOutput.name}"`
+        //     }
+        // });
 
     } catch (error: unknown) {
         const responseError = errorResponseFactory.getErrorResponse(error);
@@ -80,12 +88,12 @@ export async function POST(request: NextRequest) {
     }
 };
 
-async function loadImageFile(filepath: string): Promise<File> {
-    const buffer = await fs.readFile(filepath);
-    return new File([buffer], path.basename(filepath), { type: "image/png" });
-}
+// async function loadImageFile(filepath: string): Promise<File> {
+//     const buffer = await fs.readFile(filepath);
+//     return new File([buffer], path.basename(filepath), { type: "image/png" });
+// }
 
-async function saveBlob(blob: Blob, filename: string): Promise<void> {
-    const arrayBuffer = await blob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-}
+// async function saveBlob(blob: Blob, filename: string): Promise<void> {
+//     const arrayBuffer = await blob.arrayBuffer();
+//     const buffer = Buffer.from(arrayBuffer);
+// }
