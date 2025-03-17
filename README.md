@@ -45,7 +45,7 @@ There are two different ways you can run your workflows/ViewComfy apps on cloud 
 
 ### Deploy the workflows individually and access them via serverless APIs 
 
-This is the recommended option. You can deploy your workflows without the viewcomfy.json and access them via your API endpoint. This ensures that the GPUs behind your workflow will only be running when generating.
+This is the recommended option. You can deploy your workflows without the viewcomfy.json and access them via your API endpoints. This ensures that the GPUs behind your workflow will only be running when generating.
 
 To get your API endpoint, you can follow the guide above. You will then need to get API keys from your dashboard and add them to your .env file:  
 ```bash
