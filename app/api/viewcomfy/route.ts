@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
             viewComfy = JSON.parse(formData.get('viewComfy') as string);
         }
         
-        const params: Record<string, any> = {};
+        const params: Record<string, unknown> = {};
         for (const [key, value] of Array.from(formData.entries())) {
             if (key !== 'workflow') {
                 if (value instanceof File) {

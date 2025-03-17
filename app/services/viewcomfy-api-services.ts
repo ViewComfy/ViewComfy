@@ -3,12 +3,12 @@ import { ComfyWorkflowError } from "../models/errors";
 
 function buildFormData(data: {
     logs: boolean;
-    params: Record<string, any>;
-    override_workflow_api?: Record<string, any> | undefined;
+    params: Record<string, unknown>;
+    override_workflow_api?: Record<string, unknown> | undefined;
 }): FormData {
     const { params, override_workflow_api, logs } = data;
     const formData = new FormData();
-    let params_str: Record<string, any> = {};
+    const params_str: Record<string, unknown> = {};
     for (const key in params) {
         const value = params[key];
         if (value instanceof File) {
@@ -31,8 +31,8 @@ function buildFormData(data: {
 
 interface Infer {
     apiUrl: string;
-    params: Record<string, any>;
-    override_workflow_api?: Record<string, any> | undefined;
+    params: Record<string, unknown>;
+    override_workflow_api?: Record<string, unknown> | undefined;
     clientId: string;
     clientSecret: string;
 }
@@ -107,10 +107,10 @@ export const infer = async ({
             async start(controller) {
                 for (const file of outputFiles) {
                     try {
-                        let outputBuffer: Blob;
-                        let mimeType: string;
+                        // let outputBuffer: Blob;
+                        // let mimeType: string;
 
-                                        // Convert base64 data to Blob
+                        // Convert base64 data to Blob
                         const binaryData = atob(file.data);
                         const arrayBuffer = new ArrayBuffer(binaryData.length);
                         const uint8Array = new Uint8Array(arrayBuffer);
@@ -119,8 +119,8 @@ export const infer = async ({
                             uint8Array[i] = binaryData.charCodeAt(i);
                         }
 
-                        outputBuffer = new Blob([arrayBuffer], { type: file.content_type });
-                        mimeType = file.content_type;
+                        const outputBuffer = new Blob([arrayBuffer], { type: file.content_type });
+                        const mimeType = file.content_type;
 
                         const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                         controller.enqueue(new TextEncoder().encode(mimeInfo));
@@ -352,7 +352,7 @@ export class PromptResult {
     execution_time_seconds: number;
 
     /** The original prompt configuration */
-    prompt: Record<string, any>;
+    prompt: Record<string, unknown>;
 
     /** List of output files */
     outputs: File[];
@@ -362,7 +362,7 @@ export class PromptResult {
         status: string;
         completed: boolean;
         execution_time_seconds: number;
-        prompt: Record<string, any>;
+        prompt: Record<string, unknown>;
         outputs?: FilesData[];
     }) {
         const {

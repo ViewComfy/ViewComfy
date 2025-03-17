@@ -44,6 +44,7 @@ interface IInputForm extends IInputField {
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<IViewComfyBase, any, undefined>, 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSubmit: (data: any) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,

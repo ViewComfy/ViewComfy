@@ -88,8 +88,8 @@ export class ComfyUIAPIService {
         try {
             event = JSON.parse(eventData) as IComfyUIWSEventData;
         } catch (error) {
-            // console.log("Error parsing event data:", eventData);
-            // console.error(error);
+            console.log("Error parsing event data:", eventData);
+            console.error(error);
             return;
         }
 
@@ -164,7 +164,8 @@ export class ComfyUIAPIService {
                     } else {
                         resError = responseError;
                     }
-                } catch (error) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                } catch (_error) {
                     resError = await response.text();
                 }
                 console.error(resError);
