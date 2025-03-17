@@ -38,11 +38,30 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 ## Deployment
 
-Deloy your web app on the hardware of your choice in minutes using ViewComfy Cloud.  
+There are two different ways you can run your workflows/ViewComfy apps on cloud GPUs. 
 
 [![Guide](https://img.shields.io/badge/Youtube-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
 [![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
 
+### Deploy the workflows individually and access them via API 
+
+This is the recommended option. You can deploy your workflows without the viewcomfy.json and access them via your API endpoint. This ensures that the GPUs behind your workflow will only be running when generating.
+
+To get your API endpoint, you can follow the guide above. You will then need to get API keys from your dashboard and add them to your .env file:  
+```bash
+.env file ->
+VIEWCOMFY_CLIENT_ID="<your client id>"
+VIEWCOMFY_CLIENT_SECRET="<your client secret>"
+
+npm run dev
+```
+
+Finally, you can link your endpoint to your workflow inside your ViewComfy app:
+![Screenshot 2025-03-17 175719](https://github.com/user-attachments/assets/25495f87-5639-456b-9266-9fcabb3995cc)
+
+### Deploy the entire web app
+
+You can also deploy the whole web app and access it via its own unique URL by following the guide above. Note that unlike with the API option, the GPU powering the app will be running for as long as the URL is open in the browser, not just when generating. 
 
 ## Usage
 ### Form Editor
