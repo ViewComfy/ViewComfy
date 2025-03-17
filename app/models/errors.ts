@@ -42,7 +42,6 @@ export class ResponseError {
 export class ErrorResponseFactory {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public getErrorResponse(error: any): ResponseError {
-        console.log("GB: logs: error", error);
         if (error.errorType) {
             return new ResponseError({
                 errorMsg: error.message,
