@@ -8,13 +8,13 @@ function buildFormData(data: {
 }): FormData {
     const { params, override_workflow_api, logs } = data;
     const formData = new FormData();
-    const params_str: Record<string, unknown> = {};
+    const paramStr: Record<string, unknown> = {};
     for (const key in params) {
         const value = params[key];
         if (value instanceof File) {
             formData.set(key, value);
         } else {
-            params_str[key] = value;
+            paramStr[key] = value;
         }
     }
 
@@ -22,7 +22,7 @@ function buildFormData(data: {
         formData.set("workflow_api", JSON.stringify(override_workflow_api));
     }
 
-    formData.set("params", JSON.stringify(params_str));
+    formData.set("params", JSON.stringify(paramStr));
 
     formData.set("logs", logs.toString());
 
@@ -63,7 +63,7 @@ export const infer = async ({
         throw new Error("Client ID is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
     if (!clientSecret) {
-        throw new Error("c=Client Secret is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
+        throw new Error("Client Secret is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
 
     const comfyErrorHandler = new ComfyErrorHandler();

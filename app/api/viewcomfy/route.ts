@@ -12,9 +12,9 @@ const clientSecret = process.env.VIEWCOMFY_CLIENT_SECRET || "";
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
-        let override_workflow_api = undefined;
+        let overrideWorkflowApi = undefined;
         if (formData.get('workflow') && formData.get('workflow') !== 'undefined') {
-            override_workflow_api = JSON.parse(formData.get('workflow') as string);
+            overrideWorkflowApi = JSON.parse(formData.get('workflow') as string);
         }
     
         let viewComfy: IViewComfy = {inputs: [], textOutputEnabled: false};
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
             params,
             clientId,
             clientSecret,
-            override_workflow_api: override_workflow_api
+            override_workflow_api: overrideWorkflowApi
         });
         
 
