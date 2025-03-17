@@ -1,4 +1,3 @@
-import { ComfyErrorHandler } from "../helpers/comfy-error-handler";
 import { ComfyWorkflowError } from "../models/errors";
 
 function buildFormData(data: {
@@ -65,8 +64,6 @@ export const infer = async ({
     if (!clientSecret) {
         throw new Error("Client Secret is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
-
-    const comfyErrorHandler = new ComfyErrorHandler();
 
     try {
         const formData = buildFormData({
@@ -150,16 +147,10 @@ export const infer = async ({
             throw error;
         }
 
-        const comfyError =
-            comfyErrorHandler.tryToParseWorkflowError(error);
-        if (comfyError) {
-            throw comfyError;
-        }
-
         throw new ComfyWorkflowError({
             message: "Error running workflow",
             errors: [
-                "Something went wrong running the workflow, the most common cases are missing nodes and running out of Vram. Make sure that you can run this workflow on your deployment.",
+                error instanceof Error ? error.message : String(error),
             ],
         });
     }
