@@ -11,13 +11,18 @@ export interface IUsePostPlayground {
     onError: (error: any) => void,
 }
 
+const viewcomfyCloud = process.env.VIEW_COMFY_CLOUD;
+
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
-            const url = viewcomfyEndpoint ? "/api/viewcomfy" : "/api/comfy";
+            let url = "/api/comfy";
+            if (viewcomfyEndpoint && !viewcomfyCloud) {
+                url = "/api/viewcomfy"
+            }
 
             const formData = new FormData();
 

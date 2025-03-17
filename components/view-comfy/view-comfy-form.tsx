@@ -103,7 +103,11 @@ export function ViewComfyForm(args: {
                                                                     <Info size={10} />
                                                                 </TooltipTrigger>
                                                                 <TooltipContent className="max-w-[300px]">
-                                                                    <p>You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the right hand side menu.</p>
+                                                                    <p>
+                                                                        You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the right hand side menu. 
+                                                                        <br/><br/>
+                                                                        If you don&apos;t have an endpoint, please leave this field empty.
+                                                                    </p>
                                                                 </TooltipContent>
                                                             </Tooltip>
                                                         </FormLabel>
