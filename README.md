@@ -56,7 +56,8 @@ VIEWCOMFY_CLIENT_SECRET="<your client secret>"
 npm run dev
 ```
 
-Finally, you can link your endpoint to your workflow inside your ViewComfy app.
+Finally, you can link your endpoint to your workflow inside your ViewComfy app:
+
 ![Screenshot 2025-03-17 175719](https://github.com/user-attachments/assets/25495f87-5639-456b-9266-9fcabb3995cc)
 
 ### Deploy the entire web app
