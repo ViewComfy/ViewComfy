@@ -43,7 +43,7 @@ There are two different ways you can run your workflows/ViewComfy apps on cloud 
 [![Guide](https://img.shields.io/badge/Youtube-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
 [![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
 
-### Deploy the workflows individually and access them via API 
+### Deploy the workflows individually and access them via serverless APIs 
 
 This is the recommended option. You can deploy your workflows without the viewcomfy.json and access them via your API endpoint. This ensures that the GPUs behind your workflow will only be running when generating.
 
