@@ -3,9 +3,9 @@ import { ComfyWorkflowError } from "../models/errors";
 function buildFormData(data: {
     logs: boolean;
     params: Record<string, unknown>;
-    override_workflow_api?: Record<string, unknown> | undefined;
+    overrideWorkflowApi?: Record<string, unknown> | undefined;
 }): FormData {
-    const { params, override_workflow_api, logs } = data;
+    const { params, overrideWorkflowApi, logs } = data;
     const formData = new FormData();
     const paramStr: Record<string, unknown> = {};
     for (const key in params) {
@@ -17,8 +17,8 @@ function buildFormData(data: {
         }
     }
 
-    if (override_workflow_api) {
-        formData.set("workflow_api", JSON.stringify(override_workflow_api));
+    if (overrideWorkflowApi) {
+        formData.set("workflow_api", JSON.stringify(overrideWorkflowApi));
     }
 
     formData.set("params", JSON.stringify(paramStr));
@@ -31,7 +31,7 @@ function buildFormData(data: {
 interface Infer {
     apiUrl: string;
     params: Record<string, unknown>;
-    override_workflow_api?: Record<string, unknown> | undefined;
+    overrideWorkflowApi?: Record<string, unknown> | undefined;
     clientId: string;
     clientSecret: string;
 }
@@ -45,13 +45,13 @@ interface InferWithLogs extends Infer {
  *
  * @param apiUrl - The URL to send the request to
  * @param params - The parameter to send to the workflow
- * @param override_workflow_api - Optional override the default workflow_api of the deployment
+ * @param overrideWorkflowApi - Optional override the default workflow_api of the deployment
  * @returns The parsed prompt result or null
  */
 export const infer = async ({
     apiUrl,
     params,
-    override_workflow_api,
+    overrideWorkflowApi,
     clientId,
     clientSecret,
 }: Infer) => {
@@ -69,7 +69,7 @@ export const infer = async ({
         const formData = buildFormData({
             logs: false,
             params,
-            override_workflow_api,
+            overrideWorkflowApi,
         });
 
         const response = await fetch(apiUrl, {
@@ -259,7 +259,7 @@ export const inferWithLogsStream = async ({
     apiUrl,
     params,
     loggingCallback,
-    override_workflow_api,
+    overrideWorkflowApi: override_workflow_api,
     clientId,
     clientSecret,
 }: InferWithLogs): Promise<PromptResult | null> => {
@@ -276,7 +276,7 @@ export const inferWithLogsStream = async ({
     try {
         const formData = buildFormData({
             logs: true,
-            override_workflow_api,
+            overrideWorkflowApi: override_workflow_api,
             params,
         });
         const response = await fetch(apiUrl, {
