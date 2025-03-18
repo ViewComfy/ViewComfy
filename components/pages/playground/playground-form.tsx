@@ -49,15 +49,11 @@ export default function PlaygroundForm(props: {
 
 
     return (
-        <>
-            <ViewComfyForm form={form} onSubmit={onSubmit} inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} isLoading={loading}>
-                <div className={cn("sticky bottom-0 p-4 bg-background w-full  rounded-md")}>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                        Generate <WandSparkles className={cn("size-5 ml-2")} />
-                    </Button>
-                </div>
-            </ViewComfyForm>
-        </>
+        <ViewComfyForm form={form} onSubmit={onSubmit} inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} isLoading={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
+                Generate <WandSparkles className={cn("size-5 ml-2")} />
+            </Button>
+        </ViewComfyForm>
     )
 }
 
