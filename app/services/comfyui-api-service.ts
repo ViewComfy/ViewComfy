@@ -164,9 +164,9 @@ export class ComfyUIAPIService {
                     } else {
                         resError = responseError;
                     }
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                } catch (_error) {
-                    resError = await response.text();
+                } catch (error) {
+                    console.error("cannot parse response", error);
+                    throw error;
                 }
                 console.error(resError);
                 throw resError;
