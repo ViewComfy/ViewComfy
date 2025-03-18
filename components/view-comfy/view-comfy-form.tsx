@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2 } from "lucide-react";
+import { Trash2, Info } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -30,6 +30,11 @@ import {
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
 import { getComfyUIRandomSeed, cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -37,7 +42,9 @@ interface IInputForm extends IInputField {
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>, onSubmit: (data: any) => void,
+    form: UseFormReturn<IViewComfyBase, any, undefined>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSubmit: (data: any) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
@@ -55,12 +62,12 @@ export function ViewComfyForm(args: {
                         <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
                             <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
                                 {editMode && (
-                                    <>
+                                    <div className="grid gap-2">
                                         <FormField
                                             control={form.control}
                                             name="title"
                                             render={({ field }) => (
-                                                <FormItem key="title" className="ml-0.5">
+                                                <FormItem key="title" className="ml-0.5 mr-0.5">
                                                     <FormLabel>Title</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="The name of your workflow" {...field} />
@@ -73,10 +80,46 @@ export function ViewComfyForm(args: {
                                             control={form.control}
                                             name="description"
                                             render={({ field }) => (
-                                                <FormItem key="description" className="ml-0.5">
+                                                <FormItem key="description" className="ml-0.5 mr-0.5">
                                                     <FormLabel>Description</FormLabel>
                                                     <FormControl>
                                                         <Textarea placeholder="The description of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="viewcomfyEndpoint"
+                                            render={({ field }) => (
+                                                <FormItem key="viewcomfyEndpoint" className="ml-0.5 mr-0.5">
+                                                    <FormLabel>
+                                                        ViewComfy Endpoint (optional)
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="text-muted-foreground"
+                                                                    onClick={() => { }}
+                                                                >
+                                                                    <Info className="size-5" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent className="max-w-[300px]">
+                                                                <p>
+                                                                    You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the right hand side menu.
+                                                                    <br /><br />
+                                                                    If you don&apos;t have an endpoint, please leave this field empty.
+                                                                </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="ViewComfy endpoint" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -106,7 +149,7 @@ export function ViewComfyForm(args: {
                                                 </FormItem>
                                             )}
                                         />
-                                    </>
+                                    </div>
                                 )}
                                 {!editMode && (
                                     <div id="workflow-title-description">
@@ -187,7 +230,6 @@ export function ViewComfyForm(args: {
                 )}
             </form>
         </Form>
-
     )
 }
 

@@ -104,6 +104,7 @@ function PlaygroundPageContent() {
         doPost({
             viewComfy: generationData,
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
+            viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (data) => {
                 onSetResults(data);
             }, onError: (error) => {

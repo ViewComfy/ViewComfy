@@ -88,8 +88,8 @@ export class ComfyUIAPIService {
         try {
             event = JSON.parse(eventData) as IComfyUIWSEventData;
         } catch (error) {
-            // console.log("Error parsing event data:", eventData);
-            // console.error(error);
+            console.log("Error parsing event data:", eventData);
+            console.error(error);
             return;
         }
 
@@ -165,7 +165,8 @@ export class ComfyUIAPIService {
                         resError = responseError;
                     }
                 } catch (error) {
-                    resError = await response.text();
+                    console.error("cannot parse response", error);
+                    throw error;
                 }
                 console.error(resError);
                 throw resError;
