@@ -8,7 +8,6 @@ const errorResponseFactory = new ErrorResponseFactory();
 const clientId = process.env.VIEWCOMFY_CLIENT_ID || "";
 const clientSecret = process.env.VIEWCOMFY_CLIENT_SECRET || "";
 
-// Move your main function logic into a route handler
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
@@ -41,13 +40,12 @@ export async function POST(request: NextRequest) {
             return new NextResponse("viewComfy is required", { status: 400 });
         }
 
-        // Call the API and wait for the results
         const stream = await infer({
             apiUrl: viewComfyUrl,
             params,
             clientId,
             clientSecret,
-            override_workflow_api: overrideWorkflowApi
+            overrideWorkflowApi: overrideWorkflowApi
         });
         
 
@@ -58,27 +56,6 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Call the API and get the logs of the execution in real time
-        // the console.log is the function that will be use to log the messages
-        // you can use any function that you want
-        // const result = await inferWithLogsStream({
-        //     apiUrl: viewComfyUrl,
-        //     params,
-        //     loggingCallback: console.log,
-        //     clientId,
-        //     clientSecret,
-        // });
-
-        // const firstOutput = result.outputs[0];
-
-        
-        // return new NextResponse(firstOutput, {
-        //     headers: {
-        //         'Content-Type': firstOutput.type,
-        //         'Content-Disposition': `inline; filename="${firstOutput.name}"`
-        //     }
-        // });
-
     } catch (error: unknown) {
         const responseError = errorResponseFactory.getErrorResponse(error);
 
@@ -87,13 +64,3 @@ export async function POST(request: NextRequest) {
         });
     }
 };
-
-// async function loadImageFile(filepath: string): Promise<File> {
-//     const buffer = await fs.readFile(filepath);
-//     return new File([buffer], path.basename(filepath), { type: "image/png" });
-// }
-
-// async function saveBlob(blob: Blob, filename: string): Promise<void> {
-//     const arrayBuffer = await blob.arrayBuffer();
-//     const buffer = Buffer.from(arrayBuffer);
-// }
