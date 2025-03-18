@@ -5,6 +5,7 @@ export interface IViewComfyBase {
     title: string;
     description: string;
     textOutputEnabled?: boolean;
+    viewcomfyEndpoint?: string;
     previewImages: string[];
     inputs: IMultiValueInput[];
     advancedInputs: IMultiValueInput[];

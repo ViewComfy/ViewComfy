@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2 } from "lucide-react";
+import { Trash2, Info } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -30,6 +30,11 @@ import {
 } from "@/components/ui/collapsible"
 import { useState, useEffect } from "react";
 import { getComfyUIRandomSeed, cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -37,7 +42,9 @@ interface IInputForm extends IInputField {
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>, onSubmit: (data: any) => void,
+    form: UseFormReturn<IViewComfyBase, any, undefined>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onSubmit: (data: any) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
@@ -55,60 +62,97 @@ export function ViewComfyForm(args: {
                         <div id="inputs-form" className="flex flex-col w-full h-full">
                             <ScrollArea className="flex-1 px-[5px] pr-4 pb-24"> {/* Added pb-24 for button space */}
                                 <div className="grid w-full items-start gap-4">
-                                    {editMode && (
-                                        <>
-                                            <FormField
-                                                control={form.control}
-                                                name="title"
-                                                render={({ field }) => (
-                                                    <FormItem key="title" className="ml-0.5">
-                                                        <FormLabel>Title</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="The name of your workflow" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="description"
-                                                render={({ field }) => (
-                                                    <FormItem key="description" className="ml-0.5">
-                                                        <FormLabel>Description</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea placeholder="The description of your workflow" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="textOutputEnabled"
-                                                render={({ field }) => (
-                                                    <FormItem key="textOutputEnabled" className="">
-                                                        <FormControl>
-                                                            <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
-                                                                (field.value) ? "mb-[-5px]" : "pb-2"
-                                                            )}>
-                                                                <FormLabel>Enable text output</FormLabel>
-                                                                <Checkbox
-                                                                    checked={field.value}
-                                                                    onCheckedChange={field.onChange}
-                                                                />
-                                                            </div>
-                                                        </FormControl>
-                                                        {(field.value) && (
-                                                            <FormDescription className="pb-2">
-                                                                Text output is in beta and can lead to unexpected text being rendered
-                                                            </FormDescription>
-                                                        )}
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </>
-                                    )}
+                                {editMode && (
+                                    <div className="grid gap-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="title"
+                                            render={({ field }) => (
+                                                <FormItem key="title" className="ml-0.5 mr-0.5">
+                                                    <FormLabel>Title</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="The name of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem key="description" className="ml-0.5 mr-0.5">
+                                                    <FormLabel>Description</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea placeholder="The description of your workflow" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="viewcomfyEndpoint"
+                                            render={({ field }) => (
+                                                <FormItem key="viewcomfyEndpoint" className="ml-0.5 mr-0.5">
+                                                    <FormLabel>
+                                                        ViewComfy Endpoint (optional)
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="text-muted-foreground"
+                                                                    onClick={() => { }}
+                                                                >
+                                                                    <Info className="size-5" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent className="max-w-[300px]">
+                                                                <p>
+                                                                    You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the right hand side menu.
+                                                                    <br /><br />
+                                                                    If you don&apos;t have an endpoint, please leave this field empty.
+                                                                </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="ViewComfy endpoint" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="textOutputEnabled"
+                                            render={({ field }) => (
+                                                <FormItem key="textOutputEnabled" className="">
+                                                    <FormControl>
+                                                        <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                                            (field.value) ? "mb-[-5px]" : "pb-2"
+                                                        )}>
+                                                            <FormLabel>Enable text output</FormLabel>
+                                                            <Checkbox
+                                                                checked={field.value}
+                                                                onCheckedChange={field.onChange}
+                                                            />
+                                                        </div>
+                                                    </FormControl>
+                                                    {(field.value) && (
+                                                        <FormDescription className="pb-2">
+                                                            Text output is in beta and can lead to unexpected text being rendered
+                                                        </FormDescription>
+                                                    )}
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                )}
+                               
                                     {!editMode && (
                                         <div id="workflow-title-description">
                                             <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
@@ -193,7 +237,6 @@ export function ViewComfyForm(args: {
                 )}
             </form>
         </Form>
-
     )
 }
 
