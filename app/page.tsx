@@ -7,6 +7,7 @@ import ViewComfyPage from "@/components/pages/view-comfy/view-comfy-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // export const description =
 //     "An AI playground with a sidebar navigation and a main content area. The playground has a header with a settings drawer and a share button. The sidebar has navigation links and a user menu. The main content area shows a form to configure the model and messages."
@@ -16,6 +17,7 @@ export default function Page() {
     const [currentTab, setCurrentTab] = useState(viewMode ? TabValue.Playground : TabValue.WorkflowApi);
     const [deployWindow, setDeployWindow] = useState<boolean>(false);
     return (
+        <TooltipProvider>
         <ViewComfyProvider>
             <div className="flex flex-col h-screen w-full overflow-x-auto overflow-y-hidden">
                 <TopNav />
@@ -60,5 +62,6 @@ export default function Page() {
             }
             <Toaster />
         </ViewComfyProvider>
+        </TooltipProvider>
     )
 }
