@@ -59,8 +59,9 @@ export function ViewComfyForm(args: {
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
                 <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                     <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
-                        <div id="inputs-form" className="grid w-full items-start gap-2 h-full">
-                            <ScrollArea className="w-full h-full flex-1 rounded-md px-[5px] pr-4">
+                        <div id="inputs-form" className="flex flex-col w-full h-full">
+                            <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}> 
+                                <div className="grid w-full items-start gap-4">
                                 {editMode && (
                                     <div className="grid gap-2">
                                         <FormField
@@ -151,61 +152,67 @@ export function ViewComfyForm(args: {
                                         />
                                     </div>
                                 )}
-                                {!editMode && (
-                                    <div id="workflow-title-description">
-                                        <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                        <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
-                                    </div>
-                                )}
-                                <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
-                                    {editMode && (
-                                        <legend className="-ml-1 px-1 text-sm font-medium">
-                                            Basic Inputs
-                                        </legend>
+                               
+                                    {!editMode && (
+                                        <div id="workflow-title-description">
+                                            <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
+                                            <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                        </div>
                                     )}
-                                    {inputFieldArray.fields.map((field, index) => {
-                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                        // @ts-ignore
-                                        if (field.inputs.length > 0) {
-                                            if (editMode) {
-                                                return (
-                                                    <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                                        <legend className="-ml-1 px-1 text-sm font-medium">
-                                                            {
-                                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                                // @ts-ignore
-                                                                field.title
-                                                            }
+                                    <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+                                        {editMode && (
+                                            <legend className="-ml-1 px-1 text-sm font-medium">
+                                                Basic Inputs
+                                            </legend>
+                                        )}
+                                        {inputFieldArray.fields.map((field, index) => {
+                                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                            // @ts-ignore
+                                            if (field.inputs.length > 0) {
+                                                if (editMode) {
+                                                    return (
+                                                        <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                                            <legend className="-ml-1 px-1 text-sm font-medium">
+                                                                {
+                                                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                                    // @ts-ignore
+                                                                    field.title
+                                                                }
 
-                                                            <Button
-                                                                size="icon"
-                                                                variant="ghost"
-                                                                className="text-muted-foreground"
-                                                                onClick={() => inputFieldArray.remove(index)}
-                                                            >
-                                                                <Trash2 className="size-5" />
-                                                            </Button>
-                                                        </legend>
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="text-muted-foreground"
+                                                                    onClick={() => inputFieldArray.remove(index)}
+                                                                >
+                                                                    <Trash2 className="size-5" />
+                                                                </Button>
+                                                            </legend>
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                        </fieldset>
+                                                    )
+                                                }
+
+                                                return (
+                                                    <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
                                                         <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
                                                     </fieldset>
                                                 )
                                             }
-
-                                            return (
-                                                <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                    <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                                </fieldset>
-                                            )
-                                        }
-                                        return undefined;
-                                    })}
-                                    {!editMode && (args.children)}
-                                </fieldset>
-                                {advancedFieldArray.fields.length > 0 && (
-                                    <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
-                                )}
-                                {editMode && (args.children)}
-                            </ScrollArea >
+                                            return undefined;
+                                        })}
+                                    </fieldset>
+                                    {advancedFieldArray.fields.length > 0 && (
+                                        <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
+                                    )}
+                                    {editMode && (args.children)}
+                                </div>
+                            </ScrollArea>
+                            {!editMode && (
+                                <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t z-10">
+                                    {args.children}
+                                </div>
+                            )}
                         </div>
                     </div>
                     {editMode && (

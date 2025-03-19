@@ -22,24 +22,28 @@ export class ComfyWorkflow {
         this.workflowFilePath = path.join(COMFY_WORKFLOWS_DIR, this.workflowFileName);
     }
 
-    public async setViewComfy(viewComfy: IInput[]) {
-        for (const input of viewComfy) {
-            const path = input.key.split("-");
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let obj: any = this.workflow;
-            for (let i = 0; i < path.length - 1; i++) {
-                if (i === path.length - 1) {
-                    continue;
-                }
-                obj = obj[path[i]];
-            }
-            if (input.value instanceof File) {
-                const filePath = await this.createFileFromInput(input.value);
-                obj[path[path.length - 1]] = filePath;
-            } else {
-                obj[path[path.length - 1]] = input.value;
-            }
+  public async setViewComfy(viewComfy: IInput[]) {
+    try {
+      for (const input of viewComfy) {
+        const path = input.key.split("-");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let obj: any = this.workflow;
+        for (let i = 0; i < path.length - 1; i++) {
+          if (i === path.length - 1) {
+            continue;
+          }
+          obj = obj[path[i]];
         }
+        if (input.value instanceof File) {
+          const filePath = await this.createFileFromInput(input.value);
+          obj[path[path.length - 1]] = filePath;
+        } else {
+          obj[path[path.length - 1]] = input.value;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
 
         for (const key in this.workflow) {
             const node = this.workflow[key];
