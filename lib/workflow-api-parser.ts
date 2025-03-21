@@ -61,19 +61,16 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
 
                 case "LoadImage":
                 case "LoadImageMask":
-                    const uploadInput = inputs.find(input => input.title === "Upload");
-                    if (uploadInput) {
-                        const input = inputs[0];
-                        input.valueType = "image";
-                        input.title = getTitleFromValue(value.class_type, value);
-                        input.placeholder = getTitleFromValue(value.class_type, value);
-                        input.value = null;
-                        basicInputs.push({
-                            title: getTitleFromValue(value.class_type, value),
-                            inputs: [input],
-                            key: `${key}-${value.class_type}`
-                        });
-                    }
+                    const input = inputs[0];
+                    input.valueType = "image";
+                    input.title = getTitleFromValue(value.class_type, value);
+                    input.placeholder = getTitleFromValue(value.class_type, value);
+                    input.value = null;
+                    basicInputs.push({
+                        title: getTitleFromValue(value.class_type, value),
+                        inputs: [input],
+                        key: `${key}-${value.class_type}`
+                    });
                     break;
 
                 case "VHS_LoadVideo":
