@@ -81,11 +81,11 @@ export const usePostPlayground = () => {
                         output.push(blob);
                     }
                 }
-    
-                onSuccess(output);
+
+                if (output.length > 0) {
+                    onSuccess(output);
+                }
             }
-
-
             
         } catch (error) {
             onError(error);
