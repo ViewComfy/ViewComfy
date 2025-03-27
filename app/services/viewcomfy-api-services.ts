@@ -91,9 +91,9 @@ export const infer = async ({
         }
 
         const data = await response.json();
-        const outputFiles = data.outputs;
+        const results = new PromptResult(data);
 
-        if (outputFiles.length === 0) {
+        if (results.outputs.length === 0) {
             throw new ComfyWorkflowError({
                 message: "No output files found",
                 errors: ["No output files found"],
@@ -102,26 +102,13 @@ export const infer = async ({
 
         const stream = new ReadableStream<Uint8Array>({
             async start(controller) {
-                for (const file of outputFiles) {
+                debugger;
+                for (const blob of results.outputs) {
                     try {
-                        // let outputBuffer: Blob;
-                        // let mimeType: string;
-
-                        // Convert base64 data to Blob
-                        const binaryData = atob(file.data);
-                        const arrayBuffer = new ArrayBuffer(binaryData.length);
-                        const uint8Array = new Uint8Array(arrayBuffer);
-
-                        for (let i = 0; i < binaryData.length; i++) {
-                            uint8Array[i] = binaryData.charCodeAt(i);
-                        }
-
-                        const outputBuffer = new Blob([arrayBuffer], { type: file.content_type });
-                        const mimeType = file.content_type;
-
+                        const mimeType = blob.type;
                         const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                         controller.enqueue(new TextEncoder().encode(mimeInfo));
-                        controller.enqueue(new Uint8Array(await outputBuffer.arrayBuffer()));
+                        controller.enqueue(new Uint8Array(await blob.arrayBuffer()));
                         controller.enqueue(
                             new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"),
                         );
@@ -346,7 +333,7 @@ export class PromptResult {
     prompt: Record<string, unknown>;
 
     /** List of output files */
-    outputs: File[];
+    outputs: Blob[];
 
     constructor(data: {
         prompt_id: string;
@@ -377,12 +364,12 @@ export class PromptResult {
             }
 
             const blob = new Blob([arrayBuffer], { type: output.content_type });
-
+            return blob;
             // Create File object from Blob
-            return new File([blob], output.filename, {
-                type: output.content_type,
-                lastModified: new Date().getTime(),
-            });
+            // return new File([blob], output.filename, {
+            //     type: output.content_type,
+            //     lastModified: new Date().getTime(),
+            // });
         });
 
         this.prompt_id = prompt_id;
