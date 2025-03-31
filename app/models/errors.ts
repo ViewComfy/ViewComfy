@@ -48,6 +48,21 @@ export class ErrorResponseFactory {
                 error: error.errors,
                 errorType: error.errorType
             });
+        } else if (error.cause && error.cause.code) {
+            // TODO: make proper error handling for ViewComfy API requests
+            if (error.cause.code === "ERR_INVALID_URL") {
+                return new ResponseError({
+                    errorMsg: error.message,
+                    error: "Invalid API Endpoint",
+                    errorType: error.cause.code
+                });
+            } else {
+                return new ResponseError({
+                    errorMsg: error.message,
+                    error: error.cause.message,
+                    errorType: error.cause.code
+                });
+            }
         }
 
         return new ResponseError({

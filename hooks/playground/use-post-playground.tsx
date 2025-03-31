@@ -2,23 +2,30 @@ import { IViewComfy } from "@/app/interfaces/comfy-input";
 import type { ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react"
 
-const url = "/api/comfy"
-
 export interface IUsePostPlayground {
     viewComfy: IViewComfy,
     workflow?: object,
+    viewcomfyEndpoint?: string | null,
     onSuccess: (outputs: Blob[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
 }
 
+const viewcomfyCloud = process.env.VIEW_COMFY_CLOUD;
+
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
-    const doPost = useCallback(async ({ viewComfy, workflow, onSuccess, onError }: IUsePostPlayground) => {
+    const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
+            let url = "/api/comfy";
+            if (viewcomfyEndpoint && !viewcomfyCloud) {
+                url = "/api/viewcomfy"
+            }
+
             const formData = new FormData();
+
             const viewComfyJSON: IViewComfy = { 
                     inputs:[],
                     textOutputEnabled: viewComfy.textOutputEnabled ?? false
@@ -33,11 +40,13 @@ export const usePostPlayground = () => {
 
             formData.append('workflow', JSON.stringify(workflow));
             formData.append('viewComfy', JSON.stringify(viewComfyJSON));
+            formData.append('viewcomfyEndpoint', viewcomfyEndpoint ?? "");
+
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
             });
-
+            
             if (!response.ok) {
                 const responseError: ResponseError = await response.json();
                 throw responseError;
@@ -48,7 +57,7 @@ export const usePostPlayground = () => {
             }
 
             const reader = response.body.getReader();
-            let buffer = new Uint8Array(0);
+            let buffer: Uint8Array = new Uint8Array(0);
             const output: Blob[] = [];
             const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
 
@@ -72,9 +81,12 @@ export const usePostPlayground = () => {
                         output.push(blob);
                     }
                 }
-            }
 
-            onSuccess(output);
+                if (output.length > 0) {
+                    onSuccess(output);
+                }
+            }
+            
         } catch (error) {
             onError(error);
         }

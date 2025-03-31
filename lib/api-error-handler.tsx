@@ -10,6 +10,8 @@ export class ApiErrorHandler {
                 description = error.errorDetails.map((detail, index) => (
                     (<> <p key={index}>{detail}</p> <br /> </> as React.ReactNode)
                 ));
+            } else if (typeof error.errorDetails === 'string') {
+                description = error.errorDetails
             } else {
                 description = <p>error.errorDetails</p>;
             }

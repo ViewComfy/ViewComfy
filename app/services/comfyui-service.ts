@@ -39,7 +39,7 @@ export class ComfyUIService {
             if (outputFiles.length === 0) {
                 throw new ComfyWorkflowError({
                     message: "No output files found",
-                    errors: ["No output files found"],
+                    errors: ['Make sure your workflow contains at least one node that saves an output to the ComfyUI output folder. eg. "Save Image" or "Video Combine" from comfyui-videohelpersuite'],
                 });
             }
 
@@ -114,7 +114,8 @@ export class ComfyUIService {
             const filePath = path.join(process.cwd(), viewComfyFileName);
             const fileContent = await fs.readFile(filePath, "utf8");
             workflow = JSON.parse(fileContent);
-        } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_error) {
             throw missingWorkflowError;
         }
 

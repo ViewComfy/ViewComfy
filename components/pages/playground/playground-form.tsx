@@ -16,6 +16,7 @@ export default function PlaygroundForm(props: {
         title: viewComfyJSON.title,
         description: viewComfyJSON.description,
         textOutputEnabled: viewComfyJSON.textOutputEnabled ?? false,
+        viewcomfyEndpoint: viewComfyJSON.viewcomfyEndpoint ?? "",
         inputs: viewComfyJSON.inputs,
         advancedInputs: viewComfyJSON.advancedInputs,
     }
@@ -41,6 +42,7 @@ export default function PlaygroundForm(props: {
                 title: viewComfyJSON.title,
                 description: viewComfyJSON.description,
                 textOutputEnabled: viewComfyJSON.textOutputEnabled ?? false,
+                viewcomfyEndpoint: viewComfyJSON.viewcomfyEndpoint ?? "",
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
             });
