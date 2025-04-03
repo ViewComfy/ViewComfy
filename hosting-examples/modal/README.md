@@ -12,7 +12,7 @@ To deploy a ViewComfy App on Modal, you can follow these steps:
 
 1. Deploy your workflow on ViewComfy
 
-Deployed your workflow on ViewComfy cloud and connected your view_comfy.json with your serverless API endpoint. See "Deploy the workflows individually and access them via serverless APIs" on the project main ReadMe for all the details. 
+Deployed your workflow on ViewComfy cloud and connected your view_comfy.json with your serverless API endpoint. See "Deploy the workflows individually and access them via serverless APIs" on the project's main ReadMe for all the details. 
 
 2. Create an account at [modal.com](https://modal.com/)
 
