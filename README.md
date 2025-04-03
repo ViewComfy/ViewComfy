@@ -38,31 +38,45 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 ## Deployment
 
-There are two different ways you can run your workflows/ViewComfy apps on cloud GPUs. 
+There are two different ways you can run your ViewComfy apps on cloud GPUs. 
 
 [![Guide](https://img.shields.io/badge/Youtube-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
 [![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
 
-### Deploy the workflows individually and access them via serverless APIs 
+### Deploy the frontend and backend separately.
 
-This is the recommended option. You can deploy your workflows without the viewcomfy.json and access them via your API endpoints. This ensures that the GPUs behind your workflow will only be running when generating.
+This is the recommended option. You can deploy your workflows (backend) without the viewcomfy.json and access them via your serverless API endpoints. This ensures that the GPUs behind your workflow will only be running when generating.
 
-To get an API endpoint, you can follow the guide above. You will then need to get your API keys from the dashboard and add them to your .env file:  
+You can then separately deploy the ViewComfy app (frontend) and run it on a CPU.
+
+**Deploy the backend**
+  
+To get an API endpoint, you can follow the guide above. You will then need to get your API keys from the dashboard and add them to your .env file:
+
 ```bash
 .env file ->
 VIEWCOMFY_CLIENT_ID="<your client id>"
 VIEWCOMFY_CLIENT_SECRET="<your client secret>"
-
-npm run dev
 ```
 
 Finally, you can link your endpoint to your workflow inside your ViewComfy app:
 
 ![Screenshot 2025-03-17 175719](https://github.com/user-attachments/assets/25495f87-5639-456b-9266-9fcabb3995cc)
 
+Once you are done, the app will send a request to your viewcomfy deployment every time you click generate. 
+
+  **Deploy the Frontend**
+
+After deploying the backend, you also have the option to deploy the frontend on the hosting service of your choice. After this, your ComfyUI workflow will truly be a web app. 
+
+There is an example on how to do that using Modal in the hosting-examples/modal folder.
+
+The advantage of deploying in two parts is that you can run the heavy generation tasks on GPUs while running the frontend on a CPU. This is a lot more cost effective than running everything on a GPU! 
+
 ### Deploy the entire web app
 
-You can also deploy the whole web app and access it via its own unique URL by following the guide above. Note that unlike with the API option, the GPU powering the app will be running for as long as the URL is open in the browser, not just when generating. 
+You can also deploy the whole web app and access it via its own unique URL by following the guide above. Note that unlike with the API option, the GPU powering the app will be running for as long as the URL is open in the browser, not just when generating.
+
 
 ## Usage
 ### Form Editor
