@@ -176,7 +176,7 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
         </>;
     }
     return (
-        <Suspense>
+        <>
             <div className="flex flex-col h-full">
                 <Header title={"Playground"} />
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
@@ -283,7 +283,7 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                 </main>
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
             </div>
-        </Suspense>
+        </>
     )
 }
 
@@ -297,8 +297,10 @@ export default function PlaygroundPage() {
 
     // If user management is enabled, use the UserContentWrapper
     return (
-        <UserContentWrapper>
-            {(userId) => <PlaygroundPageContent userId={userId} />}
-        </UserContentWrapper>
+        <Suspense>
+            <UserContentWrapper>
+                {(userId) => <PlaygroundPageContent userId={userId} />}
+            </UserContentWrapper>
+        </Suspense>
     );
 }
