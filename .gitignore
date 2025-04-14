@@ -38,3 +38,6 @@ powershell_venv
 *.tsbuildinfo
 next-env.d.ts
 *.Identifier
+
+# clerk configuration (can include secrets)
+/.clerk/
