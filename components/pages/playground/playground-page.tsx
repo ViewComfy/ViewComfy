@@ -25,7 +25,8 @@ import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
 import dynamic from "next/dynamic";
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react'
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -47,7 +48,7 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
         if (viewMode) {
             const fetchViewComfy = async () => {
                 try {
-                    
+
                     const apiUrl = appId ? `/api/playground?appId=${appId}` : "/api/playground";
 
                     const response = await fetch(apiUrl);
@@ -175,7 +176,7 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
         </>;
     }
     return (
-        <>
+        <Suspense>
             <div className="flex flex-col h-full">
                 <Header title={"Playground"} />
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
@@ -282,7 +283,7 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                 </main>
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
             </div>
-        </>
+        </Suspense>
     )
 }
 
