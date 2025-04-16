@@ -1,4 +1,5 @@
 import { ResponseError } from "@/app/models/errors";
+import { Fragment } from "react";
 
 export class ApiErrorHandler {
 
@@ -8,7 +9,7 @@ export class ApiErrorHandler {
             let description: React.ReactNode = <></>;
             if (Array.isArray(error.errorDetails)) {
                 description = error.errorDetails.map((detail, index) => (
-                    (<> <p key={index}>{detail}</p> <br /> </> as React.ReactNode)
+                    (<Fragment key={index}> {detail} <br /> </Fragment> as React.ReactNode)
                 ));
             } else if (typeof error.errorDetails === 'string') {
                 description = error.errorDetails

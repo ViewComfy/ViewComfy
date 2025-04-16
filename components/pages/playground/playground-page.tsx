@@ -24,20 +24,33 @@ import { cn } from "@/lib/utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
+import dynamic from "next/dynamic";
+import { useSearchParams } from 'next/navigation';
 
 const apiErrorHandler = new ApiErrorHandler();
 
-function PlaygroundPageContent() {
+// Dynamically import the user content wrapper
+const UserContentWrapper = dynamic(
+    () => import("@/components/auth/user-content-wrapper"),
+    { ssr: false }
+);
+
+function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+    const searchParams = useSearchParams();
+    const appId = searchParams?.get("appId");
 
     useEffect(() => {
         if (viewMode) {
             const fetchViewComfy = async () => {
                 try {
-                    const response = await fetch("/api/playground");
+
+                    const apiUrl = appId ? `/api/playground?appId=${appId}` : "/api/playground";
+
+                    const response = await fetch(apiUrl);
 
                     if (!response.ok) {
                         const responseError: ResponseError =
@@ -69,7 +82,7 @@ function PlaygroundPageContent() {
             };
             fetchViewComfy();
         }
-    }, [viewMode, viewComfyStateDispatcher]);
+    }, [viewMode, viewComfyStateDispatcher, appId]);
 
     const { doPost, loading } = usePostPlayground();
 
@@ -107,6 +120,12 @@ function PlaygroundPageContent() {
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (data) => {
                 onSetResults(data);
+
+                // If user is logged in, could save their generation history
+                if (userId) {
+                    // Save to user history logic
+                    console.log(`Saving generation results for user ${userId}`);
+                }
             }, onError: (error) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -158,7 +177,7 @@ function PlaygroundPageContent() {
     return (
         <>
             <div className="flex flex-col h-full">
-                <Header title="Playground" />
+                <Header title={"Playground"} />
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
@@ -268,8 +287,17 @@ function PlaygroundPageContent() {
 }
 
 export default function PlaygroundPage() {
-    return (
+    const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
 
-        <PlaygroundPageContent />
+    // If user management is disabled, render without auth
+    if (!userManagement) {
+        return <PlaygroundPageContent userId={null} />;
+    }
+
+    // If user management is enabled, use the UserContentWrapper
+    return (
+        <UserContentWrapper>
+            {(userId) => <PlaygroundPageContent userId={userId} />}
+        </UserContentWrapper>
     );
 }

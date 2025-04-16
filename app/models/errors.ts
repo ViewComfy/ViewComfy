@@ -78,5 +78,6 @@ export enum ErrorTypes {
     COMFY = "ComfyError",
     UNKNOWN = "UnknownError",
     VIEW_MODE_MISSING_FILES = "ViewModeMissingFilesError",
+    VIEW_MODE_MISSING_APP_ID = "ViewModeMissingAppIdError",
 }
 

@@ -1,5 +1,6 @@
 import { IViewComfy } from "@/app/interfaces/comfy-input";
 import type { ResponseError } from "@/app/models/errors";
+import { useSearchParams } from "next/navigation";
 import { useState, useCallback } from "react"
 
 export interface IUsePostPlayground {
@@ -15,6 +16,8 @@ const viewcomfyCloud = process.env.VIEW_COMFY_CLOUD;
 
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
+    const searchParams = useSearchParams();
+    const appId = searchParams?.get("appId");
 
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
@@ -41,6 +44,10 @@ export const usePostPlayground = () => {
             formData.append('workflow', JSON.stringify(workflow));
             formData.append('viewComfy', JSON.stringify(viewComfyJSON));
             formData.append('viewcomfyEndpoint', viewcomfyEndpoint ?? "");
+
+            if (appId) {
+                formData.append('appId', appId);
+            }
 
             const response = await fetch(url, {
                 method: 'POST',

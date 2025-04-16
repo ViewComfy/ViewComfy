@@ -22,6 +22,8 @@ export interface IViewComfyWorkflow extends IViewComfyBase {
 }
 
 export interface IViewComfyJSON {
+    appTitle?: string;
+    appImg?: string;
     file_type?: string;
     file_version?: string;
     version?: string;
@@ -35,6 +37,8 @@ export interface IViewComfy {
 }
 
 export interface IViewComfyState {
+    appTitle?: string;
+    appImg?: string;
     viewComfys: IViewComfy[];
     viewComfyDraft: IViewComfyDraft | undefined;
     currentViewComfy: IViewComfy | undefined;
@@ -143,6 +147,8 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
                 return state;
             }
             return {
+                appTitle: action.payload.appTitle ?? "ViewComfy",
+                appImg: action.payload.appImg ?? undefined,
                 viewComfys: [...action.payload.workflows.map((workflow) => ({
                     viewComfyJSON: workflow.viewComfyJSON,
                     workflowApiJSON: workflow.workflowApiJSON,
