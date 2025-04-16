@@ -57,8 +57,8 @@ export const usePostPlayground = () => {
             if (!response.ok) {
                 if (response.status === 504) {
                     const error = new ResponseError({
-                        errorMsg: "Your workflow is taking too long to respond. The maximum allowed time is 5 minutes.",
-                        error: "ViewComfy Timeout",
+                        error: "Your workflow is taking too long to respond. The maximum allowed time is 5 minutes.",
+                        errorMsg: "ViewComfy Timeout",
                         errorType: ErrorTypes.VIEW_MODE_TIMEOUT
                     });
                     throw error;
