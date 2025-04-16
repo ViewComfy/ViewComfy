@@ -1,5 +1,5 @@
 import { IViewComfy } from "@/app/interfaces/comfy-input";
-import type { ResponseError } from "@/app/models/errors";
+import { ErrorTypes, ResponseError } from "@/app/models/errors";
 import { useSearchParams } from "next/navigation";
 import { useState, useCallback } from "react"
 
@@ -55,6 +55,14 @@ export const usePostPlayground = () => {
             });
             
             if (!response.ok) {
+                if (response.status === 504) {
+                    const error = new ResponseError({
+                        errorMsg: "Your workflow is taking too long to respond. The maximum allowed time is 5 minutes.",
+                        error: "ViewComfy Timeout",
+                        errorType: ErrorTypes.VIEW_MODE_TIMEOUT
+                    });
+                    throw error;
+                }
                 const responseError: ResponseError = await response.json();
                 throw responseError;
             }
