@@ -79,5 +79,6 @@ export enum ErrorTypes {
     UNKNOWN = "UnknownError",
     VIEW_MODE_MISSING_FILES = "ViewModeMissingFilesError",
     VIEW_MODE_MISSING_APP_ID = "ViewModeMissingAppIdError",
+    VIEW_MODE_TIMEOUT = "ViewModeTimeoutError",
 }
 
