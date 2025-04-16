@@ -32,7 +32,9 @@ export async function GET(request: NextRequest) {
             const err = new ErrorBase({
                 message: "App ID is required",
                 errorType: ErrorTypes.VIEW_MODE_MISSING_APP_ID,
-                errors: ["You're missing the App ID in the URL, make sure to copy it from the ViewComfy Dashboard"]
+                errors: ["You're missing the App ID in the URL, make sure to copy it from the ViewComfy Dashboard",
+                    "If you're a new user you need to get access to the ViewComfy Apps"
+                ]
             });
             const responseError = errorResponseFactory.getErrorResponse(err);
             return NextResponse.json(responseError, {
