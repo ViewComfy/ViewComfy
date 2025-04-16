@@ -125,6 +125,18 @@ You can also drop a view_comfy.json directly in the form editor to edit it witho
 
 Feel free to contribute with feedback, suggestions, issues or pull requests.
 
+### User Management
+
+ViewComfy supports user management through [Clerk](https://clerk.com/). You can enable it by setting the NEXT_PUBLIC_USER_MANAGEMENT="true" and it works best with the Playground mode (NEXT_PUBLIC_VIEW_MODE="true").
+
+```bash
+.env file ->
+NEXT_PUBLIC_USER_MANAGEMENT="true"
+NEXT_PUBLIC_VIEW_MODE="true"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-publishable-key"
+CLERK_SECRET_KEY="your-clerk-secret-key"
+```
+
 ## Docker
 
 Build docker image
