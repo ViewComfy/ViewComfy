@@ -26,7 +26,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
 import dynamic from "next/dynamic";
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react'
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -297,10 +296,8 @@ export default function PlaygroundPage() {
 
     // If user management is enabled, use the UserContentWrapper
     return (
-        <Suspense>
-            <UserContentWrapper>
-                {(userId) => <PlaygroundPageContent userId={userId} />}
-            </UserContentWrapper>
-        </Suspense>
+        <UserContentWrapper>
+            {(userId) => <PlaygroundPageContent userId={userId} />}
+        </UserContentWrapper>
     );
 }

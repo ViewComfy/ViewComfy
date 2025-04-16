@@ -1,7 +1,7 @@
 "use client"
 import { Sidebar, TabValue } from "@/components/sidebar";
 import { TopNav } from "@/components/top-nav"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import PlaygroundPage from "@/components/pages/playground/playground-page";
 import ViewComfyPage from "@/components/pages/view-comfy/view-comfy-page";
 import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
@@ -22,7 +22,7 @@ export default function AppContent() {
                     <div className="flex flex-1 overflow-x-auto overflow-y-hidden">
                         <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} deployWindow={deployWindow} onDeployWindow={setDeployWindow} />
                         <main className="flex-1 overflow-x-auto overflow-y-hidden">
-                            {currentTab === TabValue.Playground && <PlaygroundPage />}
+                            {currentTab === TabValue.Playground && <Suspense><PlaygroundPage /></Suspense>}
                             {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
                         </main>
                     </div>
