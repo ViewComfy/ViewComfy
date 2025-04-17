@@ -127,7 +127,7 @@ Feel free to contribute with feedback, suggestions, issues or pull requests.
 
 ### User Management
 
-ViewComfy supports user management through [Clerk](https://clerk.com/). You can enable it by setting the NEXT_PUBLIC_USER_MANAGEMENT="true" and it works best with the Playground mode (NEXT_PUBLIC_VIEW_MODE="true").
+ViewComfy supports user management through [Clerk](https://clerk.com/). You can enable it by setting the NEXT_PUBLIC_USER_MANAGEMENT="true". You should use it only when the Playground mode (NEXT_PUBLIC_VIEW_MODE="true").
 
 ```bash
 .env file ->
