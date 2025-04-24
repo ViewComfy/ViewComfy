@@ -26,6 +26,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
 import dynamic from "next/dynamic";
 import { useSearchParams } from 'next/navigation';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -231,24 +237,11 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                                                             >
                                                                 {(output.outputs.type.startsWith('image/')) && (
                                                                     <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                        <img
-                                                                            src={output.url}
-                                                                            alt={`${output.url}`}
-                                                                            className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105")}
-                                                                        />
+                                                                        <ImageDialog output={output} />
                                                                     </BlurFade>
                                                                 )}
                                                                 {(output.outputs.type.startsWith('video/')) && (
-                                                                    <video
-                                                                        key={output.url}
-                                                                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-md"
-                                                                        autoPlay
-                                                                        loop
-
-                                                                    >
-                                                                        <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
-                                                                        <source src={output.url} />
-                                                                    </video>
+                                                                    <VideoDialog output={output} />
                                                                 )}
                                                             </div>
                                                             {(output.outputs.type.startsWith('text/')) && (
@@ -300,4 +293,68 @@ export default function PlaygroundPage() {
             {(userId) => <PlaygroundPageContent userId={userId} />}
         </UserContentWrapper>
     );
+}
+
+export function ImageDialog({ output }: { output: { outputs: Blob, url: string } }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <img
+                    key={output.url}
+                    src={output.url}
+                    alt={`${output.url}`}
+                    className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                />
+            </DialogTrigger>
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+                <div className="inline-block">
+                    <img
+                        key={output.url}
+                        src={output.url}
+                        alt={`${output.url}`}
+                        className="max-h-[85vh] w-auto object-contain rounded-md"
+                    />
+                </div>
+                <DialogFooter className="bg-transparent">
+                    <Button className="w-full"
+                        onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = output.url;
+                            link.download = `${output.url.split('/').pop()}`;
+                            link.click();
+                        }}
+                    >Download</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+export function VideoDialog({ output }: { output: { outputs: Blob, url: string } }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <video
+                    key={output.url}
+                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-md hover:cursor-pointer"
+                    autoPlay
+                    loop
+
+                >
+                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                    <source src={output.url} />
+                </video>
+            </DialogTrigger>
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+                <video
+                    key={output.url}
+                    className="max-h-[85vh] w-auto object-contain rounded-md"
+                    controls
+                >
+                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                    <source src={output.url} />
+                </video>
+            </DialogContent>
+        </Dialog>
+    )
 }
