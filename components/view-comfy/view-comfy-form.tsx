@@ -316,7 +316,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                                 variant="secondary"
                                                 className="border-2 text-muted-foreground"
                                                 onClick={() => {
-                                                    form.setValue(`previewImages.${index}`, null);
+                                                    form.setValue(`previewImages.${index}`, "");
                                                     setInputValues(prev => {
                                                         const newValues = [...prev];
                                                         newValues[index] = "";
