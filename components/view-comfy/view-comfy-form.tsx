@@ -35,6 +35,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -60,99 +61,99 @@ export function ViewComfyForm(args: {
                 <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                     <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                         <div id="inputs-form" className="flex flex-col w-full h-full">
-                            <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}> 
+                            <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}>
                                 <div className="grid w-full items-start gap-4">
-                                {editMode && (
-                                    <div className="grid gap-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="title"
-                                            render={({ field }) => (
-                                                <FormItem key="title" className="ml-0.5 mr-0.5">
-                                                    <FormLabel>Title</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="The name of your workflow" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="description"
-                                            render={({ field }) => (
-                                                <FormItem key="description" className="ml-0.5 mr-0.5">
-                                                    <FormLabel>Description</FormLabel>
-                                                    <FormControl>
-                                                        <Textarea placeholder="The description of your workflow" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="viewcomfyEndpoint"
-                                            render={({ field }) => (
-                                                <FormItem key="viewcomfyEndpoint" className="ml-0.5 mr-0.5">
-                                                    <FormLabel>
-                                                        ViewComfy Endpoint (optional)
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    type="button"
-                                                                    size="icon"
-                                                                    variant="ghost"
-                                                                    className="text-muted-foreground"
-                                                                    onClick={() => { }}
-                                                                >
-                                                                    <Info className="size-5" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent className="max-w-[300px]">
-                                                                <p>
-                                                                    You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the right hand side menu.
-                                                                    <br /><br />
-                                                                    If you don&apos;t have an endpoint, please leave this field empty.
-                                                                </p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="ViewComfy endpoint" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={form.control}
-                                            name="textOutputEnabled"
-                                            render={({ field }) => (
-                                                <FormItem key="textOutputEnabled" className="">
-                                                    <FormControl>
-                                                        <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
-                                                            (field.value) ? "mb-[-5px]" : "pb-2"
-                                                        )}>
-                                                            <FormLabel>Enable text output</FormLabel>
-                                                            <Checkbox
-                                                                checked={field.value}
-                                                                onCheckedChange={field.onChange}
-                                                            />
-                                                        </div>
-                                                    </FormControl>
-                                                    {(field.value) && (
-                                                        <FormDescription className="pb-2">
-                                                            Text output is in beta and can lead to unexpected text being rendered
-                                                        </FormDescription>
-                                                    )}
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )}
-                               
+                                    {editMode && (
+                                        <div className="grid gap-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="title"
+                                                render={({ field }) => (
+                                                    <FormItem key="title" className="ml-0.5 mr-0.5">
+                                                        <FormLabel>Title</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="The name of your workflow" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="description"
+                                                render={({ field }) => (
+                                                    <FormItem key="description" className="ml-0.5 mr-0.5">
+                                                        <FormLabel>Description</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="The description of your workflow" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="viewcomfyEndpoint"
+                                                render={({ field }) => (
+                                                    <FormItem key="viewcomfyEndpoint" className="ml-0.5 mr-0.5">
+                                                        <FormLabel>
+                                                            ViewComfy Endpoint (optional)
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        type="button"
+                                                                        size="icon"
+                                                                        variant="ghost"
+                                                                        className="text-muted-foreground"
+                                                                        onClick={() => { }}
+                                                                    >
+                                                                        <Info className="size-5" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent className="max-w-[300px]">
+                                                                    <p>
+                                                                        You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the left hand side menu.
+                                                                        <br /><br />
+                                                                        If you don&apos;t have an endpoint, please leave this field empty.
+                                                                    </p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="ViewComfy endpoint" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="textOutputEnabled"
+                                                render={({ field }) => (
+                                                    <FormItem key="textOutputEnabled" className="">
+                                                        <FormControl>
+                                                            <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
+                                                                (field.value) ? "mb-[-5px]" : "pb-2"
+                                                            )}>
+                                                                <FormLabel>Enable text output</FormLabel>
+                                                                <Checkbox
+                                                                    checked={field.value}
+                                                                    onCheckedChange={field.onChange}
+                                                                />
+                                                            </div>
+                                                        </FormControl>
+                                                        {(field.value) && (
+                                                            <FormDescription className="pb-2">
+                                                                Text output is in beta and can lead to unexpected text being rendered
+                                                            </FormDescription>
+                                                        )}
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+
                                     {!editMode && (
                                         <div id="workflow-title-description">
                                             <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
@@ -241,43 +242,49 @@ export function ViewComfyForm(args: {
 }
 
 function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
+    const [inputValues, setInputValues] = useState<string[]>(["", "", ""]);
+    const [urlErrors, setUrlErrors] = useState<string[]>(["", "", ""]);
 
-    const saveImage = async (file: File | null, onChange: (url: string) => void): Promise<void> => {
-        if (file) {
-            try {
-                const formData = new FormData()
-                formData.append('file', file)
-                const response = await fetch('/api/playground/preview-images', {
-                    method: 'POST',
-                    body: formData,
-                })
-                if (!response.ok) {
-                    throw new Error('Upload failed')
-                }
-                const data = await response.json()
-                onChange(data.url)
-            } catch (error) {
-                console.error('Error uploading file:', error)
-            }
-        }
-    }
+    const handleImageLoad = (index: number, url: string) => {
+        form.setValue(`previewImages.${index}`, url);
+    };
 
-    const deleteImage = async (imageUrl: string) => {
+    const handleInputChange = (index: number, value: string) => {
+        const newValues = [...inputValues];
+        newValues[index] = value;
+        setInputValues(newValues);
+
+        // Clear error when user starts typing
+        const newErrors = [...urlErrors];
+        newErrors[index] = "";
+        setUrlErrors(newErrors);
+    };
+
+    const handleBlur = (index: number) => {
         try {
-            const response = await fetch('/api/playground/preview-images', {
-                method: 'DELETE',
-                body: JSON.stringify({ url: imageUrl }), // Send the image URL or identifier
-            });
-            if (!response.ok) {
-                throw new Error('Image deletion failed');
+            // Only update form value if URL is valid or empty
+            if (!inputValues[index]) {
+                form.setValue(`previewImages.${index}`, "");
+                return;
             }
-        } catch (error) {
-            console.error('Error deleting image:', error);
+
+            new URL(inputValues[index]);
+            form.setValue(`previewImages.${index}`, inputValues[index]);
+
+            // Clear error on valid URL
+            const newErrors = [...urlErrors];
+            newErrors[index] = "";
+            setUrlErrors(newErrors);
+        } catch (e) {
+            // Invalid URL, set error message but keep the input value
+            const newErrors = [...urlErrors];
+            newErrors[index] = "Please enter a valid URL";
+            setUrlErrors(newErrors);
         }
     };
 
     return (
-        <div className="grid gap-4">
+        <div className="grid gap-4 pl-1 pr-1">
             {[0, 1, 2].map((index) => (
                 <FormField
                     key={index}
@@ -295,31 +302,49 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                                 alt={`Preview ${index + 1}`}
                                                 className="w-full object-contain rounded-md max-h-[300px]"
                                                 onError={() => {
-                                                    field.onChange("");
+                                                    form.setValue(`previewImages.${index}`, "");
+                                                    setInputValues(prev => {
+                                                        const newValues = [...prev];
+                                                        newValues[index] = "";
+                                                        return newValues;
+                                                    });
                                                 }}
+                                                onLoad={() => handleImageLoad(index, field.value)}
                                             />
                                             <Button
                                                 variant="secondary"
                                                 className="border-2 text-muted-foreground"
                                                 onClick={() => {
-                                                    deleteImage(field.value);
-                                                    field.onChange("")
+                                                    form.setValue(`previewImages.${index}`, "");
+                                                    setInputValues(prev => {
+                                                        const newValues = [...prev];
+                                                        newValues[index] = "";
+                                                        return newValues;
+                                                    });
                                                 }}
                                             >
                                                 <Trash2 className="size-5 mr-2" /> Remove image
                                             </Button>
                                         </div>
                                     ) : (
-                                        <Dropzone
-                                            onChange={(file) => saveImage(file, field.onChange)}
-                                            fileExtensions={['png', 'jpg', 'jpeg']}
-                                            className="form-dropzone"
-                                            inputPlaceholder="Drop an image"
-                                        />
+                                        <div className="space-y-1">
+                                            <Input
+                                                placeholder={"https://your-image.com/preview.jpg"}
+                                                value={inputValues[index]}
+                                                onChange={(e) => handleInputChange(index, e.target.value)}
+                                                onBlur={() => handleBlur(index)}
+                                                type="text"
+                                                className={urlErrors[index] ? "border-red-500" : ""}
+                                            />
+                                            {urlErrors[index] && (
+                                                <p className="text-sm font-medium text-red-500">
+                                                    {urlErrors[index]}
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </FormControl>
-                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -439,6 +464,12 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
     if (input.valueType === "seed" || input.valueType === "noise_seed" || input.valueType === "rand_seed") {
         return (
             <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+        )
+    }
+
+    if (input.valueType === "select") {
+        return (
+            <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
     }
 
@@ -717,6 +748,41 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
                     {input.helpText}
                 </FormDescription>
             )}
+        </FormItem>
+    )
+}
+
+function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+    const { input, field, editMode, remove, index } = args;
+    return (
+        <FormItem key={input.id}>
+            <FormLabel className={FORM_STYLE.label}>{input.title}
+                {editMode && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={remove ? () => remove(index) : undefined}
+                    >
+                        <Trash2 className="size-5" />
+                    </Button>
+                )}
+            </FormLabel>
+            <FormControl>
+                <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder={input.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {input.options?.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </FormControl>
         </FormItem>
     )
 }

@@ -8,9 +8,10 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed";
+    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select";
     validations: { required: boolean };
     key: string;
+    options?: { label: string, value: string }[];
 }
 
 export interface IMultiValueInput {
