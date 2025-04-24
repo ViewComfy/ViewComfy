@@ -275,6 +275,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];
@@ -752,6 +753,7 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
     )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     return (
