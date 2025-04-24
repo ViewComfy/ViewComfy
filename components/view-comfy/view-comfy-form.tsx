@@ -284,7 +284,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
     };
 
     return (
-        <div className="grid gap-4 pl-1 pr-1">
+        <div className="grid gap-4 p-1">
             {[0, 1, 2].map((index) => (
                 <FormField
                     key={index}
@@ -315,7 +315,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                                 variant="secondary"
                                                 className="border-2 text-muted-foreground"
                                                 onClick={() => {
-                                                    form.setValue(`previewImages.${index}`, "");
+                                                    form.setValue(`previewImages.${index}`, null);
                                                     setInputValues(prev => {
                                                         const newValues = [...prev];
                                                         newValues[index] = "";

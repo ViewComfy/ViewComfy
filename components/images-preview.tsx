@@ -10,21 +10,33 @@ export function PreviewOutputsImageGallery({
 }: {
     viewComfyJSON: IViewComfyWorkflow
 }) {
+    let images = [];
+    let image1Path = null;
+    let image2Path = null;
+    let image3Path = null;
 
-    const [image1, setImage1] = useState<string | null>(
-        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[0]) ? viewComfyJSON.previewImages[0] : null
-    );
-    const [image2, setImage2] = useState<string | null>(
-        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[1]) ? viewComfyJSON.previewImages[1] : null
-    );
-    const [image3, setImage3] = useState<string | null>(
-        (viewComfyJSON.previewImages && viewComfyJSON.previewImages[2]) ? viewComfyJSON.previewImages[2] : null
-    );
+    if (viewComfyJSON.previewImages) {
+        images = viewComfyJSON.previewImages.filter((image) => !!image);
+        if (images.length === 1) {
+            image1Path = images[0];
+        } else if (images.length === 2) {
+            image1Path = images[0];
+            image3Path = images[1];
+        } else if (images.length === 3) {
+            image1Path = images[0];
+            image2Path = images[1];
+            image3Path = images[2];
+        }
+    }
+
+    const [image1, setImage1] = useState<string | null>(image1Path);
+    const [image2, setImage2] = useState<string | null>(image2Path);
+    const [image3, setImage3] = useState<string | null>(image3Path);
 
     const first = {
         initial: {
-            x: 20,
-            rotate: -5,
+            x: images.length === 1 ? 0 : 20,
+            rotate: images.length === 1 ? 0 : -5,
         },
         hover: {
             x: 0,
@@ -48,7 +60,7 @@ export function PreviewOutputsImageGallery({
                 animate="animate"
                 whileHover="hover"
                 className="flex w-full min-h-[6rem] dark:bg-dot-white/[0.2] bg-dot-black/[0.2] flex-row space-x-2 items-center justify-center p-4"
-            >   
+            >
                 {(image1) && (
                     <motion.div
                         variants={first}
@@ -94,13 +106,13 @@ export function PreviewOutputsImageGallery({
                     </motion.div>
                 )}
             </motion.div>
-        {!(image1 ?? image2 ?? image3) && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full text-center">
-                <span className="text-lg">
-                    Click the Generate button to start.
-                </span>
-            </div>
-        )}
+            {!(image1 ?? image2 ?? image3) && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full text-center">
+                    <span className="text-lg">
+                        Click the Generate button to start.
+                    </span>
+                </div>
+            )}
         </>
     );
 };
