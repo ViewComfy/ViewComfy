@@ -12,10 +12,10 @@ export class SettingsService {
     }
 
     public getViewComfyCloudApiClientId(): string {
-        return process.env.VIEWCOMFY_CLOUD_API_CLIENT_ID || "";
+        return process.env.VIEWCOMFY_CLIENT_ID || "";
     }
 
     public getViewComfyCloudApiClientSecret(): string {
-        return process.env.VIEWCOMFY_CLOUD_API_CLIENT_SECRET || "";
+        return process.env.VIEWCOMFY_CLIENT_SECRET || "";
     }
 }
