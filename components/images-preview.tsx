@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, Variants } from "framer-motion";
 import type { IViewComfyWorkflow } from "@/app/providers/view-comfy-provider";
 
 export function PreviewOutputsImageGallery({
@@ -11,48 +11,52 @@ export function PreviewOutputsImageGallery({
     viewComfyJSON: IViewComfyWorkflow
 }) {
     let images = [];
-    let image1Path = null;
-    let image2Path = null;
-    let image3Path = null;
+    const [image1, setImage1] = useState<string | null>(null);
+    const [image2, setImage2] = useState<string | null>(null);
+    const [image3, setImage3] = useState<string | null>(null);
+    const [first, setFirst] = useState<Variants | undefined>({});
+    const [second, setSecond] = useState<Variants | undefined>({});
 
-    if (viewComfyJSON.previewImages) {
-        images = viewComfyJSON.previewImages.filter((image) => !!image);
-        if (images.length === 1) {
-            image1Path = images[0];
-        } else if (images.length === 2) {
-            image1Path = images[0];
-            image3Path = images[1];
-        } else if (images.length === 3) {
-            image1Path = images[0];
-            image2Path = images[1];
-            image3Path = images[2];
+    useEffect(() => {
+        if (viewComfyJSON.previewImages) {
+            images = viewComfyJSON.previewImages.filter((image) => !!image);
+            if (images.length === 1) {
+                setImage1(images[0]);
+                setImage2(null);
+                setImage3(null);
+            } else if (images.length === 2) {
+                setImage1(images[0]);
+                setImage2(null);
+                setImage3(images[1]);
+            } else if (images.length === 3) {
+                setImage1(images[0]);
+                setImage2(images[1]);
+                setImage3(images[2]);
+            }
         }
-    }
 
-    const [image1, setImage1] = useState<string | null>(image1Path);
-    const [image2, setImage2] = useState<string | null>(image2Path);
-    const [image3, setImage3] = useState<string | null>(image3Path);
+        setFirst({
+            initial: {
+                x: images.length === 1 ? 0 : 20,
+                rotate: images.length === 1 ? 0 : -5,
+            },
+            hover: {
+                x: 0,
+                rotate: 0,
+            },
+        });
+        setSecond({
+            initial: {
+                x: -20,
+                rotate: 5,
+            },
+            hover: {
+                x: 0,
+                rotate: 0,
+            },
+        });
+    }, [viewComfyJSON]);
 
-    const first = {
-        initial: {
-            x: images.length === 1 ? 0 : 20,
-            rotate: images.length === 1 ? 0 : -5,
-        },
-        hover: {
-            x: 0,
-            rotate: 0,
-        },
-    };
-    const second = {
-        initial: {
-            x: -20,
-            rotate: 5,
-        },
-        hover: {
-            x: 0,
-            rotate: 0,
-        },
-    };
     return (
         <>
             <motion.div
