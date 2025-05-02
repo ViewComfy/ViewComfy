@@ -108,7 +108,7 @@ export function TopNav() {
 
 function ViewComfyIconButton({ appTitle, appImg }: { appTitle?: string, appImg?: string }) {
     return (
-        <Button variant="outline" size="icon" aria-label="Home" className="p-0 overflow-hidden" style={{ width: 'auto', maxWidth: '120px', height: '34px' }}>
+        <Button variant="outline" size="icon" aria-label="Home" className="p-0 overflow-hidden" style={{ width: 'auto', maxWidth: '120px', height: appImg ? '48px' : '34px' }}>
             {!appImg ? (
                 <Link href="https://viewcomfy.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full h-full">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" version="1.1" style={{ width: '34px', height: '34px' }}>
