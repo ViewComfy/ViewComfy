@@ -10,9 +10,7 @@ import Image from "next/image";
 export function TopNav() {
     const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
     const { viewComfyState } = useViewComfy();
-    const [appTitle, setAppTitle] = useState(viewComfyState.appTitle);
-    const [appImg, setAppImg] = useState(viewComfyState.appImg);
-    const [isLoading, setIsLoading] = useState(true);
+    const [appTitle, setAppTitle] = useState(viewComfyState.appTitle || "ViewComfy");
 
     useEffect(() => {
         if (viewComfyState.appTitle) {
@@ -20,29 +18,11 @@ export function TopNav() {
         }
     }, [viewComfyState.appTitle]);
 
-    useEffect(() => {
-        if (viewComfyState.viewComfys.length === 0 && !userManagementEnabled) {
-            setAppTitle("ViewComfy");
-        }
-    }, [viewComfyState.viewComfys, userManagementEnabled]);
-
-    useEffect(() => {
-        if (viewComfyState.appImg) {
-            setAppImg(viewComfyState.appImg);
-        }
-    }, [viewComfyState.appImg]);
-
-    useEffect(() => {
-        if (appTitle) {
-            setIsLoading(false);
-        }
-    }, [appTitle]);
-
     return (
         <nav className="flex items-center justify-between px-4 py-2 bg-background border-b gap-2">
 
-            {!isLoading ? (<div className="flex items-center">
-                <ViewComfyIconButton appTitle={appTitle} appImg={appImg} />
+            {!false ? (<div className="flex items-center">
+                <ViewComfyIconButton appTitle={appTitle} appImg={viewComfyState.appImg} />
                 <span className="ml-2 text-lg font-semibold">{appTitle}</span>
             </div>) : (
                 <div className="flex items-center gap-2">

@@ -12,6 +12,7 @@ import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, 
 import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
+import { Input } from '@/components/ui/input';
 // import { BentoGridThirdDemo } from '@/components/images-preview';
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -28,12 +29,39 @@ export default function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
-    const [viewJSON, setViewJSON] = useState<boolean>(false);
+    const [viewJSON] = useState<boolean>(false);
 
-    // add back this functionality with a button at one point
-    if (false) {
-        setViewJSON(false);
+    const [appTitle, setAppTitle] = useState<string>(viewComfyState.appTitle || "");
+    const [appImg, setAppImg] = useState<string>(viewComfyState.appImg || "");
+    const [appImgError, setAppImgError] = useState<string | undefined>(undefined);
+
+    const handleOnBlur = (inputBlur: "appTitle" | "appImg") => {
+        if (inputBlur === "appTitle") {
+            viewComfyStateDispatcher({ type: ActionType.SET_APP_TITLE, payload: appTitle });
+        } else if (inputBlur === "appImg") {
+            setAppImgError(undefined);
+            if (!appImg) {
+                viewComfyStateDispatcher({ type: ActionType.SET_APP_IMG, payload: "" });
+            } else {
+                try {
+                    new URL(appImg);
+                    viewComfyStateDispatcher({ type: ActionType.SET_APP_IMG, payload: appImg });
+                } catch (error) {
+                    console.error('Error parsing image URL:', error);
+                    setAppImgError("Invalid image URL");
+                }
+            }
+        }
     }
+
+    useEffect(() => {
+        setAppTitle(viewComfyState.appTitle || "");
+    }, [viewComfyState.appTitle]);
+
+    useEffect(() => {
+        setAppImg(viewComfyState.appImg || "");
+    }, [viewComfyState.appImg]);
+
 
     useEffect(() => {
         if (file) {
@@ -168,6 +196,28 @@ export default function ViewComfyPage() {
                     <>
                         {viewComfyState.viewComfyDraft?.viewComfyJSON && (
                             <div className="flex flex-col w-full h-full overflow-hidden">
+                                {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
+                                    <div className="w-full flex flex-wrap items-center gap-4 mb-4 pl-1">
+                                        <div className="flex">
+                                            <div className="w-full flex gap-4">
+                                                <div className="grid w-1/2 items-center gap-1.5">
+                                                    <Label htmlFor="appTitle">App Title</Label>
+                                                    <Input id="appTitle" placeholder="ViewComfy" value={appTitle} onBlur={() => handleOnBlur("appTitle")} onChange={(e) => setAppTitle(e.target.value)} />
+                                                </div>
+
+                                                <div className="grid w-full items-center gap-1.5 pr-4">
+                                                    <Label htmlFor="appImg">App Image URL</Label>
+                                                    <Input id="appImg" placeholder="https://example.com/image.png" value={appImg} onBlur={() => handleOnBlur("appImg")} onChange={(e) => setAppImg(e.target.value)} />
+                                                </div>
+                                            </div>
+                                            {appImgError && (
+                                                <p className="text-sm font-medium text-red-500 mt-1">
+                                                    {appImgError}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="w-full flex flex-wrap items-center gap-4 mb-4">
                                     {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
                                         <div className="flex">

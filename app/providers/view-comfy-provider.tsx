@@ -52,7 +52,9 @@ export enum ActionType {
     SET_VIEW_COMFY_DRAFT = "SET_VIEW_COMFY_DRAFT",
     UPDATE_CURRENT_VIEW_COMFY = "UPDATE_CURRENT_VIEW_COMFY",
     RESET_CURRENT_AND_DRAFT_VIEW_COMFY = "RESET_CURRENT_AND_DRAFT_VIEW_COMFY",
-    INIT_VIEW_COMFY = "INIT_VIEW_COMFY"
+    INIT_VIEW_COMFY = "INIT_VIEW_COMFY",
+    SET_APP_TITLE = "SET_APP_TITLE",
+    SET_APP_IMG = "SET_APP_IMG"
 }
 
 // Update the Action type to use the enum
@@ -64,9 +66,11 @@ export type Action =
     | { type: ActionType.UPDATE_CURRENT_VIEW_COMFY; payload: IViewComfy }
     | { type: ActionType.RESET_CURRENT_AND_DRAFT_VIEW_COMFY; payload: undefined }
     | { type: ActionType.INIT_VIEW_COMFY; payload: IViewComfyJSON }
+    | { type: ActionType.SET_APP_TITLE; payload: string }
+    | { type: ActionType.SET_APP_IMG; payload: string }
 
 function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfyState {
-
+    console.log({ action });
     switch (action.type) {
         case ActionType.ADD_VIEW_COMFY: {
             const data = {
@@ -87,6 +91,10 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
             return data;
         }
         case ActionType.SET_VIEW_COMFY_DRAFT:
+
+            if (action.payload) {
+                action.payload.viewComfyJSON.viewcomfyEndpoint = ""
+            }
             return {
                 ...state,
                 viewComfyDraft: action.payload ? { ...action.payload } : undefined
@@ -148,7 +156,7 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
             }
             return {
                 appTitle: action.payload.appTitle ?? "ViewComfy",
-                appImg: action.payload.appImg ?? undefined,
+                appImg: action.payload.appImg ?? "",
                 viewComfys: [...action.payload.workflows.map((workflow) => ({
                     viewComfyJSON: workflow.viewComfyJSON,
                     workflowApiJSON: workflow.workflowApiJSON,
@@ -157,6 +165,16 @@ function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfySta
                 viewComfyDraft: { viewComfyJSON: action.payload.workflows[0].viewComfyJSON, workflowApiJSON: action.payload.workflows[0].workflowApiJSON },
             };
         }
+        case ActionType.SET_APP_TITLE:
+            return {
+                ...state,
+                appTitle: action.payload || "ViewComfy"
+            };
+        case ActionType.SET_APP_IMG:
+            return {
+                ...state,
+                appImg: action.payload
+            };
         default:
             return state;
     }
