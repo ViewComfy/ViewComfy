@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import 'react18-json-view/src/style.css'
-import { useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
+import { IViewComfyJSON, useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import { useForm, useFieldArray } from 'react-hook-form';
 import { ViewComfyForm } from '@/components/view-comfy/view-comfy-form';
 import { ToastAction } from "@/components/ui/toast"
@@ -84,16 +84,19 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
         if (downloadJson) {
             const workflows = viewComfyState.viewComfys.map((item) => {
                 return {
-                    viewComfyJSON: item.viewComfyJSON,
-                    workflowApiJSON: item.workflowApiJSON
+                    viewComfyJSON: { ...item.viewComfyJSON },
+                    workflowApiJSON: { ...item.workflowApiJSON }
                 }
             });
-            const viewComfyJSON = {
+
+            const viewComfyJSON: IViewComfyJSON = {
                 "file_type": "view_comfy",
                 "file_version": "1.0.0",
                 "version": "0.0.1",
+                "appTitle": viewComfyState.appTitle || "",
+                "appImg": viewComfyState.appImg || "",
                 workflows
-            }
+            };
 
             const jsonString = JSON.stringify(viewComfyJSON, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
@@ -108,18 +111,18 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
             document.body.removeChild(a);
             setDownloadJson(false);
         }
-    }, [downloadJson, viewComfyState.viewComfys]);
+    }, [downloadJson, viewComfyState.viewComfys, viewComfyState.appTitle, viewComfyState.appImg]);
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <ViewComfyForm 
-                form={form} 
-                onSubmit={submitOnCLick} 
-                inputFieldArray={inputFieldArray} 
-                advancedFieldArray={advancedFieldArray} 
+            <ViewComfyForm
+                form={form}
+                onSubmit={submitOnCLick}
+                inputFieldArray={inputFieldArray}
+                advancedFieldArray={advancedFieldArray}
                 editMode={true}
                 downloadViewComfyJSON={downloadViewComfyJSON}
-                >
+            >
             </ViewComfyForm>
         </div>
     )
