@@ -10,7 +10,6 @@ export function PreviewOutputsImageGallery({
 }: {
     viewComfyJSON: IViewComfyWorkflow
 }) {
-    let images = [];
     const [image1, setImage1] = useState<string | null>(null);
     const [image2, setImage2] = useState<string | null>(null);
     const [image3, setImage3] = useState<string | null>(null);
@@ -18,6 +17,7 @@ export function PreviewOutputsImageGallery({
     const [second, setSecond] = useState<Variants | undefined>({});
 
     useEffect(() => {
+        let images = [];
         if (viewComfyJSON.previewImages) {
             images = viewComfyJSON.previewImages.filter((image) => !!image);
             if (images.length === 1) {
