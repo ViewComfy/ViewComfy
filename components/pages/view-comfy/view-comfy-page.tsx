@@ -198,7 +198,7 @@ export default function ViewComfyPage() {
                             <div className="flex flex-col w-full h-full overflow-hidden">
                                 {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
                                     <div className="w-full flex flex-wrap items-center gap-4 mb-4 pl-1">
-                                        <div className="flex">
+                                        <div className="w-1/2 flex">
                                             <div className="w-full flex gap-4">
                                                 <div className="grid w-1/2 items-center gap-1.5">
                                                     <Label htmlFor="appTitle">App Title</Label>
