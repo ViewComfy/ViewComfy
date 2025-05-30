@@ -29,10 +29,10 @@ export const usePostPlayground = () => {
 
             const formData = new FormData();
 
-            const viewComfyJSON: IViewComfy = { 
-                    inputs:[],
-                    textOutputEnabled: viewComfy.textOutputEnabled ?? false
-                };
+            const viewComfyJSON: IViewComfy = {
+                inputs: [],
+                textOutputEnabled: viewComfy.textOutputEnabled ?? false
+            };
             for (const { key, value } of viewComfy.inputs) {
                 if (value instanceof File) {
                     formData.append(key, value);
@@ -53,7 +53,7 @@ export const usePostPlayground = () => {
                 method: 'POST',
                 body: formData,
             });
-            
+
             if (!response.ok) {
                 if (response.status === 504) {
                     const error = new ResponseError({
@@ -96,12 +96,12 @@ export const usePostPlayground = () => {
                         output.push(blob);
                     }
                 }
-
-                if (output.length > 0) {
-                    onSuccess(output);
-                }
             }
-            
+
+            if (output.length > 0) {
+                onSuccess(output);
+            }
+
         } catch (error) {
             onError(error);
         }
