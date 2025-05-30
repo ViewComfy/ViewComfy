@@ -8,7 +8,7 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select";
+    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select" | "audio";
     validations: { required: boolean };
     key: string;
     options?: { label: string, value: string }[];
@@ -83,6 +83,15 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                     basicInputs.push({
                         title: getTitleFromValue(value.class_type, value),
                         inputs: inputs,
+                        key: `${key}-${value.class_type}`
+                    });
+                case "LoadAudio":
+                    const audioInput = inputs[0];
+                    audioInput.valueType = "audio";
+                    audioInput.value = null;
+                    basicInputs.push({
+                        title: getTitleFromValue(value.class_type, value),
+                        inputs: [audioInput],
                         key: `${key}-${value.class_type}`
                     });
                     break;

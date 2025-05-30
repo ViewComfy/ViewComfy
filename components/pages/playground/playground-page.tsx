@@ -241,7 +241,14 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                                                                     </BlurFade>
                                                                 )}
                                                                 {(output.outputs.type.startsWith('video/')) && (
-                                                                    <VideoDialog output={output} />
+                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                        <VideoDialog output={output} />
+                                                                    </BlurFade>
+                                                                )}
+                                                                {(output.outputs.type.startsWith('audio/')) && (
+                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                        <AudioDialog output={output} />
+                                                                    </BlurFade>
                                                                 )}
                                                             </div>
                                                             {(output.outputs.type.startsWith('text/')) && (
@@ -306,7 +313,7 @@ export function ImageDialog({ output }: { output: { outputs: Blob, url: string }
                     className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                 />
             </DialogTrigger>
-            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div className="inline-block">
                     <img
                         key={output.url}
@@ -345,7 +352,7 @@ export function VideoDialog({ output }: { output: { outputs: Blob, url: string }
                     <source src={output.url} />
                 </video>
             </DialogTrigger>
-            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <video
                     key={output.url}
                     className="max-h-[85vh] w-auto object-contain rounded-md"
@@ -354,6 +361,19 @@ export function VideoDialog({ output }: { output: { outputs: Blob, url: string }
                     <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
                     <source src={output.url} />
                 </video>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+export function AudioDialog({ output }: { output: { outputs: Blob, url: string } }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <audio src={output.url} controls />
+            </DialogTrigger>
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+                <audio src={output.url} controls />
             </DialogContent>
         </Dialog>
     )

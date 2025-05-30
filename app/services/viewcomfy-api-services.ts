@@ -1,4 +1,5 @@
 import { ComfyWorkflowError } from "../models/errors";
+import { fileTypeFromBlob } from "file-type";
 
 function buildFormData(data: {
     logs: boolean;
@@ -105,7 +106,11 @@ export const infer = async ({
                 debugger;
                 for (const blob of results.outputs) {
                     try {
-                        const mimeType = blob.type;
+                        let mimeType = blob.type;
+                        const libraryInfo = await fileTypeFromBlob(blob);
+                        if (libraryInfo) {
+                            mimeType = libraryInfo.mime;
+                        }
                         const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
                         controller.enqueue(new TextEncoder().encode(mimeInfo));
                         controller.enqueue(new Uint8Array(await blob.arrayBuffer()));

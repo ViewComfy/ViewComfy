@@ -456,7 +456,7 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
         )
     }
 
-    if (input.valueType === "video" || input.valueType === "image") {
+    if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
             <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
         )
@@ -565,6 +565,8 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
         fileExtensions = ['png', 'jpg', 'jpeg']
     } else if (input.valueType === "video") {
         fileExtensions = ['mp4', 'avi', 'webm', 'mkv', 'gif']
+    } else if (input.valueType === "audio") {
+        fileExtensions = ['mp3', 'wav', 'm4b', 'm4p', 'wma', 'webm']
     }
 
     useEffect(() => {
@@ -633,6 +635,9 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                                     <track default kind="captions" srcLang="en" src="" />
                                     <source src={media.src} />
                                 </video>
+                            )}
+                            {(input.valueType === "audio") && (
+                                <audio src={media.src} controls />
                             )}
                         </div>
                         <Button
