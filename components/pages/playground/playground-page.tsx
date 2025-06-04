@@ -344,9 +344,7 @@ export function VideoDialog({ output }: { output: { outputs: Blob, url: string }
                 <video
                     key={output.url}
                     className="max-w-full max-h-full w-auto h-auto object-contain rounded-md hover:cursor-pointer"
-                    autoPlay
-                    loop
-
+                    controls
                 >
                     <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
                     <source src={output.url} />

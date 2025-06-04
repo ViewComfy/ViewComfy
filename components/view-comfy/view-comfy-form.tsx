@@ -628,9 +628,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                             {(input.valueType === "video") && (
                                 <video
                                     className="max-w-full max-h-full object-contain"
-                                    autoPlay
-                                    loop
-
+                                    controls
                                 >
                                     <track default kind="captions" srcLang="en" src="" />
                                     <source src={media.src} />
