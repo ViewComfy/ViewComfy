@@ -20,7 +20,7 @@ export default function Login() {
             </div>
             <div className="hidden lg:block lg:relative lg:overflow-hidden">
                 <Image
-                    src="/viewcomfy_logo.svg"
+                    src="/view_comfy_logo.svg"
                     alt="ViewComfy Logo"
                     width={1920}
                     height={1080}
