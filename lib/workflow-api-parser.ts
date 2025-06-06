@@ -85,6 +85,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                         inputs: inputs,
                         key: `${key}-${value.class_type}`
                     });
+                    break;
                 case "LoadAudio":
                     const audioInput = inputs[0];
                     audioInput.valueType = "audio";
