@@ -83,6 +83,8 @@ You can also deploy the whole web app and access it via its own unique URL by fo
 
 You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
 
+For more details on how to use the editor with advanced Comfy workflows, you can refer to [this](https://youtu.be/70h0FUohMlE) guide. 
+
 ### Playground
 
 The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
