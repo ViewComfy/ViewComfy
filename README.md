@@ -40,20 +40,21 @@ For a  more detailed guide on how to set up ViewMode and share your app with ngr
 
 ## Deployment
 
-There are two different ways you can run your ViewComfy apps on cloud GPUs. 
+You can deploy ViewComfy apps on the service of your choice, but by far the easiest way to do it is by using [ViewComfy Cloud](https://app.viewcomfy.com/). 
 
-[![Guide](https://img.shields.io/badge/Youtube-Guide-FF0000)](https://youtu.be/pIODXFU9sHw)
-[![Deploy](https://img.shields.io/badge/ViewComfy-Deploy-4D7D85)](https://app.viewcomfy.com/)
+ViewComfy Cloud is designed to make the whole deployment process feel like a breeze. It's as simple as uploading your workflow; everything else is taken care of for you - no need to worry about setting up volumes, docker images, or anything like that. 
 
-### Deploy the frontend and backend separately.
+### Set up the Comfy server 
 
-This is the recommended option. You can deploy your workflows (backend) without the viewcomfy.json and access them via your serverless API endpoints. This ensures that the GPUs behind your workflow will only be running when generating.
+The first thing you need to do to deploy your app is set up the Comfy server and get your API endpoint. This [guide](https://youtu.be/pIODXFU9sHw) goes over how to do that.
 
-You can then separately deploy the ViewComfy app (frontend) and run it on a CPU.
+Once set up, the workflow will be running on the serverless infrastructure and be accessible via the standard Comfy interface and an API endpoint. 
 
-**Deploy the backend**
-  
-To get an API endpoint, you can follow the guide above. You will then need to get your API keys from the dashboard and add them to your .env file:
+To link your endpoint to your workflow inside your ViewComfy app, you just need to copy it in the right field:
+
+![Screenshot 2025-03-17 175719](https://github.com/user-attachments/assets/25495f87-5639-456b-9266-9fcabb3995cc)
+
+To use the endpoint with your local installation of ViewComfy, you will also need to get your API keys from the dashboard and add them to your .env file:
 
 ```bash
 .env file ->
@@ -61,24 +62,15 @@ VIEWCOMFY_CLIENT_ID="<your client id>"
 VIEWCOMFY_CLIENT_SECRET="<your client secret>"
 ```
 
-Finally, you can link your endpoint to your workflow inside your ViewComfy app:
-
-![Screenshot 2025-03-17 175719](https://github.com/user-attachments/assets/25495f87-5639-456b-9266-9fcabb3995cc)
-
 Once you are done, the app will send a request to your viewcomfy deployment every time you click generate. 
 
-  **Deploy the Frontend**
+### Deploy the ViewComfy app
 
-After deploying the backend, you also have the option to deploy the frontend on the hosting service of your choice. After this, your ComfyUI workflow will truly be a web app. 
+The easiest way to do this is to navigate to the ViewComfy Apps tab on the ViewComfy cloud dashboard and drop the viewcomfy.json there. For all the details, you can refer to [this](https://www.youtube.com/watch?v=pIODXFU9sHw&ab_channel=ViewComfy) video.
 
-There is an example on how to do that using Modal in the hosting-examples/modal folder.
+![deploy a viewcomfy app](https://github.com/user-attachments/assets/23988845-2526-4a16-b93d-89a3d1a365b9)
 
-The advantage of deploying in two parts is that you can run the heavy generation tasks on GPUs while running the frontend on a CPU. This is a lot more cost effective than running everything on a GPU! 
-
-### Deploy the entire web app
-
-You can also deploy the whole web app and access it via its own unique URL by following the guide above. Note that unlike with the API option, the GPU powering the app will be running for as long as the URL is open in the browser, not just when generating.
-
+But ultimately, you can deploy your app on the hosting service of your choice. For example, there are some details on how to host the app on modal in the hosting-examples/modal folder.
 
 ## Usage
 ### Form Editor
