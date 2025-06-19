@@ -35,7 +35,7 @@ npm run dev
 ```
 
 ### Detailed installation guide
-For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to our blog: <https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app>
+For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to [our blog](https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app).
 
 
 ## Deployment
@@ -62,7 +62,7 @@ VIEWCOMFY_CLIENT_ID="<your client id>"
 VIEWCOMFY_CLIENT_SECRET="<your client secret>"
 ```
 
-Once you are done, the app will send a request to your viewcomfy deployment every time you click generate. 
+Once you are done, the app will send a request to your ViewComfy deployment every time you click generate. 
 
 ### Deploy the ViewComfy app
 
