@@ -12,8 +12,6 @@ export interface IUsePostPlayground {
     onError: (error: any) => void,
 }
 
-const viewcomfyCloud = process.env.VIEW_COMFY_CLOUD;
-
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
@@ -23,7 +21,7 @@ export const usePostPlayground = () => {
         setLoading(true);
         try {
             let url = "/api/comfy";
-            if (viewcomfyEndpoint && !viewcomfyCloud) {
+            if (viewcomfyEndpoint) {
                 url = "/api/viewcomfy"
             }
 
