@@ -27,8 +27,16 @@ export const usePostPlaygroundAuth = () => {
             }
             await inferViewComfyCloud({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, token });
 
-        } catch (error) {
-            onError(error);
+        } catch (error: any) {
+            if (error instanceof Error) {
+                onError(new ResponseError({
+                    errorMsg: "Something went wrong",
+                    error: error.message,
+                    errorType: ErrorTypes.UNKNOWN
+                }));
+            } else {
+                onError(error);
+            }
         }
         setLoading(false);
     }, []);
