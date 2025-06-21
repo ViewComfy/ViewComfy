@@ -3,15 +3,12 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { ErrorResponseFactory } from "@/app/models/errors";
 import { ViewComfyApiParamBuilder } from "@/app/models/viewcomfy-api-param-builder";
 import { SettingsService } from "@/app/services/settings-service";
-import { auth } from "@clerk/nextjs/server";
-import { ViewComfyService } from "@/app/services/viewcomfy-service";
 
 const errorResponseFactory = new ErrorResponseFactory();
 const settingsService = new SettingsService();
-const viewComfyService = new ViewComfyService();
 
-let clientId = settingsService.getViewComfyCloudApiClientId();
-let clientSecret = settingsService.getViewComfyCloudApiClientSecret();
+const clientId = settingsService.getViewComfyCloudApiClientId();
+const clientSecret = settingsService.getViewComfyCloudApiClientSecret();
 
 export async function POST(request: NextRequest) {
 
@@ -20,43 +17,6 @@ export async function POST(request: NextRequest) {
 
         const viewComfyApiParamBuilder = new ViewComfyApiParamBuilder(formData);
         viewComfyApiParamBuilder.buildParamsForViewComfyApi();
-
-        if (settingsService.isUserManagementEnabled()) {
-            const { userId, getToken } = await auth();
-
-            if (!userId) {
-                const error = new Error('Unauthorized');
-                const responseError = errorResponseFactory.getErrorResponse(error);
-
-                return NextResponse.json(responseError, {
-                    status: 401,
-                });
-            }
-
-            const token = await getToken();
-            if (!token) {
-                const error = new Error('Unauthorized: Token is missing');
-                const responseError = errorResponseFactory.getErrorResponse(error);
-
-                return NextResponse.json(responseError, {
-                    status: 401,
-                });
-            }
-
-            const appId = formData.get('appId') as string;
-            if (!appId) {
-                const error = new Error('App ID is required');
-                const responseError = errorResponseFactory.getErrorResponse(error);
-
-                return NextResponse.json(responseError, {
-                    status: 422,
-                });
-            }
-
-            const secrets = await viewComfyService.getViewComfyAppSecrets(appId, token);
-            clientId = secrets.clientId;
-            clientSecret = secrets.clientSecret;
-        };
 
         if (!clientId || !clientSecret) {
             const error = new Error('Client ID or Client Secret is missing');

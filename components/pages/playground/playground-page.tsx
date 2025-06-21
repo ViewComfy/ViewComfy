@@ -32,6 +32,8 @@ import {
     DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { usePostPlaygroundAuth } from "@/hooks/playground/use-post-playground-auth";
+import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -41,7 +43,17 @@ const UserContentWrapper = dynamic(
     { ssr: false }
 );
 
-function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
+function PlaygroundWithAuth({ userId }: { userId: string | null }) {
+    const { doPost, loading } = usePostPlaygroundAuth();
+    return <PlaygroundPageContent userId={userId} doPost={doPost} loading={loading} />;
+}
+
+function PlaygroundWithoutAuth() {
+    const { doPost, loading } = usePostPlayground();
+    return <PlaygroundPageContent userId={null} doPost={doPost} loading={loading} />;
+}
+
+function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: string | null, doPost: (params: IUsePostPlayground) => void, loading: boolean }) {
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
@@ -90,17 +102,8 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
         }
     }, [viewMode, viewComfyStateDispatcher, appId]);
 
-    const { doPost, loading } = usePostPlayground();
-
-    // useEffect(() => {
-    //     if (viewComfyState?.viewComfyJSON) {
-    //         setFormState({ ...viewComfyState.viewComfyJSON });
-    //         SetResults({});
-    //     }
-    // }, [viewComfyState?.viewComfyJSON]);
 
     function onSubmit(data: IViewComfyWorkflow) {
-        // setFormState(data);
         const inputs: { key: string, value: string }[] = [];
 
         for (const dataInputs of data.inputs) {
@@ -120,11 +123,11 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
             textOutputEnabled: data.textOutputEnabled ?? false
         };
 
-        doPost({
+        const doPostParams = {
             viewComfy: generationData,
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
-            onSuccess: (data) => {
+            onSuccess: (data: Blob[]) => {
                 onSetResults(data);
 
                 // If user is logged in, could save their generation history
@@ -132,7 +135,8 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                     // Save to user history logic
                     console.log(`Saving generation results for user ${userId}`);
                 }
-            }, onError: (error) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
                     open: true,
@@ -143,7 +147,9 @@ function PlaygroundPageContent({ userId = null }: { userId: string | null }) {
                     }
                 });
             }
-        });
+        }
+
+        doPost(doPostParams);
     }
 
     const onSetResults = (data: Blob[]) => {
@@ -291,13 +297,13 @@ export default function PlaygroundPage() {
 
     // If user management is disabled, render without auth
     if (!userManagement) {
-        return <PlaygroundPageContent userId={null} />;
+        return <PlaygroundWithoutAuth />;
     }
 
     // If user management is enabled, use the UserContentWrapper
     return (
         <UserContentWrapper>
-            {(userId) => <PlaygroundPageContent userId={userId} />}
+            {(userId) => <PlaygroundWithAuth userId={userId} />}
         </UserContentWrapper>
     );
 }

@@ -1,15 +1,32 @@
 import { IViewComfy } from "@/app/interfaces/comfy-input";
 import { ErrorTypes, ResponseError } from "@/app/models/errors";
+import { useAuth } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 import { useState, useCallback } from "react";
 import { IUsePostPlayground, IPlaygroundParams } from "@/hooks/playground/interfaces";
 
-export const usePostPlayground = () => {
+export const usePostPlaygroundAuth = () => {
     const [loading, setLoading] = useState(false);
+    const { getToken } = useAuth();
 
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
-            await inferLocalComfyUI({ viewComfy, workflow, viewcomfyEndpoint, onSuccess });
+            let token: string | null = null;
+            try {
+
+                token = await getToken({ template: "long_token" });
+
+            } catch (error) {
+                console.error("Error getting token", error);
+                throw error;
+            }
+
+            if (!token) {
+                throw new Error("token is not set");
+            }
+            await inferViewComfyCloud({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, token });
+
         } catch (error) {
             onError(error);
         }
@@ -100,6 +117,9 @@ const inferViewComfyCloud = async (params: IPlaygroundParams & { onSuccess: (out
 
 const inferLocalComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void }) => {
 
+    const searchParams = useSearchParams();
+    const appId = searchParams?.get("appId");
+
     const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
 
     const url = viewcomfyEndpoint ? "/api/viewcomfy" : "/api/comfy";
@@ -121,6 +141,10 @@ const inferLocalComfyUI = async (params: IPlaygroundParams & { onSuccess: (outpu
     formData.append('workflow', JSON.stringify(workflow));
     formData.append('viewComfy', JSON.stringify(viewComfyJSON));
     formData.append('viewcomfyEndpoint', viewcomfyEndpoint ?? "");
+
+    if (appId) {
+        formData.append('appId', appId);
+    }
 
     const response = await fetch(url, {
         method: 'POST',
