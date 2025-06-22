@@ -33,8 +33,7 @@ interface Infer {
     apiUrl: string;
     params: Record<string, unknown>;
     overrideWorkflowApi?: Record<string, unknown> | undefined;
-    clientId: string;
-    clientSecret: string;
+    secret: Secret;
 }
 
 interface InferWithLogs extends Infer {
@@ -53,17 +52,10 @@ export const infer = async ({
     apiUrl,
     params,
     overrideWorkflowApi,
-    clientId,
-    clientSecret,
+    secret,
 }: Infer) => {
     if (!apiUrl) {
         throw new Error("viewComfyUrl is not set. Please get the right endpoint from your dashboard.");
-    }
-    if (!clientId) {
-        throw new Error("Client ID is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
-    }
-    if (!clientSecret) {
-        throw new Error("Client Secret is not set. You need your API keys to use your API endpoint. You can get your keys from the ViewComfy dashboard and add them to the .env file.");
     }
 
     try {
@@ -73,20 +65,23 @@ export const infer = async ({
             overrideWorkflowApi,
         });
 
+        const headers: Record<string, string> = secret.clientId && secret.clientSecret ? {
+            "client_id": secret.clientId,
+            "client_secret": secret.clientSecret,
+        } : {
+            "Authorization": `Bearer ${secret.token}`,
+        };
+
         const response = await fetch(apiUrl, {
             method: "POST",
             body: formData,
             redirect: "follow",
-            headers: {
-                "client_id": clientId,
-                "client_secret": clientSecret,
-            },
+            headers,
         });
 
         if (!response.ok) {
-            const errMsg = `Failed to fetch viewComfy: ${
-                response.statusText
-            }, ${await response.text()}`;
+            const errMsg = `Failed to fetch viewComfy: ${response.statusText
+                }, ${await response.text()}`;
             console.error(errMsg);
             throw new Error(errMsg);
         }
@@ -252,17 +247,10 @@ export const inferWithLogsStream = async ({
     params,
     loggingCallback,
     overrideWorkflowApi: override_workflow_api,
-    clientId,
-    clientSecret,
+    secret,
 }: InferWithLogs): Promise<PromptResult | null> => {
     if (!apiUrl) {
         throw new Error("url is not set");
-    }
-    if (!clientId) {
-        throw new Error("clientId is not set");
-    }
-    if (!clientSecret) {
-        throw new Error("clientSecret is not set");
     }
 
     try {
@@ -271,13 +259,17 @@ export const inferWithLogsStream = async ({
             overrideWorkflowApi: override_workflow_api,
             params,
         });
+
+        const headers: Record<string, string> = secret.clientId && secret.clientSecret ? {
+            "client_id": secret.clientId,
+            "client_secret": secret.clientSecret,
+        } : {
+            "Authorization": `Bearer ${secret.token}`,
+        };
         const response = await fetch(apiUrl, {
             method: "POST",
             body: formData,
-            headers: {
-                "client_id": clientId,
-                "client_secret": clientSecret,
-            },
+            headers,
         });
 
         if (response.status === 201) {
@@ -297,8 +289,7 @@ export const inferWithLogsStream = async ({
         }
     } catch (e) {
         console.error(
-            `Error with streaming request: ${
-                e instanceof Error ? e.message : String(e)
+            `Error with streaming request: ${e instanceof Error ? e.message : String(e)
             }`
         );
         throw e;
@@ -383,5 +374,35 @@ export class PromptResult {
         this.execution_time_seconds = execution_time_seconds;
         this.prompt = prompt;
         this.outputs = fileOutputs;
+    }
+}
+
+export class Secret {
+    clientId: string | undefined;
+    clientSecret: string | undefined;
+    token: string | undefined;
+
+    constructor(params: {
+        clientId: string,
+        clientSecret: string
+    } | {
+        token: string
+    }) {
+
+        if ("clientId" in params) {
+            if (!params.clientId) {
+                throw new Error("clientId is not set");
+            }
+            if (!params.clientSecret) {
+                throw new Error("clientSecret is not set");
+            }
+            this.clientId = params.clientId;
+            this.clientSecret = params.clientSecret;
+        } else {
+            if (!params.token) {
+                throw new Error("token is not set");
+            }
+            this.token = params.token;
+        }
     }
 }

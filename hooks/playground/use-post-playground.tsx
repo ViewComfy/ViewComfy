@@ -9,7 +9,7 @@ export const usePostPlayground = () => {
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         setLoading(true);
         try {
-            await inferLocalComfyUI({ viewComfy, workflow, viewcomfyEndpoint, onSuccess });
+            await inferComfyUI({ viewComfy, workflow, viewcomfyEndpoint, onSuccess });
         } catch (error) {
             onError(error);
         }
@@ -98,7 +98,7 @@ const inferViewComfyCloud = async (params: IPlaygroundParams & { onSuccess: (out
 
 }
 
-const inferLocalComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void }) => {
+const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void }) => {
 
     const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
 

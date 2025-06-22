@@ -3,6 +3,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { ErrorResponseFactory } from "@/app/models/errors";
 import { ViewComfyApiParamBuilder } from "@/app/models/viewcomfy-api-param-builder";
 import { SettingsService } from "@/app/services/settings-service";
+import { auth } from "@clerk/nextjs/server";
+import { Secret } from "@/app/services/viewcomfy-api-services";
 
 const errorResponseFactory = new ErrorResponseFactory();
 const settingsService = new SettingsService();
@@ -18,20 +20,50 @@ export async function POST(request: NextRequest) {
         const viewComfyApiParamBuilder = new ViewComfyApiParamBuilder(formData);
         viewComfyApiParamBuilder.buildParamsForViewComfyApi();
 
-        if (!clientId || !clientSecret) {
-            const error = new Error('Client ID or Client Secret is missing');
-            const responseError = errorResponseFactory.getErrorResponse(error);
+        let secret: Secret | undefined;
 
-            return NextResponse.json(responseError, {
-                status: 422,
-            });
+        if (settingsService.isUserManagementEnabled()) {
+            const { userId, getToken } = await auth();
+
+            if (!userId) {
+                const error = new Error('Unauthorized');
+                const responseError = errorResponseFactory.getErrorResponse(error);
+
+                return NextResponse.json(responseError, {
+                    status: 401,
+                });
+            }
+
+            const token = await getToken();
+            if (!token) {
+                const error = new Error('Unauthorized: Token is missing');
+                const responseError = errorResponseFactory.getErrorResponse(error);
+
+                return NextResponse.json(responseError, {
+                    status: 401,
+                });
+            }
+
+            secret = new Secret({ token });
+        }
+
+        if (!secret) {
+            if (!clientId || !clientSecret) {
+                const error = new Error('Client ID or Client Secret is missing');
+                const responseError = errorResponseFactory.getErrorResponse(error);
+
+                return NextResponse.json(responseError, {
+                    status: 422,
+                });
+            }
+
+            secret = new Secret({ clientId, clientSecret });
         }
 
         const stream = await infer({
             apiUrl: viewComfyApiParamBuilder.viewComfyUrl,
             params: viewComfyApiParamBuilder.params,
-            clientId,
-            clientSecret,
+            secret,
             overrideWorkflowApi: viewComfyApiParamBuilder.overrideWorkflowApi
         });
 

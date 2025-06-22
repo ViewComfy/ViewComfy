@@ -32,7 +32,6 @@ import {
     DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { usePostPlaygroundAuth } from "@/hooks/playground/use-post-playground-auth";
 import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 
 const apiErrorHandler = new ApiErrorHandler();
@@ -44,7 +43,8 @@ const UserContentWrapper = dynamic(
 );
 
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
-    const { doPost, loading } = usePostPlaygroundAuth();
+    // TODO: Use this to implement history retrieval
+    const { doPost, loading } = usePostPlayground();
     return <PlaygroundPageContent userId={userId} doPost={doPost} loading={loading} />;
 }
 
