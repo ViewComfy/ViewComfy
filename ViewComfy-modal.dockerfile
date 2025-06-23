@@ -74,6 +74,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # USER nextjs
 
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 EXPOSE 3000
 
 ENV HOSTNAME="0.0.0.0"
