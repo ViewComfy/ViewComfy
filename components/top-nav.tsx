@@ -5,7 +5,7 @@ import { useViewComfy } from "@/app/providers/view-comfy-provider";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
-import { UserNav } from "@/components/logged-user";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export function TopNav() {
     const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
@@ -77,11 +77,10 @@ export function TopNav() {
                 </Button>
                 <ModeToggle />
                 {userManagementEnabled && (
-                    <UserNav />
-                    // <SignedIn>
-                    //     <UserButton />
-                    //     <UserNav />
-                    // </SignedIn>
+                    // <UserNav />
+                    <SignedIn>
+                        <UserButton />
+                    </SignedIn>
                 )}
             </div>
         </nav>
