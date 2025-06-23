@@ -24,7 +24,7 @@ export function UserNav() {
     }
 
     if (!isSignedIn) {
-        return <div>Sign in to view this page</div>;
+        return <div></div>;
     }
 
     return (

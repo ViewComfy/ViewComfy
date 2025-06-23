@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle";
-import { SignedIn } from "@clerk/nextjs";
 import { useViewComfy } from "@/app/providers/view-comfy-provider";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
@@ -78,10 +77,11 @@ export function TopNav() {
                 </Button>
                 <ModeToggle />
                 {userManagementEnabled && (
-                    <SignedIn>
-                        {/* <UserButton /> */}
-                        <UserNav />
-                    </SignedIn>
+                    <UserNav />
+                    // <SignedIn>
+                    //     <UserButton />
+                    //     <UserNav />
+                    // </SignedIn>
                 )}
             </div>
         </nav>
