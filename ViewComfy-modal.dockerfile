@@ -50,9 +50,6 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Change this if you want the editor on the build result
-ENV NEXT_PUBLIC_VIEW_MODE="true"
-
 RUN npm run build
 
 # Production image, copy all the files and run next
