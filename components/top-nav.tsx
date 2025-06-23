@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle";
-import { UserButton } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
 import { useViewComfy } from "@/app/providers/view-comfy-provider";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
+import { UserNav } from "@/components/logged-user";
+
 export function TopNav() {
     const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
     const { viewComfyState } = useViewComfy();
@@ -78,7 +79,8 @@ export function TopNav() {
                 <ModeToggle />
                 {userManagementEnabled && (
                     <SignedIn>
-                        <UserButton />
+                        {/* <UserButton /> */}
+                        <UserNav />
                     </SignedIn>
                 )}
             </div>
