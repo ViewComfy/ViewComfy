@@ -1,4 +1,4 @@
-name: ViewComfy Modal Build
+name: ViewComfy editor Modal Build
 
 on:
   push:
@@ -74,5 +74,9 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_USER_MANAGEMENT=true
+            NEXT_PUBLIC_VIEW_MODE=false
           cache-from: type=gha
           cache-to: type=gha,mode=max
