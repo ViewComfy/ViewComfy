@@ -1,4 +1,4 @@
-name: ViewComfy Editor Modal Build
+name: ViewComfy Playground Modal Build
 
 on:
   push:
@@ -23,7 +23,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}-editor-modal
+  IMAGE_NAME: ${{ github.repository }}-playground-modal
 
 
 jobs:
@@ -77,6 +77,6 @@ jobs:
           build-args: |
             NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
             NEXT_PUBLIC_USER_MANAGEMENT=true
-            NEXT_PUBLIC_VIEW_MODE=false
+            NEXT_PUBLIC_VIEW_MODE=true
           cache-from: type=gha
           cache-to: type=gha,mode=max
