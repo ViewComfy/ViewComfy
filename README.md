@@ -142,7 +142,11 @@ CLERK_SECRET_KEY="your-clerk-secret-key"
 Build docker image
 
 ```bash
-docker build -t viewcomfy .
+docker build \
+  --build-arg NEXT_PUBLIC_VIEW_MODE="true" \
+  --build-arg NEXT_PUBLIC_USER_MANAGEMENT="true" \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-publishable-key" \
+  -t viewcomfy .
 ```
 
 Run docker image
