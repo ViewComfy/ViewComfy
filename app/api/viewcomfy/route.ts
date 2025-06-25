@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
                 });
             }
 
-            const token = await getToken();
+            const token = await getToken({ template: "long_token" });
             if (!token) {
                 const error = new Error('Unauthorized: Token is missing');
                 const responseError = errorResponseFactory.getErrorResponse(error);
