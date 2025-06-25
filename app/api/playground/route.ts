@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
             return new Response('Unauthorized', { status: 401 })
         }
 
-        const token = await getToken();
+        const token = await getToken({ template: "long_token" });
         if (!token) {
             return new Response('Unauthorized: Token is missing', { status: 401 })
         }
