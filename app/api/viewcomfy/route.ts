@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
                     status: 401,
                 });
             }
-
             secret = new Secret({ token });
         }
 

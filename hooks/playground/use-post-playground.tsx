@@ -67,37 +67,6 @@ function buildFormData(data: {
     return formData;
 }
 
-const inferViewComfyCloud = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void, token: string }) => {
-    const { viewComfy, viewcomfyEndpoint, onSuccess, token } = params;
-
-    if (!viewcomfyEndpoint) {
-        throw new Error("viewcomfyEndpoint is not set");
-    }
-
-    const viewComfyParams: Record<string, any> = {};
-
-    for (const { key, value } of viewComfy.inputs) {
-        if (value instanceof File) {
-            viewComfyParams[key] = value;
-        } else {
-            viewComfyParams[key] = value;
-        }
-    }
-
-    const result = await infer({
-        apiUrl: viewcomfyEndpoint,
-        params: viewComfyParams,
-        secret: new Secret({ token }),
-    });
-
-    if (result.outputs.length > 0) {
-        onSuccess(result.outputs);
-    } else {
-        onSuccess([]);
-    }
-
-}
-
 const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void }) => {
 
     const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;

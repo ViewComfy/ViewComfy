@@ -10,3 +10,14 @@ export function getComfyUIRandomSeed() {
   const maxFloored = Math.floor(2 ** 32);
   return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
 }
+
+export function fromSecondsToTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  let result = `${minutes}m ${remainingSeconds}s`
+  if (hours > 0) {
+    result = `${hours}h ${result}`
+  }
+  return result;
+}

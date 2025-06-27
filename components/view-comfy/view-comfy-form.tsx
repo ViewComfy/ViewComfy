@@ -69,10 +69,10 @@ export function ViewComfyForm(args: {
                                                 control={form.control}
                                                 name="title"
                                                 render={({ field }) => (
-                                                    <FormItem key="title" className="ml-0.5 mr-0.5">
+                                                    <FormItem key="title" className="m-1">
                                                         <FormLabel>Title</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="The name of your workflow" {...field} />
+                                                            <Input className="" placeholder="The name of your workflow" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -95,7 +95,7 @@ export function ViewComfyForm(args: {
                                                 control={form.control}
                                                 name="viewcomfyEndpoint"
                                                 render={({ field }) => (
-                                                    <FormItem key="viewcomfyEndpoint" className="ml-0.5 mr-0.5">
+                                                    <FormItem key="viewcomfyEndpoint" className="m-1">
                                                         <FormLabel>
                                                             ViewComfy Endpoint (optional)
                                                             <Tooltip>
