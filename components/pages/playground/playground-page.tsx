@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import {
-    Settings
+    Settings,
+    History
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +34,8 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { IUsePostPlayground } from "@/hooks/playground/interfaces";
+import { HistorySidebar } from "@/components/history-sidebar";
+import { Textarea } from "@/components/ui/textarea";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -42,24 +45,27 @@ const UserContentWrapper = dynamic(
     { ssr: false }
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
     // TODO: Use this to implement history retrieval
     const { doPost, loading } = usePostPlayground();
-    return <PlaygroundPageContent userId={userId} doPost={doPost} loading={loading} />;
+    return <PlaygroundPageContent doPost={doPost} loading={loading} />;
 }
 
 function PlaygroundWithoutAuth() {
     const { doPost, loading } = usePostPlayground();
-    return <PlaygroundPageContent userId={null} doPost={doPost} loading={loading} />;
+    return <PlaygroundPageContent doPost={doPost} loading={loading} />;
 }
 
-function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: string | null, doPost: (params: IUsePostPlayground) => void, loading: boolean }) {
+function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostPlayground) => void, loading: boolean }) {
     const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
     const searchParams = useSearchParams();
     const appId = searchParams?.get("appId");
+    const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
+    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     useEffect(() => {
         if (viewMode) {
@@ -123,19 +129,15 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
             textOutputEnabled: data.textOutputEnabled ?? false
         };
 
+        setTextOutputEnabled(data.textOutputEnabled ?? false);
+
         const doPostParams = {
             viewComfy: generationData,
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (data: Blob[]) => {
                 onSetResults(data);
-
-                // If user is logged in, could save their generation history
-                if (userId) {
-                    // Save to user history logic
-                    console.log(`Saving generation results for user ${userId}`);
-                }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -189,7 +191,24 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
     return (
         <>
             <div className="flex flex-col h-full">
-                <Header title={"Playground"} />
+                <div className="md:grid md:grid-cols-2">
+                    <div>
+                        <Header title={"Playground"} />
+                    </div>
+                    <div className="hidden pr-4 md:flex md:items-center md:justify-end">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className={cn("gap-2")}
+                            onClick={() => setHistorySidebarOpen(value => !value)}
+                        >
+                            <History className="h-4 w-4" />
+                            History
+                        </Button>
+                    </div>
+                </div>
+
+
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
@@ -214,8 +233,8 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
                         {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
 
                     </div>
-                    <div className="relative h-full min-h-[50vh] rounded-xl bg-muted/50 px-1 lg:col-span-2">
-                        <ScrollArea className="relative flex h-full w-full flex-col">
+                    <div className="relative flex h-full min-h-[50vh] rounded-xl bg-muted/50 p-1 lg:col-span-2">
+                        <ScrollArea className="relative flex h-full w-full flex-1 flex-col">
                             {(Object.keys(results).length === 0) && !loading && (
                                 <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
                                     <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
@@ -223,7 +242,15 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
                                     <Badge variant="outline" className="absolute right-3 top-3">
                                         Output
                                     </Badge>
+
                                 </>
+                            )}
+                            {!loading && Object.keys(results).length > 0 && (
+                                <div className="absolute right-3 top-3 flex gap-2">
+                                    <Badge variant="outline">
+                                        Output
+                                    </Badge>
+                                </div>
                             )}
                             {loading ? (
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -256,19 +283,12 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
                                                                         <AudioDialog output={output} />
                                                                     </BlurFade>
                                                                 )}
+
                                                             </div>
-                                                            {(output.outputs.type.startsWith('text/')) && (
-                                                                <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
-                                                                    {URL.createObjectURL(output.outputs) && (
-                                                                        <object
-                                                                            data={output.url}
-                                                                            type={output.outputs.type}
-                                                                            className="w-full"
-                                                                        >
-                                                                            Unable to display text content
-                                                                        </object>
-                                                                    )}
-                                                                </pre>
+                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
+                                                                <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                    <TextOutput output={output} />
+                                                                </BlurFade>
                                                             )}
                                                         </Fragment>
                                                     ))}
@@ -284,6 +304,7 @@ function PlaygroundPageContent({ userId = null, doPost, loading }: { userId: str
                                 </div>
                             )}
                         </ScrollArea>
+                        <HistorySidebar open={historySidebarOpen} setOpen={setHistorySidebarOpen} />
                     </div>
                 </main>
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
@@ -380,5 +401,19 @@ export function AudioDialog({ output }: { output: { outputs: Blob, url: string }
                 <audio src={output.url} controls />
             </DialogContent>
         </Dialog>
+    )
+}
+
+export function TextOutput({ output }: { output: { outputs: Blob, url: string } }) {
+    const [text, setText] = useState<string>("");
+
+    useEffect(() => {
+        output.outputs.text().then(setText);
+    }, [output.outputs]);
+
+    return (
+        <div className="pt-4 w-full">
+            <Textarea value={text} readOnly className="w-full" rows={5} />
+        </div>
     )
 }

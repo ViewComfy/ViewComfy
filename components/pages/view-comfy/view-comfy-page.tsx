@@ -218,7 +218,7 @@ export default function ViewComfyPage() {
                                         </div>
                                     </div>
                                 )}
-                                <div className="w-full flex flex-wrap items-center gap-4 mb-4">
+                                <div className="w-full flex flex-wrap items-center gap-4 mb-4 ml-1">
                                     {(viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy) && (
                                         <div className="flex">
                                             <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />

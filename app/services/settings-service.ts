@@ -18,4 +18,11 @@ export class SettingsService {
     public getViewComfyCloudApiClientSecret(): string {
         return process.env.VIEWCOMFY_CLIENT_SECRET || "";
     }
+
+    public getApiUrl(): string {
+        if (!process.env.NEXT_PUBLIC_API_URL) {
+            throw new Error("NEXT_PUBLIC_API_URL is not set");
+        }
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
 }
