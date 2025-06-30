@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog"
 import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
+import { Textarea } from "@/components/ui/textarea";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -64,6 +65,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
     const searchParams = useSearchParams();
     const appId = searchParams?.get("appId");
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
+    const [textOutputEnabled, setTextOutputEnabled] = useState(false);
 
     useEffect(() => {
         if (viewMode) {
@@ -126,6 +128,8 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
             inputs: inputs,
             textOutputEnabled: data.textOutputEnabled ?? false
         };
+
+        setTextOutputEnabled(data.textOutputEnabled ?? false);
 
         const doPostParams = {
             viewComfy: generationData,
@@ -279,19 +283,12 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
                                                                         <AudioDialog output={output} />
                                                                     </BlurFade>
                                                                 )}
+
                                                             </div>
-                                                            {(output.outputs.type.startsWith('text/')) && (
-                                                                <pre className="whitespace-pre-wrap break-words text-sm bg-white rounded-md w-full">
-                                                                    {URL.createObjectURL(output.outputs) && (
-                                                                        <object
-                                                                            data={output.url}
-                                                                            type={output.outputs.type}
-                                                                            className="w-full"
-                                                                        >
-                                                                            Unable to display text content
-                                                                        </object>
-                                                                    )}
-                                                                </pre>
+                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
+                                                                <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                                    <TextOutput output={output} />
+                                                                </BlurFade>
                                                             )}
                                                         </Fragment>
                                                     ))}
@@ -404,5 +401,19 @@ export function AudioDialog({ output }: { output: { outputs: Blob, url: string }
                 <audio src={output.url} controls />
             </DialogContent>
         </Dialog>
+    )
+}
+
+export function TextOutput({ output }: { output: { outputs: Blob, url: string } }) {
+    const [text, setText] = useState<string>("");
+
+    useEffect(() => {
+        output.outputs.text().then(setText);
+    }, [output.outputs]);
+
+    return (
+        <div className="pt-4 w-full">
+            <Textarea value={text} readOnly className="w-full" rows={5} />
+        </div>
     )
 }
