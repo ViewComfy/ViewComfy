@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import type { IInput } from "@/app/interfaces/input";
-import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
+import * as constants from "@/app/constants";
 import { getComfyUIRandomSeed } from "@/lib/utils";
 
 const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
@@ -56,7 +56,7 @@ export class ComfyWorkflow {
                 default:
                     Object.keys(node.inputs).forEach((key) => {
                         if (
-                            SEED_LIKE_INPUT_VALUES.includes(key)
+                            constants.SEED_LIKE_INPUT_VALUES.some(str => key.includes(str))
                             && node.inputs[key] === Number.MIN_VALUE
                         ) {
                             const newSeed = this.getNewSeed();
