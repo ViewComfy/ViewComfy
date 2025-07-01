@@ -21,7 +21,7 @@ import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
 import { ApiErrorHandler } from "@/lib/api-error-handler";
 import type { ResponseError } from "@/app/models/errors";
 import BlurFade from "@/components/ui/blur-fade";
-import { cn } from "@/lib/utils";
+import { cn, getComfyUIRandomSeed } from "@/lib/utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
@@ -36,6 +36,7 @@ import {
 import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
+import * as constants from "@/app/constants";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -110,7 +111,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
 
 
     function onSubmit(data: IViewComfyWorkflow) {
-        const inputs: { key: string, value: string }[] = [];
+        const inputs: { key: string, value: unknown }[] = [];
 
         for (const dataInputs of data.inputs) {
             for (const input of dataInputs.inputs) {
@@ -127,6 +128,13 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
         const generationData = {
             inputs: inputs,
             textOutputEnabled: data.textOutputEnabled ?? false
+        };
+
+        for (const input of generationData.inputs) {
+            if (constants.SEED_LIKE_INPUT_VALUES.some(str => input.key.includes(str)) && input.value === Number.MIN_VALUE) {
+                const newSeed = getComfyUIRandomSeed();
+                input.value = newSeed;
+            }
         };
 
         setTextOutputEnabled(data.textOutputEnabled ?? false);

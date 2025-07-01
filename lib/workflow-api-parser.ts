@@ -1,4 +1,4 @@
-import { SEED_LIKE_INPUT_VALUES } from "@/app/constants";
+import * as constants from "@/app/constants";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 
 export interface IInputField {
@@ -100,7 +100,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                 default:
 
                     for (const input of inputs) {
-                        if (SEED_LIKE_INPUT_VALUES.includes(input.title.toLowerCase())) {
+                        if (constants.SEED_LIKE_INPUT_VALUES.some(str => input.title.toLowerCase().includes(str))) {
                             input.valueType = "seed";
                         }
                     }
