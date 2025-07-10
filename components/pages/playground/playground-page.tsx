@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import {
     Settings,
-    History
+    History,
+    Download
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -59,7 +60,7 @@ function PlaygroundWithoutAuth() {
 }
 
 function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostPlayground) => void, loading: boolean }) {
-    const [results, SetResults] = useState<{ [key: string]: { outputs: Blob, url: string }[] }>({});
+    const [results, SetResults] = useState<{ [key: string]: { outputs: File, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
@@ -143,7 +144,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
             viewComfy: generationData,
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
-            onSuccess: (data: Blob[]) => {
+            onSuccess: (data: File[]) => {
                 onSetResults(data);
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
             }, onError: (error: any) => {
@@ -162,7 +163,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
         doPost(doPostParams);
     }
 
-    const onSetResults = (data: Blob[]) => {
+    const onSetResults = (data: File[]) => {
         const timestamp = Date.now();
         const newGeneration = data.map((output) => ({ outputs: output, url: URL.createObjectURL(output) }));
         SetResults((prevResults) => ({
@@ -269,35 +270,10 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
                                     <div className="flex flex-col w-full h-full">
                                         {Object.entries(results).map(([timestamp, generation], index, array) => (
                                             <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
-                                                <div className="flex flex-wrap w-full h-full gap-4" key={timestamp}>
+                                                <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={timestamp}>
                                                     {generation.map((output) => (
                                                         <Fragment key={output.url}>
-                                                            <div
-                                                                key={output.url}
-                                                                className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
-                                                            >
-                                                                {(output.outputs.type.startsWith('image/')) && (
-                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                        <ImageDialog output={output} />
-                                                                    </BlurFade>
-                                                                )}
-                                                                {(output.outputs.type.startsWith('video/')) && (
-                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                        <VideoDialog output={output} />
-                                                                    </BlurFade>
-                                                                )}
-                                                                {(output.outputs.type.startsWith('audio/')) && (
-                                                                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                        <AudioDialog output={output} />
-                                                                    </BlurFade>
-                                                                )}
-
-                                                            </div>
-                                                            {(output.outputs.type.startsWith('text/') && textOutputEnabled) && (
-                                                                <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                                    <TextOutput output={output} />
-                                                                </BlurFade>
-                                                            )}
+                                                            <OutputRenderer output={output} textOutputEnabled={textOutputEnabled} />
                                                         </Fragment>
                                                     ))}
                                                 </div>
@@ -337,7 +313,7 @@ export default function PlaygroundPage() {
     );
 }
 
-export function ImageDialog({ output }: { output: { outputs: Blob, url: string } }) {
+export function ImageDialog({ output }: { output: { outputs: File, url: string } }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -372,7 +348,7 @@ export function ImageDialog({ output }: { output: { outputs: Blob, url: string }
     )
 }
 
-export function VideoDialog({ output }: { output: { outputs: Blob, url: string } }) {
+export function VideoDialog({ output }: { output: { outputs: File, url: string } }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -399,7 +375,7 @@ export function VideoDialog({ output }: { output: { outputs: Blob, url: string }
     )
 }
 
-export function AudioDialog({ output }: { output: { outputs: Blob, url: string } }) {
+export function AudioDialog({ output }: { output: { outputs: File, url: string } }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -412,7 +388,7 @@ export function AudioDialog({ output }: { output: { outputs: Blob, url: string }
     )
 }
 
-export function TextOutput({ output }: { output: { outputs: Blob, url: string } }) {
+export function TextOutput({ output }: { output: { outputs: File, url: string } }) {
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
@@ -421,7 +397,72 @@ export function TextOutput({ output }: { output: { outputs: Blob, url: string } 
 
     return (
         <div className="pt-4 w-full">
-            <Textarea value={text} readOnly className="w-full" rows={5} />
+            <Textarea id={output.outputs.name} value={text} readOnly className="w-full" rows={5} />
         </div>
+    )
+}
+
+export function FileOutput({ output }: { output: { outputs: File, url: string } }) {
+    return (
+        <div
+            key={output.url}
+            className="flex w-full items-center justify-center"
+        >
+            <Button onClick={() => {
+                const link = document.createElement('a');
+                link.href = output.url;
+                link.download = output.outputs.name;
+                link.click();
+            }}>
+                <Download className="h-4 w-4 mr-2" />
+                {output.outputs.name}
+            </Button>
+        </div>
+    )
+}
+
+
+function OutputRenderer({ output, textOutputEnabled }: { output: { outputs: File, url: string }, textOutputEnabled: boolean }) {
+
+    const getOutputComponent = () => {
+        if (!output) {
+            console.log({ output });
+        }
+
+        if (output.outputs.type.startsWith('image/') && output.outputs.type !== "image/vnd.adobe.photoshop") {
+            return <ImageDialog output={output} />
+        } else if (output.outputs.type.startsWith('video/')) {
+            return <VideoDialog output={output} />
+        } else if (output.outputs.type.startsWith('audio/')) {
+            return <AudioDialog output={output} />
+        } else if (output.outputs.type.startsWith('text/')) {
+            return null;
+        } else {
+            return <FileOutput output={output} />;
+        }
+    }
+
+    const outputComponent = getOutputComponent();
+
+    return (
+        <>
+            {outputComponent && (
+                <div
+                    key={output.url}
+                    className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                >
+                    <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                        {outputComponent}
+                    </BlurFade>
+                </div>
+            )}
+            {
+                (output.outputs.type.startsWith('text/') && textOutputEnabled) && (
+                    <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                        <TextOutput output={output} />
+                    </BlurFade>
+                )
+            }
+        </>
     )
 }

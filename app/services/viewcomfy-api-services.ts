@@ -1,5 +1,4 @@
 import { ComfyWorkflowError } from "../models/errors";
-import { fileTypeFromBlob } from "file-type";
 
 function buildFormData(data: {
     logs: boolean;
@@ -98,28 +97,25 @@ export const infer = async ({
 
         const stream = new ReadableStream<Uint8Array>({
             async start(controller) {
-                debugger;
-                for (const blob of results.outputs) {
+                for (const file of results.outputs) {
                     try {
-                        let mimeType = blob.type;
-                        const libraryInfo = await fileTypeFromBlob(blob);
-                        if (libraryInfo) {
-                            mimeType = libraryInfo.mime;
-                        }
+                        const mimeType = file.type;
                         const mimeInfo = `Content-Type: ${mimeType}\r\n\r\n`;
+                        const fileName = file.name;
+                        const fileNameInfo = `Content-Disposition: attachment; filename="${fileName}"\r\n\r\n`;
                         controller.enqueue(new TextEncoder().encode(mimeInfo));
-                        controller.enqueue(new Uint8Array(await blob.arrayBuffer()));
-                        controller.enqueue(
-                            new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"),
-                        );
+                        controller.enqueue(new TextEncoder().encode(fileNameInfo));
+                        controller.enqueue(new Uint8Array(await file.arrayBuffer()));
+                        controller.enqueue(new TextEncoder().encode("\r\n--BLOB_SEPARATOR--\r\n"));
                     } catch (error) {
                         console.error("Failed to get output file");
                         console.error(error);
                     }
                 }
                 controller.close();
-            },
+            }
         });
+
         return stream;
 
     } catch (error: unknown) {
@@ -329,7 +325,7 @@ export class PromptResult {
     prompt: Record<string, unknown>;
 
     /** List of output files */
-    outputs: Blob[];
+    outputs: File[];
 
     constructor(data: {
         prompt_id: string;
@@ -358,14 +354,7 @@ export class PromptResult {
             for (let i = 0; i < binaryData.length; i++) {
                 uint8Array[i] = binaryData.charCodeAt(i);
             }
-
-            const blob = new Blob([arrayBuffer], { type: output.content_type });
-            return blob;
-            // Create File object from Blob
-            // return new File([blob], output.filename, {
-            //     type: output.content_type,
-            //     lastModified: new Date().getTime(),
-            // });
+            return new File([arrayBuffer], output.filename, { type: output.content_type });
         });
 
         this.prompt_id = prompt_id;
@@ -373,7 +362,7 @@ export class PromptResult {
         this.completed = completed;
         this.execution_time_seconds = execution_time_seconds;
         this.prompt = prompt;
-        this.outputs = fileOutputs;
+        this.outputs =  fileOutputs;
     }
 }
 

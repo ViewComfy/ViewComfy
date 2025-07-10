@@ -1,5 +1,6 @@
 import { ComfyWorkflowError } from '@/app/models/errors';
 import { ComfyUIConnRefusedError } from '@/app/constants';
+import mime from 'mime-types';
 
 type ComfyUIWSEventType = "status" | "executing" | "execution_cached" | "progress" | "executed" | "execution_error" | "execution_success";
 
@@ -229,7 +230,8 @@ export class ComfyUIAPIService {
                 throw responseError;
             }
 
-            return await response.blob();
+            const blob = await response.blob();
+            return new File([blob], file.filename, { type: mime.lookup(file.filename) || "application/octet-stream" });
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {

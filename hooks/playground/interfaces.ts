@@ -7,7 +7,7 @@ export interface IPlaygroundParams {
 }
 
 export interface IUsePostPlayground extends IPlaygroundParams {
-    onSuccess: (outputs: Blob[]) => void,
+    onSuccess: (outputs: File[]) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
 }
