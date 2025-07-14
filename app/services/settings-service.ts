@@ -25,4 +25,11 @@ export class SettingsService {
         }
         return process.env.NEXT_PUBLIC_API_URL;
     }
+
+    public getComfyOutputDirectory(): string {
+        if (!process.env.COMFY_OUTPUT_DIR) {
+            throw new Error("COMFY_OUTPUT_DIR is not set, you need to use Full paths not relative paths");
+        }
+        return process.env.COMFY_OUTPUT_DIR;
+    }
 }

@@ -6,16 +6,20 @@ import { ComfyErrorHandler } from "@/app/helpers/comfy-error-handler";
 import { ComfyError, ComfyWorkflowError } from "@/app/models/errors";
 import { ComfyUIAPIService } from "@/app/services/comfyui-api-service";
 import { missingViewComfyFileError, viewComfyFileName } from "@/app/constants";
+import { SettingsService } from "@/app/services/settings-service";
+import mime from 'mime-types';
 
 export class ComfyUIService {
     private comfyErrorHandler: ComfyErrorHandler;
     private comfyUIAPIService: ComfyUIAPIService;
     private clientId: string;
+    private settingsService: SettingsService;
 
     constructor() {
         this.clientId = crypto.randomUUID();
         this.comfyErrorHandler = new ComfyErrorHandler();
         this.comfyUIAPIService = new ComfyUIAPIService(this.clientId);
+        this.settingsService = new SettingsService();
     }
 
     async runWorkflow(args: IComfyInput) {
@@ -34,6 +38,7 @@ export class ComfyUIService {
             const promptData = await this.comfyUIAPIService.queuePrompt(workflow);
             const outputFiles = promptData.outputFiles;
             const comfyUIAPIService = this.comfyUIAPIService;
+            const getFileFromComfyOutputDirectory = this.getFileFromComfyOutputDirectory;
 
             if (outputFiles.length === 0) {
                 throw new ComfyWorkflowError({
@@ -53,7 +58,7 @@ export class ComfyUIService {
                                     if (typeof dict === "object" && dict?.type === "output") {
                                         const filename = dict?.filename || "";
                                         if (filename) {
-                                            outputBuffer = await comfyUIAPIService.getOutputFiles({ file });
+                                            outputBuffer = await getFileFromComfyOutputDirectory({ fileName: filename });
                                         } else {
                                             throw new Error("Does not have a filename");
                                         }
@@ -129,7 +134,7 @@ export class ComfyUIService {
             const filePath = path.join(process.cwd(), viewComfyFileName);
             const fileContent = await fs.readFile(filePath, "utf8");
             workflow = JSON.parse(fileContent);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_error) {
             throw missingWorkflowError;
         }
@@ -150,6 +155,12 @@ export class ComfyUIService {
             message: "Failed to find workflowApiJSON",
             errors: ["Failed to find workflowApiJSON"],
         });
+    }
+
+    async getFileFromComfyOutputDirectory({ fileName }: { fileName: string }): Promise<File> {
+        const filePath = path.join(this.settingsService.getComfyOutputDirectory(), fileName);
+        const fileContent = await fs.readFile(filePath, "utf8");
+        return new File([fileContent], fileName, { type: mime.lookup(fileName) || "application/octet-stream" });
     }
 
 }
