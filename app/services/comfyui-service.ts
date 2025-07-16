@@ -9,17 +9,16 @@ import { missingViewComfyFileError, viewComfyFileName } from "@/app/constants";
 import { SettingsService } from "@/app/services/settings-service";
 import mime from 'mime-types';
 
+const settingsService = new SettingsService();
 export class ComfyUIService {
     private comfyErrorHandler: ComfyErrorHandler;
     private comfyUIAPIService: ComfyUIAPIService;
     private clientId: string;
-    private settingsService: SettingsService;
 
     constructor() {
         this.clientId = crypto.randomUUID();
         this.comfyErrorHandler = new ComfyErrorHandler();
         this.comfyUIAPIService = new ComfyUIAPIService(this.clientId);
-        this.settingsService = new SettingsService();
     }
 
     async runWorkflow(args: IComfyInput) {
@@ -158,7 +157,7 @@ export class ComfyUIService {
     }
 
     async getFileFromComfyOutputDirectory({ fileName }: { fileName: string }): Promise<File> {
-        const filePath = path.join(this.settingsService.getComfyOutputDirectory(), fileName);
+        const filePath = path.join(settingsService.getComfyOutputDirectory(), fileName);
         const fileContent = await fs.readFile(filePath, "utf8");
         return new File([fileContent], fileName, { type: mime.lookup(fileName) || "application/octet-stream" });
     }
