@@ -544,7 +544,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
                 </div>
             </FormControl>
             {input.helpText !== "Helper Text" && (
-                <FormDescription>
+                <FormDescription className="whitespace-pre-wrap">
                     {input.helpText}
                 </FormDescription>
             )}
@@ -686,7 +686,7 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                 />
             </FormControl>
             {(input.helpText !== "Helper Text") && (
-                <FormDescription>
+                <FormDescription className="whitespace-pre-wrap">
                     {input.helpText}
                 </FormDescription>
             )}
@@ -748,7 +748,7 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
                 <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} />
             </FormControl>
             {(input.helpText !== "Helper Text") && (
-                <FormDescription>
+                <FormDescription className="whitespace-pre-wrap">
                     {input.helpText}
                 </FormDescription>
             )}
