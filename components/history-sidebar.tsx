@@ -35,6 +35,17 @@ interface HistorySidebarProps {
 }
 
 export function HistorySidebar({ open, setOpen, className }: HistorySidebarProps) {
+    const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
+
+    // If user management is disabled, don't render the history sidebar
+    if (!userManagement) {
+        return null;
+    }
+
+    return <HistorySidebarContent open={open} setOpen={setOpen} className={className} />;
+}
+
+export function HistorySidebarContent({ open, setOpen, className }: HistorySidebarProps) {
     const [showFilters, setShowFilters] = useState(false);
     const { viewComfyState } = useViewComfy();
     const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy>(viewComfyState.viewComfys[0]);
