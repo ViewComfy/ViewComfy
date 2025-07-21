@@ -2,6 +2,7 @@ import { IBase } from "@/app/interfaces/base";
 import { IUser } from "@/app/interfaces/user";
 
 export interface IWorkflowHistoryFileModel extends IBase {
+    id: number;
     filename: string;
     contentType: string;
     size: number;

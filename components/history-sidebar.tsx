@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { History, Filter, ChevronRight, Check, Copy } from "lucide-react"
+import { History, Filter, ChevronRight, Check, Copy, FileType, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +35,17 @@ interface HistorySidebarProps {
 }
 
 export function HistorySidebar({ open, setOpen, className }: HistorySidebarProps) {
+    const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
+
+    // If user management is disabled, don't render the history sidebar
+    if (!userManagement) {
+        return null;
+    }
+
+    return <HistorySidebarContent open={open} setOpen={setOpen} className={className} />;
+}
+
+export function HistorySidebarContent({ open, setOpen, className }: HistorySidebarProps) {
     const [showFilters, setShowFilters] = useState(false);
     const { viewComfyState } = useViewComfy();
     const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy>(viewComfyState.viewComfys[0]);
@@ -269,8 +280,8 @@ function BlobPreview({
                 }}
             >
                 <DialogTrigger asChild>
-                    <div key={previewBlob.filename + "blob-preview-trigger"}>
-                        {previewBlob.contentType.startsWith("image/") && (
+                    <div key={previewBlob.id + "blob-preview-trigger"}>
+                        {previewBlob.contentType.startsWith("image/") && previewBlob.contentType !== "image/vnd.adobe.photoshop" && (
                             <Image
                                 src={previewBlob.filename}
                                 alt={"Output image"}
@@ -282,7 +293,7 @@ function BlobPreview({
                         )}
                         {previewBlob.contentType.startsWith("video/") && (
                             <video
-                                key={previewBlob.filename}
+                                key={previewBlob.id}
                                 className="object-contain rounded-md hover:cursor-pointer transition-all hover:scale-105"
                                 width={100}
                                 height={100}
@@ -301,16 +312,26 @@ function BlobPreview({
                                 <Play className="h-4 w-4" />
                             </Button>
                         )}
+                        {(previewBlob.contentType === "image/vnd.adobe.photoshop") && (
+                            <Button variant="outline">
+                                <File className="h-10 w-10" />
+                            </Button>
+                        )}
+                        {(previewBlob.contentType.startsWith("text/")) && (
+                            <Button variant="outline">
+                                <FileType className="h-10 w-10" />
+                            </Button>
+                        )}
                     </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                     <div className="relative">
                         {outputs[blobIndex].contentType.startsWith(
                             "image/",
-                        ) && (
+                        ) && outputs[blobIndex].contentType !== "image/vnd.adobe.photoshop" && (
                                 <div className="inline-block">
                                     <img
-                                        key={outputs[blobIndex].filename}
+                                        key={outputs[blobIndex].id}
                                         src={outputs[blobIndex].filename}
                                         alt={`${outputs[blobIndex].filename}`}
                                         className="max-h-[85vh] w-auto object-contain rounded-md"
@@ -321,7 +342,7 @@ function BlobPreview({
                             "video/",
                         ) && (
                                 <video
-                                    key={outputs[blobIndex].filename}
+                                    key={outputs[blobIndex].id}
                                     className="max-h-[85vh] w-auto object-contain rounded-md"
                                     controls
                                 >
@@ -339,13 +360,23 @@ function BlobPreview({
                         ) && (
                                 <div className="m-20">
                                     <audio
-                                        key={outputs[blobIndex].filename}
+                                        key={outputs[blobIndex].id}
                                         controls
                                     >
                                         <source src={outputs[blobIndex].filename} />
                                     </audio>
                                 </div>
                             )}
+                        {(outputs[blobIndex].contentType === "image/vnd.adobe.photoshop") && (
+                            <div className="m-20">
+                                <File className="h-20 w-20" />
+                            </div>
+                        )}
+                        {(outputs[blobIndex].contentType.startsWith("text/")) && (
+                            <div className="m-20">
+                                <FileType className="h-20 w-20" />
+                            </div>
+                        )}
                         {outputs.length > 1 && (
                             <>
                                 <Button
@@ -411,7 +442,7 @@ export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div className="inline-block">
                     <img
-                        key={blob.filename}
+                        key={blob.id}
                         src={blob.filename}
                         alt={`${blob.filename}`}
                         className="max-h-[85vh] w-auto object-contain rounded-md"
@@ -440,7 +471,7 @@ export function VideoDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
         <Dialog>
             <DialogTrigger asChild>
                 <video
-                    key={blob.filename}
+                    key={blob.id}
                     className="object-contain rounded-md hover:cursor-pointer transition-all hover:scale-105"
                     width={100}
                     height={100}
@@ -456,7 +487,7 @@ export function VideoDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <video
-                    key={blob.filename}
+                    key={blob.id}
                     className="max-h-[85vh] w-auto object-contain rounded-md"
                     controls
                 >

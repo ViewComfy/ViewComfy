@@ -67,7 +67,7 @@ function buildFormData(data: {
     return formData;
 }
 
-const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: Blob[]) => void }) => {
+const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: File[]) => void }) => {
 
     const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
 
@@ -113,9 +113,10 @@ const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: B
         throw new Error("No response body");
     }
 
+
     const reader = response.body.getReader();
     let buffer: Uint8Array = new Uint8Array(0);
-    const output: Blob[] = [];
+    const output: File[] = [];
     const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
 
     while (true) {
@@ -128,15 +129,40 @@ const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: B
         // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
         while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
             const outputPart = buffer.slice(0, separatorIndex);
-            buffer = buffer.slice(separatorIndex + separator.length);
-
-            const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
-            if (mimeEndIndex !== -1) {
-                const mimeType = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex)).split(': ')[1];
-                const outputData = outputPart.slice(mimeEndIndex + 4);
-                const blob = new Blob([outputData], { type: mimeType });
-                output.push(blob);
+            // Skip the separator and the newline characters around it
+            const endOfSeparator = separatorIndex + separator.length + 2; // +2 for trailing \r\n
+            if (buffer[separatorIndex - 2] === 13 && buffer[separatorIndex - 1] === 10) { // leading \r\n
+                buffer = buffer.slice(endOfSeparator - 2);
+            } else {
+                buffer = buffer.slice(endOfSeparator);
             }
+
+
+            // Find Content-Type header
+            const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
+            if (mimeEndIndex === -1) {
+                continue;
+            }
+
+            const mimeHeader = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex));
+            const mimeType = mimeHeader.split(': ')[1] || 'application/octet-stream';
+
+            const afterMimeHeader = outputPart.slice(mimeEndIndex + 4);
+
+            // Find Content-Disposition header
+            const dispositionEndIndex = findSubarray(afterMimeHeader, new TextEncoder().encode('\r\n\r\n'));
+            if (dispositionEndIndex === -1) {
+                continue;
+            }
+
+            const dispositionHeader = new TextDecoder().decode(afterMimeHeader.slice(0, dispositionEndIndex));
+            const filenameMatch = /filename="([^"]+)"/.exec(dispositionHeader);
+            const filename = filenameMatch ? filenameMatch[1] : 'file';
+
+            const outputData = afterMimeHeader.slice(dispositionEndIndex + 4);
+
+            const file = new File([outputData], filename, { type: mimeType });
+            output.push(file);
         }
     }
 
