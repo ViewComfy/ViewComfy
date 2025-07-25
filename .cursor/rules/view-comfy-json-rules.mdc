@@ -162,6 +162,11 @@ If the valueType is "select" then the options array is required and should be an
 - "label": is the label of the option
 - "value": is the value of the option
 
+If the valueType is "slider" then the slider object is required and should be an object with the following properties:
+- "min": is the minimum value of the slider
+- "max": is the maximum value of the slider
+- "step": is the step of the slider
+
 If the user want to transform the value of an input to a select input and doesn't provide the label and value, then the label will be the value and the value will be the value and the value should be the first value of the options array and the valueType should be "select".
 
 if the user wants to move an input from the inputs array to the advancedInputs array, you should move the whole object to the advancedInputs array
