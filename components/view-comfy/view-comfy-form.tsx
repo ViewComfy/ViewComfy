@@ -830,7 +830,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
             </FormControl>
             <FormDescription className="whitespace-pre-wrap">
                 Value: {field.value} <br />
-                Min: {input.slider?.min}, Max: {input.slider?.max}, Step: {input.slider?.step}, 
+                Min: {input.slider?.min}, Max: {input.slider?.max}, Step: {input.slider?.step}
             </FormDescription>
         </FormItem>
     )
