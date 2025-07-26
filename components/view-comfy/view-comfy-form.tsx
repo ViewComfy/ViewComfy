@@ -36,6 +36,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -474,6 +475,12 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
         )
     }
 
+    if (input.valueType === "slider") {
+        return (
+            <FormSliderInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+        )
+    }
+
     return (
         <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
     )
@@ -788,6 +795,43 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                     </SelectContent>
                 </Select>
             </FormControl>
+        </FormItem>
+    )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+    const { input, field, editMode, remove, index } = args;
+
+    const onSliderChange = (value: number[]) => {
+        console.log({ value });
+        field.onChange(value[0]);
+    };
+
+    console.log({ fieldValue: field.value });
+
+    return (
+        <FormItem key={input.id}>
+            <FormLabel>{input.title}
+                {editMode && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={remove ? () => remove(index) : undefined}
+                    >
+                        <Trash2 className="size-5" />
+                    </Button>
+                )}
+            </FormLabel>
+            <FormControl>
+                <Slider onValueChange={onSliderChange} defaultValue={[field.value]} min={input.slider?.min} max={input.slider?.max} step={input.slider?.step} />
+                {/* <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} /> */}
+            </FormControl>
+            <FormDescription className="whitespace-pre-wrap">
+                Value: {field.value} <br />
+                Min: {input.slider?.min}, Max: {input.slider?.max}, Step: {input.slider?.step}
+            </FormDescription>
         </FormItem>
     )
 }
