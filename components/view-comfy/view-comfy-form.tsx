@@ -512,6 +512,17 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>
                 {input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
                 {editMode && (
                     <Button
                         size="icon"
@@ -610,6 +621,17 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
                 {editMode && (
                     <Button
                         size="icon"
@@ -673,7 +695,20 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
 
     return (
         <FormItem key={input.id}>
-            <FormLabel className={FORM_STYLE.label}>{input.title}
+            <FormLabel className={FORM_STYLE.label}>
+                {input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)
+                }
                 {editMode && (
                     <Button
                         size="icon"
@@ -715,6 +750,17 @@ function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boo
             <div className="grid gap-1.5 leading-none">
                 <FormLabel className={CHECKBOX_STYLE.checkBoxLabel}>
                     {input.title}
+                    {input.tooltip && (
+                        <Tooltip>
+                            <TooltipTrigger className="">
+                                <Info className="h-4 w-4" />
+                            </TooltipTrigger>
+                            <TooltipContent className="text-center whitespace-pre-wrap">
+                                <p>
+                                    {input.tooltip}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>)}
                 </FormLabel>
                 {/* <FormDescription className="text-sm text-muted-foreground">
                     {input.helpText}
@@ -739,7 +785,19 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
     const { input, field, editMode, remove, index } = args;
     return (
         <FormItem key={input.id}>
-            <FormLabel>{input.title}
+            <FormLabel className={FORM_STYLE.label}>{input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)
+                }
                 {editMode && (
                     <Button
                         size="icon"
@@ -769,6 +827,17 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
                 {editMode && (
                     <Button
                         size="icon"
@@ -808,11 +877,20 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
         field.onChange(value[0]);
     };
 
-    console.log({ fieldValue: field.value });
-
     return (
         <FormItem key={input.id}>
-            <FormLabel>{input.title}
+            <FormLabel className="flex flex-row items-center gap-2"> {input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
                 {editMode && (
                     <Button
                         size="icon"
@@ -826,11 +904,10 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
             </FormLabel>
             <FormControl>
                 <Slider onValueChange={onSliderChange} defaultValue={[field.value]} min={input.slider?.min} max={input.slider?.max} step={input.slider?.step} />
-                {/* <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} /> */}
             </FormControl>
             <FormDescription className="whitespace-pre-wrap">
                 Value: {field.value} <br />
-                Min: {input.slider?.min}, Max: {input.slider?.max}, Step: {input.slider?.step}
+                Min: {input.slider?.min} Max: {input.slider?.max} Step: {input.slider?.step}
             </FormDescription>
         </FormItem>
     )

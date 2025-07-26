@@ -155,6 +155,7 @@ inputs rules:
 - "workflowPath": is an array of strings that define the path to the input in the workflowApiJSON.
 - "helpText": is an optional value and is a string that defines the help text of the input.
 - "validations": is an optional value and is an object that defines the validations of the input.
+- "tooltip": is an optional value and is a string that defines the tooltip of the input.
 
 advancedInputs rules are the same as the inputs rules and this used to render this inputs inside a expandable menu.
 

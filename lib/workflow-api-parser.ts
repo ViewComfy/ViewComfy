@@ -13,6 +13,7 @@ export interface IInputField {
     key: string;
     options?: { label: string, value: string }[];
     slider?: { min: number, max: number, step: number };
+    tooltip?: string;
 }
 
 export interface IMultiValueInput {
@@ -148,6 +149,7 @@ function parseInputField(args: { node: { key: string, value: any }, path: string
                 value: node.value,
                 workflowPath,
                 helpText: "Helper Text",
+                tooltip: "",
                 valueType: parseValueType(node.value),
                 validations: { required: true },
                 key: workflowPath.join("-"),
