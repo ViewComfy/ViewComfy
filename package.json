@@ -13,6 +13,7 @@
     "@clerk/themes": "^2.1.35",
     "@date-fns/utc": "^2.1.0",
     "@hookform/resolvers": "^3.9.0",
+    "@img-comparison-slider/react": "^8.0.2",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.1.1",
