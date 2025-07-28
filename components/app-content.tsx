@@ -20,7 +20,7 @@ export default function AppContent() {
                 <div className="flex flex-col h-screen w-full overflow-x-auto overflow-y-hidden">
                     <TopNav />
                     <div className="flex flex-1 overflow-x-auto overflow-y-hidden">
-                        <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} deployWindow={deployWindow} onDeployWindow={setDeployWindow} />
+                        {!viewMode && <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} deployWindow={deployWindow} onDeployWindow={setDeployWindow} />}
                         <main className="flex-1 overflow-x-auto overflow-y-hidden">
                             {currentTab === TabValue.Playground && <Suspense><PlaygroundPage /></Suspense>}
                             {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
