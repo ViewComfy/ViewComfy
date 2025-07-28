@@ -2,7 +2,8 @@
 import {
     Settings,
     History,
-    Download
+    Download,
+    Images
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +39,7 @@ import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import * as constants from "@/app/constants";
+import { ImgComparisonSlider } from '@img-comparison-slider/react';
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -68,6 +70,37 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
     const appId = searchParams?.get("appId");
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
+    const [selectedImagesForComparison, setSelectedImagesForComparison] = useState<string[]>([]);
+    const [isCompareModeActive, setIsCompareModeActive] = useState(false);
+
+    const handleImageSelectionForComparison = (imageUrl: string) => {
+        setSelectedImagesForComparison((prevSelected) => {
+            if (prevSelected.includes(imageUrl)) {
+                return prevSelected.filter((url) => url !== imageUrl);
+            } else if (prevSelected.length < 2) {
+                return [...prevSelected, imageUrl];
+            }
+            return prevSelected;
+        });
+    };
+
+    const handleClearSelectedImages = () => {
+        setSelectedImagesForComparison([]);
+    };
+
+    const handleToggleCompareMode = () => {
+        setIsCompareModeActive(prev => {
+            if (prev) {
+                handleClearSelectedImages();
+            }
+            return !prev;
+        });
+    };
+
+    const handleComparisonDialogClose = () => {
+        handleClearSelectedImages();
+        setIsCompareModeActive(false);
+    };
 
     useEffect(() => {
         if (viewMode) {
@@ -204,11 +237,21 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
                     <div>
                         <Header title={"Playground"} />
                     </div>
-                    <div className="hidden pr-4 md:flex md:items-center md:justify-end">
+                    <div className="hidden pr-4 md:flex md:items-center md:justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={handleToggleCompareMode}>
+                            <Images className="h-4 w-4" />
+                            {isCompareModeActive ? "Cancel" : "Compare"}
+                        </Button>
+                        <ImageCompareDialog
+                            image1={selectedImagesForComparison[0]}
+                            image2={selectedImagesForComparison[1]}
+                            onClose={handleComparisonDialogClose}
+                            isOpen={selectedImagesForComparison.length === 2}
+                        />
+
                         <Button
                             variant="outline"
                             size="sm"
-                            className={cn("gap-2")}
                             onClick={() => setHistorySidebarOpen(value => !value)}
                         >
                             <History className="h-4 w-4" />
@@ -273,7 +316,13 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
                                                 <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={timestamp}>
                                                     {generation.map((output) => (
                                                         <Fragment key={output.url}>
-                                                            <OutputRenderer output={output} textOutputEnabled={textOutputEnabled} />
+                                                            <OutputRenderer
+                                                                output={output}
+                                                                textOutputEnabled={textOutputEnabled}
+                                                                onSelectForComparison={handleImageSelectionForComparison}
+                                                                isSelectedForComparison={selectedImagesForComparison.includes(output.url)}
+                                                                isCompareModeActive={isCompareModeActive}
+                                                            />
                                                         </Fragment>
                                                     ))}
                                                 </div>
@@ -321,7 +370,7 @@ export function ImageDialog({ output }: { output: { outputs: File, url: string }
                     key={output.url}
                     src={output.url}
                     alt={`${output.url}`}
-                    className={cn("max-w-full max-h-full w-auto h-auto object-contain rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                    className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                 />
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
@@ -354,7 +403,7 @@ export function VideoDialog({ output }: { output: { outputs: File, url: string }
             <DialogTrigger asChild>
                 <video
                     key={output.url}
-                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-md hover:cursor-pointer"
+                    className="w-full h-64 object-cover rounded-md hover:cursor-pointer"
                     controls
                 >
                     <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
@@ -422,7 +471,7 @@ export function FileOutput({ output }: { output: { outputs: File, url: string } 
 }
 
 
-function OutputRenderer({ output, textOutputEnabled }: { output: { outputs: File, url: string }, textOutputEnabled: boolean }) {
+function OutputRenderer({ output, textOutputEnabled, onSelectForComparison, isSelectedForComparison, isCompareModeActive }: { output: { outputs: File, url: string }, textOutputEnabled: boolean, onSelectForComparison: (imageUrl: string) => void, isSelectedForComparison: boolean, isCompareModeActive: boolean }) {
 
     const getOutputComponent = () => {
         if (!output) {
@@ -430,7 +479,19 @@ function OutputRenderer({ output, textOutputEnabled }: { output: { outputs: File
         }
 
         if (output.outputs.type.startsWith('image/') && output.outputs.type !== "image/vnd.adobe.photoshop") {
-            return <ImageDialog output={output} />
+            return (
+                <div className="relative">
+                    <ImageDialog output={output} />
+                    {isCompareModeActive && (
+                        <input
+                            type="checkbox"
+                            className="absolute top-2 right-2 z-10"
+                            checked={isSelectedForComparison}
+                            onChange={() => onSelectForComparison(output.url)}
+                        />
+                    )}
+                </div>
+            );
         } else if (output.outputs.type.startsWith('video/')) {
             return <VideoDialog output={output} />
         } else if (output.outputs.type.startsWith('audio/')) {
@@ -449,7 +510,7 @@ function OutputRenderer({ output, textOutputEnabled }: { output: { outputs: File
             {outputComponent && (
                 <div
                     key={output.url}
-                    className="flex items-center justify-center px-4 sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                    className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]"
                 >
                     <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         {outputComponent}
@@ -464,5 +525,26 @@ function OutputRenderer({ output, textOutputEnabled }: { output: { outputs: File
                 )
             }
         </>
+    )
+}
+
+
+export function ImageCompareDialog({ image1, image2, onClose, isOpen }: { image1: string, image2: string, onClose: () => void, isOpen: boolean }) {
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            onClose();
+        }
+    };
+    return (
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
+                <div className="inline-block">
+                    <ImgComparisonSlider>
+                        <img slot="first" alt="first image" src={image1} className="max-h-[85vh] w-auto object-contain" />
+                        <img slot="second" alt="second image" src={image2} className="max-h-[85vh] w-auto object-contain" />
+                    </ImgComparisonSlider>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
