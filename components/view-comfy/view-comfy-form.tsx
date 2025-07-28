@@ -106,7 +106,10 @@ export function ViewComfyForm(args: {
                                                                         size="icon"
                                                                         variant="ghost"
                                                                         className="text-muted-foreground"
-                                                                        onClick={() => { }}
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            e.stopPropagation();
+                                                                        }}
                                                                     >
                                                                         <Info className="size-5" />
                                                                     </Button>
@@ -515,7 +518,10 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>
@@ -624,7 +630,10 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>
@@ -700,7 +709,10 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>
@@ -753,7 +765,10 @@ function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boo
                     {input.tooltip && (
                         <Tooltip>
                             <TooltipTrigger className="">
-                                <Info className="h-4 w-4" />
+                                <Info className="h-4 w-4" onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }} />
                             </TooltipTrigger>
                             <TooltipContent className="text-center whitespace-pre-wrap">
                                 <p>
@@ -789,7 +804,10 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>
@@ -830,7 +848,10 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>
@@ -883,7 +904,10 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
-                            <Info className="h-4 w-4" />
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
                         </TooltipTrigger>
                         <TooltipContent className="text-center whitespace-pre-wrap">
                             <p>

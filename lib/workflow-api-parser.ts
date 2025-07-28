@@ -1,6 +1,9 @@
 import * as constants from "@/app/constants";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 
+const VC_BASIC_INPUT = "VC_BASIC";
+const VC_ADVANCED_INPUT = "VC_ADV";
+
 export interface IInputField {
     title: string;
     placeholder: string;
@@ -36,6 +39,10 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
     let basicInputs: IMultiValueInput[] = [];
     let advancedInputs: IMultiValueInput[] = [];
 
+    let basicViewComfyInputs: IMultiValueInput[] = [];
+    let advancedViewComfyInputs: IMultiValueInput[] = [];
+    let finalInput;
+
     for (const [key, value] of Object.entries(source)) {
         const inputs: IInputField[] = [];
         for (const node of Object.entries(value.inputs)) {
@@ -54,11 +61,17 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                         input.valueType = "long-text";
                         input.title = getTitleFromValue(value.class_type, value);
                         input.placeholder = getTitleFromValue(value.class_type, value);
-                        basicInputs.push({
+                        const finalInput = {
                             title: getTitleFromValue(value.class_type, value),
                             inputs: inputs,
                             key: `${key}-${value.class_type}`
-                        });
+                        };
+
+                        if (isViewComfyInput(value._meta?.title)) {
+                            basicViewComfyInputs.push(finalInput)
+                        } else {
+                            basicInputs.push(finalInput);
+                        }
                     }
                     break;
 
@@ -69,11 +82,18 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                     input.title = getTitleFromValue(value.class_type, value);
                     input.placeholder = getTitleFromValue(value.class_type, value);
                     input.value = null;
-                    basicInputs.push({
+                    finalInput = {
                         title: getTitleFromValue(value.class_type, value),
                         inputs: [input],
                         key: `${key}-${value.class_type}`
-                    });
+                    };
+
+                    if (isViewComfyInput(value._meta?.title)) {
+                        basicViewComfyInputs.push(finalInput)
+                    } else {
+                        basicInputs.push(finalInput);
+                    }
+
                     break;
 
                 case "VHS_LoadVideo":
@@ -82,11 +102,19 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                         inputs[uploadInputIndex].valueType = "video"
                         inputs[uploadInputIndex].value = null
                     }
-                    basicInputs.push({
+
+                    finalInput = {
                         title: getTitleFromValue(value.class_type, value),
                         inputs: inputs,
                         key: `${key}-${value.class_type}`
-                    });
+                    };
+
+                    if (isViewComfyInput(value._meta?.title)) {
+                        basicViewComfyInputs.push(finalInput)
+                    } else {
+                        basicInputs.push(finalInput);
+                    }
+
                     break;
                 case "LoadAudio":
                     const audioInput = inputs[0];
@@ -108,11 +136,17 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                     }
 
                     if (inputs.length > 0) {
-                        advancedInputs.push({
+                        finalInput = {
                             title: getTitleFromValue(value.class_type, value),
                             inputs: inputs,
                             key: `${key}-${value.class_type}`
-                        });
+                        }
+
+                        if (isViewComfyInput(value._meta?.title)) {
+                            advancedViewComfyInputs.push(finalInput)
+                        } else {
+                            advancedInputs.push(finalInput);
+                        }
                     }
                     break;
             }
@@ -125,6 +159,16 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
     if (basicInputs.length === 0) {
         basicInputs = [...advancedInputs];
         advancedInputs = [];
+    }
+
+    if (basicViewComfyInputs.length === 0) {
+        basicViewComfyInputs = [...advancedViewComfyInputs];
+        advancedViewComfyInputs = [];
+    }
+
+    if (basicViewComfyInputs.length > 0) {
+        basicInputs = [...basicViewComfyInputs];
+        advancedInputs = [...advancedViewComfyInputs];
     }
 
     return { inputs: basicInputs, advancedInputs, title: "", description: "", previewImages: [] };
@@ -192,5 +236,24 @@ function capitalize(str: string): string {
 }
 
 function getTitleFromValue(class_type: string, value: { _meta?: { title: string } }): string {
-    return value._meta?.title || class_type;
+    if (!value._meta?.title) {
+        return class_type;
+    }
+
+    if (value._meta.title.startsWith(VC_BASIC_INPUT)) {
+        return value._meta.title.replace(VC_BASIC_INPUT, "").trim();
+    }
+    else if (value._meta.title.startsWith(VC_ADVANCED_INPUT)) {
+        return value._meta.title.replace(VC_ADVANCED_INPUT, "").trim();
+    } else {
+        return value._meta.title;
+    }
+}
+
+function isViewComfyInput(title: string) {
+    if (!title) {
+        return false;
+    }
+
+    return (title.startsWith(VC_BASIC_INPUT) || title.startsWith(VC_ADVANCED_INPUT))
 }
