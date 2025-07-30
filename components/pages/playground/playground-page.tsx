@@ -70,6 +70,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
     const appId = searchParams?.get("appId");
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
+    const [showOutputFileName, setShowOutputFileName] = useState(false);
     const [selectedImagesForComparison, setSelectedImagesForComparison] = useState<string[]>([]);
     const [isCompareModeActive, setIsCompareModeActive] = useState(false);
 
@@ -172,6 +173,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
         };
 
         setTextOutputEnabled(data.textOutputEnabled ?? false);
+        setShowOutputFileName(data.showOutputFileName ?? false);
 
         const doPostParams = {
             viewComfy: generationData,
@@ -318,6 +320,7 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
                                                         <Fragment key={output.url}>
                                                             <OutputRenderer
                                                                 output={output}
+                                                                showOutputFileName={showOutputFileName}
                                                                 textOutputEnabled={textOutputEnabled}
                                                                 onSelectForComparison={handleImageSelectionForComparison}
                                                                 isSelectedForComparison={selectedImagesForComparison.includes(output.url)}
@@ -362,16 +365,19 @@ export default function PlaygroundPage() {
     );
 }
 
-export function ImageDialog({ output }: { output: { outputs: File, url: string } }) {
+export function ImageDialog({ output, showOutputFileName }: { output: { outputs: File, url: string }, showOutputFileName: boolean }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <img
-                    key={output.url}
-                    src={output.url}
-                    alt={`${output.url}`}
-                    className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
-                />
+                <>
+                    <img
+                        key={output.url}
+                        src={output.url}
+                        alt={`${output.url}`}
+                        className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                    />
+                    {showOutputFileName && parseFileName(output.outputs.name)}
+                </>
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div className="inline-block">
@@ -471,17 +477,27 @@ export function FileOutput({ output }: { output: { outputs: File, url: string } 
 }
 
 
-function OutputRenderer({ output, textOutputEnabled, onSelectForComparison, isSelectedForComparison, isCompareModeActive }: { output: { outputs: File, url: string }, textOutputEnabled: boolean, onSelectForComparison: (imageUrl: string) => void, isSelectedForComparison: boolean, isCompareModeActive: boolean }) {
+function OutputRenderer({
+    output,
+    textOutputEnabled,
+    onSelectForComparison,
+    isSelectedForComparison,
+    isCompareModeActive,
+    showOutputFileName }:
+    {
+        output: { outputs: File, url: string },
+        textOutputEnabled: boolean,
+        onSelectForComparison: (imageUrl: string) => void,
+        isSelectedForComparison: boolean,
+        isCompareModeActive: boolean,
+        showOutputFileName: boolean,
+    }) {
 
     const getOutputComponent = () => {
-        if (!output) {
-            console.log({ output });
-        }
-
         if (output.outputs.type.startsWith('image/') && output.outputs.type !== "image/vnd.adobe.photoshop") {
             return (
                 <div className="relative">
-                    <ImageDialog output={output} />
+                    <ImageDialog output={output} showOutputFileName={showOutputFileName} />
                     {isCompareModeActive && (
                         <input
                             type="checkbox"
@@ -547,4 +563,14 @@ export function ImageCompareDialog({ image1, image2, onClose, isOpen }: { image1
             </DialogContent>
         </Dialog>
     )
+}
+
+function parseFileName(filename: string): string {
+    if (filename.startsWith("__")) {
+        return filename.substring(2,
+            filename.lastIndexOf("__")
+        );
+    } else {
+        return filename;
+    }
 }

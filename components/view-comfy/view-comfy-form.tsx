@@ -137,9 +137,7 @@ export function ViewComfyForm(args: {
                                                 render={({ field }) => (
                                                     <FormItem key="textOutputEnabled" className="">
                                                         <FormControl>
-                                                            <div className={cn(`flex ml-0.5 space-x-2 pt-2`,
-                                                                (field.value) ? "mb-[-5px]" : "pb-2"
-                                                            )}>
+                                                            <div className={"flex ml-0.5 space-x-2 pt-2 mb-[-5px]"}>
                                                                 <FormLabel>Enable text output</FormLabel>
                                                                 <Checkbox
                                                                     checked={field.value}
@@ -147,11 +145,33 @@ export function ViewComfyForm(args: {
                                                                 />
                                                             </div>
                                                         </FormControl>
-                                                        {(field.value) && (
-                                                            <FormDescription className="pb-2">
-                                                                Text output is in beta and can lead to unexpected text being rendered
-                                                            </FormDescription>
-                                                        )}
+                                                        <FormDescription className="pb-2">
+                                                            Text output is in beta and can lead to unexpected text being rendered
+                                                        </FormDescription>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="showOutputFileName"
+                                                render={({ field }) => (
+                                                    <FormItem key="showOutputFileName" className="">
+                                                        <FormControl>
+                                                            <div className={"flex ml-0.5 space-x-2 mb-[-5px]"}>
+                                                                <FormLabel>
+                                                                    Show file names on output
+                                                                </FormLabel>
+                                                                <Checkbox
+                                                                    checked={field.value}
+                                                                    onCheckedChange={field.onChange}
+                                                                />
+                                                            </div>
+                                                        </FormControl>
+                                                        <FormDescription className="pb-2">
+                                                            Show the filename below the file, you can parse the display by surrounding the filename with __
+                                                            <br />
+                                                            __example__123.png =&gt; example
+                                                        </FormDescription>
                                                     </FormItem>
                                                 )}
                                             />
@@ -164,7 +184,7 @@ export function ViewComfyForm(args: {
                                             <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
                                         </div>
                                     )}
-                                    <fieldset disabled={isLoading} className="grid gap-2 rounded-lg p-1">
+                                    <fieldset disabled={isLoading} className="grid gap-4 rounded-lg p-1">
                                         {editMode && (
                                             <legend className="-ml-1 px-1 text-sm font-medium">
                                                 Basic Inputs
@@ -894,7 +914,6 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
     const { input, field, editMode, remove, index } = args;
 
     const onSliderChange = (value: number[]) => {
-        console.log({ value });
         field.onChange(value[0]);
     };
 
