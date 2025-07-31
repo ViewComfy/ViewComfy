@@ -369,16 +369,15 @@ export function ImageDialog({ output, showOutputFileName }: { output: { outputs:
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <>
+     
                     <img
                         key={output.url}
                         src={output.url}
                         alt={`${output.url}`}
                         className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                     />
-                    {showOutputFileName && parseFileName(output.outputs.name)}
-                </>
             </DialogTrigger>
+            {showOutputFileName && parseFileName(output.outputs.name)}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div className="inline-block">
                     <img
@@ -566,6 +565,7 @@ export function ImageCompareDialog({ image1, image2, onClose, isOpen }: { image1
 }
 
 function parseFileName(filename: string): string {
+
     if (filename.startsWith("__")) {
         return filename.substring(2,
             filename.lastIndexOf("__")
