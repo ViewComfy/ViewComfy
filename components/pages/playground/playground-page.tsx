@@ -500,7 +500,7 @@ function OutputRenderer({
                     {isCompareModeActive && (
                         <input
                             type="checkbox"
-                            className="absolute top-2 right-2 z-10"
+                            className="absolute top-2 right-2 z-10 w-[20px] h-[20px]"
                             checked={isSelectedForComparison}
                             onChange={() => onSelectForComparison(output.url)}
                         />
