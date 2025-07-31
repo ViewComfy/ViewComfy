@@ -2,7 +2,7 @@ name: ViewComfy Playground Modal Build
 
 on:
   push:
-    branches: [ "main" ]
+    # branches: [ "main" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
