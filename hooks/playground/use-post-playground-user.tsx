@@ -25,54 +25,6 @@ export const usePostPlaygroundUser = () => {
     return { doPost, loading, setLoading };
 }
 
-function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
-    const c = new Uint8Array(a.length + b.length);
-    c.set(a);
-    c.set(b, a.length);
-    return c;
-}
-
-function findSubarray(arr: Uint8Array, separator: Uint8Array): number {
-    outer: for (let i = 0; i <= arr.length - separator.length; i++) {
-        for (let j = 0; j < separator.length; j++) {
-            if (arr[i + j] !== separator[j]) {
-                continue outer;
-            }
-        }
-        return i;
-    }
-    return -1;
-}
-
-
-function buildFormData(data: {
-    logs: boolean;
-    params: Record<string, any>;
-    override_workflow_api?: Record<string, any> | undefined;
-}): FormData {
-    const { params, override_workflow_api, logs } = data;
-    const formData = new FormData();
-    let params_str: Record<string, any> = {};
-    for (const key in params) {
-        const value = params[key];
-        if (value instanceof File) {
-            formData.set(key, value);
-        } else {
-            params_str[key] = value;
-        }
-    }
-
-    if (override_workflow_api) {
-        formData.set("workflow_api", JSON.stringify(override_workflow_api));
-    }
-
-    formData.set("params", JSON.stringify(params_str));
-
-    formData.set("logs", logs.toString());
-
-    return formData;
-}
-
 /**
  * Represents the output file data from a prompt execution
  */
