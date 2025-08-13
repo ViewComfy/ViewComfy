@@ -2,21 +2,23 @@ import { IViewComfy } from "@/app/interfaces/comfy-input";
 import { ErrorTypes, ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react";
 import { IUsePostPlayground, IPlaygroundParams } from "@/hooks/playground/interfaces";
+import { PromptResult } from "@/app/models/prompt-result";
 
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
 
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
+        const params = { viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError };
         setLoading(true);
         try {
-            await inferComfyUI({ viewComfy, workflow, viewcomfyEndpoint, onSuccess });
+            await inferLocalComfy(params)
         } catch (error) {
             onError(error);
         }
         setLoading(false);
     }, []);
 
-    return { doPost, loading };
+    return { doPost, loading, setLoading };
 }
 
 function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
@@ -67,111 +69,6 @@ function buildFormData(data: {
     return formData;
 }
 
-const inferComfyUI = async (params: IPlaygroundParams & { onSuccess: (outputs: File[]) => void }) => {
-
-    const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
-
-    const url = viewcomfyEndpoint ? "/api/viewcomfy" : "/api/comfy";
-
-    const formData = new FormData();
-
-    const viewComfyJSON: IViewComfy = {
-        inputs: [],
-        textOutputEnabled: viewComfy.textOutputEnabled ?? false
-    };
-    for (const { key, value } of viewComfy.inputs) {
-        if (value instanceof File) {
-            formData.append(key, value);
-        } else {
-            viewComfyJSON.inputs.push({ key, value });
-        }
-    }
-
-    formData.append('workflow', JSON.stringify(workflow));
-    formData.append('viewComfy', JSON.stringify(viewComfyJSON));
-    formData.append('viewcomfyEndpoint', viewcomfyEndpoint ?? "");
-
-    const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        if (response.status === 504) {
-            const error = new ResponseError({
-                error: "Your workflow is taking too long to respond. The maximum allowed time is 5 minutes.",
-                errorMsg: "ViewComfy Timeout",
-                errorType: ErrorTypes.VIEW_MODE_TIMEOUT
-            });
-            throw error;
-        }
-        const responseError: ResponseError = await response.json();
-        throw responseError;
-    }
-
-    if (!response.body) {
-        throw new Error("No response body");
-    }
-
-
-    const reader = response.body.getReader();
-    let buffer: Uint8Array = new Uint8Array(0);
-    const output: File[] = [];
-    const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer = concatUint8Arrays(buffer, value);
-
-        let separatorIndex: number;
-        // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-        while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
-            const outputPart = buffer.slice(0, separatorIndex);
-            // Skip the separator and the newline characters around it
-            const endOfSeparator = separatorIndex + separator.length + 2; // +2 for trailing \r\n
-            if (buffer[separatorIndex - 2] === 13 && buffer[separatorIndex - 1] === 10) { // leading \r\n
-                buffer = buffer.slice(endOfSeparator - 2);
-            } else {
-                buffer = buffer.slice(endOfSeparator);
-            }
-
-
-            // Find Content-Type header
-            const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
-            if (mimeEndIndex === -1) {
-                continue;
-            }
-
-            const mimeHeader = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex));
-            const mimeType = mimeHeader.split(': ')[1] || 'application/octet-stream';
-
-            const afterMimeHeader = outputPart.slice(mimeEndIndex + 4);
-
-            // Find Content-Disposition header
-            const dispositionEndIndex = findSubarray(afterMimeHeader, new TextEncoder().encode('\r\n\r\n'));
-            if (dispositionEndIndex === -1) {
-                continue;
-            }
-
-            const dispositionHeader = new TextDecoder().decode(afterMimeHeader.slice(0, dispositionEndIndex));
-            const filenameMatch = /filename="([^"]+)"/.exec(dispositionHeader);
-            const filename = filenameMatch ? filenameMatch[1] : 'file';
-
-            const outputData = afterMimeHeader.slice(dispositionEndIndex + 4);
-
-            const file = new File([outputData], filename, { type: mimeType });
-            output.push(file);
-        }
-    }
-
-    if (output.length > 0) {
-        onSuccess(output);
-    } else {
-        onSuccess([]);
-    }
-}
 
 
 interface Infer {
@@ -394,87 +291,6 @@ export const inferWithLogsStream = async ({
     }
 };
 
-/**
- * Represents the output file data from a prompt execution
- */
-export interface FilesData {
-    filename: string;
-    content_type: string;
-    data: string;
-    size: number;
-}
-
-/**
- * Creates a PromptResult object from the response
- *
- * @param data Raw prompt result data
- * @returns A properly formatted PromptResult with File objects
- */
-export class PromptResult {
-    /** Unique identifier for the prompt */
-    prompt_id: string;
-
-    /** Current status of the prompt execution */
-    status: string;
-
-    /** Whether the prompt execution is complete */
-    completed: boolean;
-
-    /** Time taken to execute the prompt in seconds */
-    execution_time_seconds: number;
-
-    /** The original prompt configuration */
-    prompt: Record<string, any>;
-
-    /** List of output files */
-    outputs: File[];
-
-    constructor(data: {
-        prompt_id: string;
-        status: string;
-        completed: boolean;
-        execution_time_seconds: number;
-        prompt: Record<string, any>;
-        outputs?: FilesData[];
-    }) {
-        const {
-            prompt_id,
-            status,
-            completed,
-            execution_time_seconds,
-            prompt,
-            outputs = [],
-        } = data;
-
-        // Convert output data to File objects
-        const fileOutputs = outputs.map((output) => {
-            // Convert base64 data to Blob
-            const binaryData = atob(output.data);
-            const arrayBuffer = new ArrayBuffer(binaryData.length);
-            const uint8Array = new Uint8Array(arrayBuffer);
-
-            for (let i = 0; i < binaryData.length; i++) {
-                uint8Array[i] = binaryData.charCodeAt(i);
-            }
-
-            const blob = new Blob([arrayBuffer], { type: output.content_type });
-
-            // Create File object from Blob
-            return new File([blob], output.filename, {
-                type: output.content_type,
-                lastModified: new Date().getTime(),
-            });
-        });
-
-        this.prompt_id = prompt_id;
-        this.status = status;
-        this.completed = completed;
-        this.execution_time_seconds = execution_time_seconds;
-        this.prompt = prompt;
-        this.outputs = fileOutputs;
-    }
-}
-
 class Secret {
     clientId: string | undefined;
     clientSecret: string | undefined;
@@ -502,5 +318,109 @@ class Secret {
             }
             this.token = params.token;
         }
+    }
+}
+
+const inferLocalComfy = async (params: IPlaygroundParams & { onSuccess: (outputs: File[]) => void }) => {
+
+    const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
+
+    const url = viewcomfyEndpoint ? "/api/viewcomfy" : "/api/comfy";
+
+    const formData = new FormData();
+
+    const viewComfyJSON: IViewComfy = {
+        inputs: [],
+        textOutputEnabled: viewComfy.textOutputEnabled ?? false
+    };
+    for (const { key, value } of viewComfy.inputs) {
+        if (value instanceof File) {
+            formData.append(key, value);
+        } else {
+            viewComfyJSON.inputs.push({ key, value });
+        }
+    }
+
+    formData.append('workflow', JSON.stringify(workflow));
+    formData.append('viewComfy', JSON.stringify(viewComfyJSON));
+    formData.append('viewcomfyEndpoint', viewcomfyEndpoint ?? "");
+
+    const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        if (response.status === 504) {
+            const error = new ResponseError({
+                error: "Your workflow is taking too long to respond. The maximum allowed time is 5 minutes.",
+                errorMsg: "ViewComfy Timeout",
+                errorType: ErrorTypes.VIEW_MODE_TIMEOUT
+            });
+            throw error;
+        }
+        const responseError: ResponseError = await response.json();
+        throw responseError;
+    }
+
+    if (!response.body) {
+        throw new Error("No response body");
+    }
+
+    const reader = response.body.getReader();
+    let buffer: Uint8Array = new Uint8Array(0);
+    const output: File[] = [];
+    const separator = new TextEncoder().encode('--BLOB_SEPARATOR--');
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer = concatUint8Arrays(buffer, value);
+
+        let separatorIndex: number;
+        // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+        while ((separatorIndex = findSubarray(buffer, separator)) !== -1) {
+            const outputPart = buffer.slice(0, separatorIndex);
+            // Skip the separator and the newline characters around it
+            const endOfSeparator = separatorIndex + separator.length + 2; // +2 for trailing \r\n
+            if (buffer[separatorIndex - 2] === 13 && buffer[separatorIndex - 1] === 10) { // leading \r\n
+                buffer = buffer.slice(endOfSeparator - 2);
+            } else {
+                buffer = buffer.slice(endOfSeparator);
+            }
+
+            // Find Content-Type header
+            const mimeEndIndex = findSubarray(outputPart, new TextEncoder().encode('\r\n\r\n'));
+            if (mimeEndIndex === -1) {
+                continue;
+            }
+
+            const mimeHeader = new TextDecoder().decode(outputPart.slice(0, mimeEndIndex));
+            const mimeType = mimeHeader.split(': ')[1] || 'application/octet-stream';
+
+            const afterMimeHeader = outputPart.slice(mimeEndIndex + 4);
+
+            // Find Content-Disposition header
+            const dispositionEndIndex = findSubarray(afterMimeHeader, new TextEncoder().encode('\r\n\r\n'));
+            if (dispositionEndIndex === -1) {
+                continue;
+            }
+
+            const dispositionHeader = new TextDecoder().decode(afterMimeHeader.slice(0, dispositionEndIndex));
+            const filenameMatch = /filename="([^"]+)"/.exec(dispositionHeader);
+            const filename = filenameMatch ? filenameMatch[1] : 'file';
+
+            const outputData = afterMimeHeader.slice(dispositionEndIndex + 4);
+
+            const file = new File([outputData], filename, { type: mimeType });
+            output.push(file);
+        }
+    }
+
+    if (output.length > 0) {
+        onSuccess(output);
+    } else {
+        onSuccess([]);
     }
 }

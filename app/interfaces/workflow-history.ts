@@ -6,6 +6,7 @@ export interface IWorkflowHistoryFileModel extends IBase {
     filename: string;
     contentType: string;
     size: number;
+    filepath: string;
 }
 
 export interface IWorkflowHistoryWorkflowModel extends IBase {

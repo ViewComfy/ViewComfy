@@ -13,10 +13,9 @@ import {
     DrawerContent,
     DrawerTrigger,
 } from "@/components/ui/drawer"
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import { Header } from "@/components/header";
 import PlaygroundForm from "./playground-form";
-import { Loader } from "@/components/loader";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
 import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
@@ -40,6 +39,9 @@ import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import * as constants from "@/app/constants";
 import { ImgComparisonSlider } from '@img-comparison-slider/react';
+import { useSocket } from "@/app/providers/socket-provider";
+import { S3FilesData } from "@/app/models/prompt-result";
+import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-user";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -52,18 +54,19 @@ const UserContentWrapper = dynamic(
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
     // TODO: Use this to implement history retrieval
-    const { doPost, loading } = usePostPlayground();
-    return <PlaygroundPageContent doPost={doPost} loading={loading} />;
+    const { doPost, loading, setLoading } = usePostPlaygroundUser();
+    return <PlaygroundPageContent doPost={doPost} loading={loading} setLoading={setLoading} />;
 }
 
 function PlaygroundWithoutAuth() {
-    const { doPost, loading } = usePostPlayground();
-    return <PlaygroundPageContent doPost={doPost} loading={loading} />;
+    const { doPost, loading, setLoading } = usePostPlayground();
+    return <PlaygroundPageContent doPost={doPost} loading={loading} setLoading={setLoading} />;
 }
 
-function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostPlayground) => void, loading: boolean }) {
-    const [results, SetResults] = useState<{ [key: string]: { outputs: File, url: string }[] }>({});
+function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (params: IUsePostPlayground) => void, loading: boolean, setLoading: (loading: boolean) => void }) {
+    const [results, setResults] = useState<{ [key: string]: { outputs: File | S3FilesData, url: string }[] }>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
+    const { currentLog, setResultCallback, setErrorCallback } = useSocket();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
     const searchParams = useSearchParams();
@@ -144,6 +147,61 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
         }
     }, [viewMode, viewComfyStateDispatcher, appId]);
 
+    const onSetResults = useCallback((data: S3FilesData[] | File[]) => {
+        if (!data) {
+            return;
+        }
+        
+        const timestamp = Date.now();
+        const newGeneration: { outputs: File | S3FilesData, url: string }[] = [];
+
+        for (const output of data) {
+            if (output instanceof S3FilesData) {
+                newGeneration.push({ outputs: output, url: output.filepath });
+            } else {
+                newGeneration.push({ outputs: output, url: URL.createObjectURL(output) });
+            }
+        }
+
+        if (newGeneration.length > 0) {
+            setResults((prevResults) => ({
+                [timestamp]: newGeneration,
+                ...prevResults
+            }));
+        }
+        setLoading(false);
+    }, [setLoading]);
+
+    const onSocketError = useCallback((error: Error) => {
+        if (!error) {
+            return;
+        }
+
+        setLoading(false);
+
+        const errorMessage = error?.message || error?.toString() || "Unknown socket error occurred";
+
+        setErrorAlertDialog({
+            open: true,
+            errorTitle: "Execution Error",
+            errorDescription: <>{errorMessage}</>,
+            onClose: () => {
+                setErrorAlertDialog({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+            }
+        });
+    }, [setLoading]);
+
+    // Register the result and error callbacks with the socket provider
+    useEffect(() => {
+        setResultCallback(onSetResults);
+        setErrorCallback(onSocketError);
+
+        // Clean up callbacks on unmount
+        return () => {
+            setResultCallback(null);
+            setErrorCallback(null);
+        };
+    }, [setResultCallback, setErrorCallback, onSetResults, onSocketError]);
 
     function onSubmit(data: IViewComfyWorkflow) {
         const inputs: { key: string, value: unknown }[] = [];
@@ -197,15 +255,6 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
 
         doPost(doPostParams);
     }
-
-    const onSetResults = (data: File[]) => {
-        const timestamp = Date.now();
-        const newGeneration = data.map((output) => ({ outputs: output, url: URL.createObjectURL(output) }));
-        SetResults((prevResults) => ({
-            [timestamp]: newGeneration,
-            ...prevResults
-        }));
-    };
 
     useEffect(() => {
         return () => {
@@ -299,46 +348,64 @@ function PlaygroundPageContent({ doPost, loading }: { doPost: (params: IUsePostP
 
                                 </>
                             )}
-                            {!loading && Object.keys(results).length > 0 && (
+                            {(!loading || Object.keys(results).length > 0) && Object.keys(results).length > 0 && (
                                 <div className="absolute right-3 top-3 flex gap-2">
                                     <Badge variant="outline">
                                         Output
                                     </Badge>
                                 </div>
                             )}
-                            {loading ? (
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                    <Loader />
-                                </div>
-                            ) : (
-                                <div className="flex-1 h-full p-4 flex overflow-y-auto">
-                                    <div className="flex flex-col w-full h-full">
-                                        {Object.entries(results).map(([timestamp, generation], index, array) => (
-                                            <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
-                                                <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={timestamp}>
-                                                    {generation.map((output) => (
-                                                        <Fragment key={output.url}>
-                                                            <OutputRenderer
-                                                                output={output}
-                                                                showOutputFileName={showOutputFileName}
-                                                                textOutputEnabled={textOutputEnabled}
-                                                                onSelectForComparison={handleImageSelectionForComparison}
-                                                                isSelectedForComparison={selectedImagesForComparison.includes(output.url)}
-                                                                isCompareModeActive={isCompareModeActive}
-                                                            />
-                                                        </Fragment>
-                                                    ))}
+                            <div className="flex-1 h-full p-4 flex overflow-y-auto">
+                                <div className="flex flex-col w-full h-full">
+                                    {loading && (
+                                        <div className="flex flex-col gap-4 w-full">
+                                            <div className="flex flex-wrap w-full gap-4 pt-4">
+                                                <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                                                    <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                                        <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
+                                                            <div className="flex flex-col items-center gap-2">
+                                                                <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
+                                                                <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+                                                            </div>
+                                                        </div>
+                                                    </BlurFade>
                                                 </div>
-                                                <hr className={
-                                                    `w-full py-4 
-                                                ${index !== array.length - 1 ? 'border-gray-300' : 'border-transparent'}
-                                                `}
-                                                />
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="text-xs text-muted-foreground">
+                                                    {currentLog?.data}
+                                                    {!currentLog && "Prompt Scheduled"}
+                                                </div>
+                                            </div>
+                                            <hr className="w-full py-4 border-gray-300" />
+                                        </div>
+                                    )}
+                                    {Object.entries(results).map(([timestamp, generation], index, array) => (
+                                        <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
+                                            <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={timestamp}>
+                                                {generation.map((output) => (
+                                                    <Fragment key={output.url}>
+                                                        <OutputRenderer
+                                                            output={output}
+                                                            showOutputFileName={showOutputFileName}
+                                                            textOutputEnabled={textOutputEnabled}
+                                                            onSelectForComparison={handleImageSelectionForComparison}
+                                                            isSelectedForComparison={selectedImagesForComparison.includes(output.url)}
+                                                            isCompareModeActive={isCompareModeActive}
+                                                        />
+                                                    </Fragment>
+                                                ))}
+                                            </div>
+                                            <hr className={
+                                                `w-full py-4 
+                                            ${index !== array.length - 1 ? 'border-gray-300' : 'border-transparent'}
+                                            `
+                                            }
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
                         </ScrollArea>
                         <HistorySidebar open={historySidebarOpen} setOpen={setHistorySidebarOpen} />
                     </div>
@@ -365,19 +432,19 @@ export default function PlaygroundPage() {
     );
 }
 
-export function ImageDialog({ output, showOutputFileName }: { output: { outputs: File, url: string }, showOutputFileName: boolean }) {
+export function ImageDialog({ output, showOutputFileName }: { output: { outputs: File | S3FilesData, url: string }, showOutputFileName: boolean }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-     
-                    <img
-                        key={output.url}
-                        src={output.url}
-                        alt={`${output.url}`}
-                        className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
-                    />
+
+                <img
+                    key={output.url}
+                    src={output.url}
+                    alt={`${output.url}`}
+                    className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                />
             </DialogTrigger>
-            {showOutputFileName && parseFileName(output.outputs.name)}
+            {showOutputFileName && parseFileName(output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name)}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div className="inline-block">
                     <img
@@ -402,7 +469,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { outputs:
     )
 }
 
-export function VideoDialog({ output }: { output: { outputs: File, url: string } }) {
+export function VideoDialog({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -429,7 +496,7 @@ export function VideoDialog({ output }: { output: { outputs: File, url: string }
     )
 }
 
-export function AudioDialog({ output }: { output: { outputs: File, url: string } }) {
+export function AudioDialog({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -442,21 +509,30 @@ export function AudioDialog({ output }: { output: { outputs: File, url: string }
     )
 }
 
-export function TextOutput({ output }: { output: { outputs: File, url: string } }) {
+export function TextOutput({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
-        output.outputs.text().then(setText);
-    }, [output.outputs]);
+        if (output.outputs instanceof File) {
+            output.outputs.text().then(setText);
+        } else {
+            // For S3FilesData, we'd need to fetch the content from the URL
+            fetch(output.url).then(response => response.text()).then(setText);
+        }
+    }, [output.outputs, output.url]);
+
+    const outputName = output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name;
 
     return (
         <div className="pt-4 w-full">
-            <Textarea id={output.outputs.name} value={text} readOnly className="w-full" rows={5} />
+            <Textarea id={outputName} value={text} readOnly className="w-full" rows={5} />
         </div>
     )
 }
 
-export function FileOutput({ output }: { output: { outputs: File, url: string } }) {
+export function FileOutput({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
+    const outputName = output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name;
+
     return (
         <div
             key={output.url}
@@ -465,11 +541,11 @@ export function FileOutput({ output }: { output: { outputs: File, url: string } 
             <Button onClick={() => {
                 const link = document.createElement('a');
                 link.href = output.url;
-                link.download = output.outputs.name;
+                link.download = outputName;
                 link.click();
             }}>
                 <Download className="h-4 w-4 mr-2" />
-                {output.outputs.name}
+                {outputName}
             </Button>
         </div>
     )
@@ -484,7 +560,7 @@ function OutputRenderer({
     isCompareModeActive,
     showOutputFileName }:
     {
-        output: { outputs: File, url: string },
+        output: { outputs: File | S3FilesData, url: string },
         textOutputEnabled: boolean,
         onSelectForComparison: (imageUrl: string) => void,
         isSelectedForComparison: boolean,
@@ -493,7 +569,9 @@ function OutputRenderer({
     }) {
 
     const getOutputComponent = () => {
-        if (output.outputs.type.startsWith('image/') && output.outputs.type !== "image/vnd.adobe.photoshop") {
+        const contentType = output.outputs instanceof S3FilesData ? output.outputs.content_type : output.outputs.type;
+
+        if (contentType.startsWith('image/') && contentType !== "image/vnd.adobe.photoshop") {
             return (
                 <div className="relative">
                     <ImageDialog output={output} showOutputFileName={showOutputFileName} />
@@ -507,11 +585,11 @@ function OutputRenderer({
                     )}
                 </div>
             );
-        } else if (output.outputs.type.startsWith('video/')) {
+        } else if (contentType.startsWith('video/')) {
             return <VideoDialog output={output} />
-        } else if (output.outputs.type.startsWith('audio/')) {
+        } else if (contentType.startsWith('audio/')) {
             return <AudioDialog output={output} />
-        } else if (output.outputs.type.startsWith('text/')) {
+        } else if (contentType.startsWith('text/')) {
             return null;
         } else {
             return <FileOutput output={output} />;
@@ -533,7 +611,7 @@ function OutputRenderer({
                 </div>
             )}
             {
-                (output.outputs.type.startsWith('text/') && textOutputEnabled) && (
+                ((output.outputs instanceof S3FilesData ? output.outputs.content_type : output.outputs.type).startsWith('text/') && textOutputEnabled) && (
                     <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         <TextOutput output={output} />
                     </BlurFade>
