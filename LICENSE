@@ -2,13 +2,11 @@ Copyright (c) 2025 ViewComfy
 
 This software is available under a dual license:
 
-1. **Open Source License (GNU AGPL v3.0)**  
-   You may use, modify, and distribute this software under the terms of the GNU Affero General Public License v3.0 (AGPL-3.0), *provided* that your use is **non-commercial** and for **research or educational purposes only**.  
-   The full text of the AGPL-3.0 license is provided in `LICENSE.AGPL` and at:  
-   https://www.gnu.org/licenses/agpl-3.0.html
+1. Open Source License (GNU AGPL v3.0)  
+You may use, modify, and distribute this software under the terms of the GNU Affero General Public License v3.0 (AGPL-3.0), provided that your use is non-commercial and for research or educational purposes only. The full text of the AGPL-3.0 license is provided in LICENSE.AGPL and at: https://www.gnu.org/licenses/agpl-3.0.html
 
-2. **Commercial License**  
-   Any use of this software for **commercial purposes** — including, but not limited to:  
+2. Commercial License
+Any use of this software for commercial purposes — including, but not limited to:  
    - Internal use within a for-profit company  
    - Client work or consulting projects  
    - Incorporation into a SaaS, PaaS, or other paid service  
@@ -16,11 +14,5 @@ This software is available under a dual license:
 
    — requires a separate, paid commercial license.  
 
-   To obtain a commercial license, please contact:  
-   `<you@example.com>`
+To obtain a commercial license, please contact: team@viewcomfy.com
 
----
-
-**Summary:**  
-- Non-commercial research/educational use → AGPL-3.0 terms.  
-- Any commercial use → Requires a paid license.
