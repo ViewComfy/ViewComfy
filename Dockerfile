@@ -1,6 +1,6 @@
 FROM debian:stable-slim AS base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get --allow-releaseinfo-change update && apt-get install -y --no-install-recommends \
     # Add any specific packages you need here \
     curl \
     build-essential \
