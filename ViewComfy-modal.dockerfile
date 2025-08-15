@@ -2,7 +2,7 @@ FROM debian:stable-slim AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
+RUN apt-get --allow-releaseinfo-change update && \
     apt-get install -y software-properties-common \
     curl \
     build-essential \
