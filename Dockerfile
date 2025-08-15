@@ -1,4 +1,4 @@
-FROM debian:stable-slim AS base
+FROM debian:bookworm-slim AS base
 
 RUN apt-get --allow-releaseinfo-change update && apt-get install -y --no-install-recommends \
     # Add any specific packages you need here \
