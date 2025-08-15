@@ -10,4 +10,5 @@ if (!URL) {
 
 export const socket: Socket = io(URL, {
     autoConnect: false,
+    transports: ["websocket"],
 });
