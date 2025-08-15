@@ -73,5 +73,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="<NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY>"
+            NEXT_PUBLIC_USER_MANAGEMENT=false
+            NEXT_PUBLIC_VIEW_MODE=false
+            NEXT_PUBLIC_API_URL="localhost:3000/api"
+            NEXT_PUBLIC_CLOUD_WS_URL="localhost:3000"
           cache-from: type=gha
           cache-to: type=gha,mode=max

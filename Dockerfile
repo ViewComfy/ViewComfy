@@ -1,6 +1,6 @@
-FROM debian:stable-slim AS base
+FROM debian:bookworm-slim AS base
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get --allow-releaseinfo-change update && apt-get install -y --no-install-recommends \
     # Add any specific packages you need here \
     curl \
     build-essential \
@@ -36,11 +36,13 @@ ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_USER_MANAGEMENT
 ARG NEXT_PUBLIC_VIEW_MODE
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_CLOUD_WS_URL
 
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_USER_MANAGEMENT=$NEXT_PUBLIC_USER_MANAGEMENT
 ENV NEXT_PUBLIC_VIEW_MODE=$NEXT_PUBLIC_VIEW_MODE
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_CLOUD_WS_URL=$NEXT_PUBLIC_CLOUD_WS_URL
 
 RUN npm run build
 

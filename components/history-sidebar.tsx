@@ -283,7 +283,7 @@ function BlobPreview({
                     <div key={previewBlob.id + "blob-preview-trigger"}>
                         {previewBlob.contentType.startsWith("image/") && previewBlob.contentType !== "image/vnd.adobe.photoshop" && (
                             <Image
-                                src={previewBlob.filename}
+                                src={previewBlob.filepath}
                                 alt={"Output image"}
                                 unoptimized
                                 width={140}
@@ -304,7 +304,7 @@ function BlobPreview({
                                     srcLang="en"
                                     src="SUBTITLE_PATH"
                                 />
-                                <source src={previewBlob.filename} />
+                                <source src={previewBlob.filepath} />
                             </video>
                         )}
                         {previewBlob.contentType.startsWith("audio/") && (
@@ -332,7 +332,7 @@ function BlobPreview({
                                 <div className="inline-block">
                                     <img
                                         key={outputs[blobIndex].id}
-                                        src={outputs[blobIndex].filename}
+                                        src={outputs[blobIndex].filepath}
                                         alt={`${outputs[blobIndex].filename}`}
                                         className="max-h-[85vh] w-auto object-contain rounded-md"
                                     />
@@ -352,7 +352,7 @@ function BlobPreview({
                                         srcLang="en"
                                         src="SUBTITLE_PATH"
                                     />
-                                    <source src={outputs[blobIndex].filename} />
+                                    <source src={outputs[blobIndex].filepath} />
                                 </video>
                             )}
                         {outputs[blobIndex].contentType.startsWith(
@@ -363,7 +363,7 @@ function BlobPreview({
                                         key={outputs[blobIndex].id}
                                         controls
                                     >
-                                        <source src={outputs[blobIndex].filename} />
+                                        <source src={outputs[blobIndex].filepath} />
                                     </audio>
                                 </div>
                             )}
@@ -409,8 +409,8 @@ function BlobPreview({
                             className="w-full"
                             onClick={() => {
                                 const link = document.createElement("a");
-                                link.href = outputs[blobIndex].filename;
-                                link.download = `${outputs[blobIndex].filename.split("/").pop()}`;
+                                link.href = outputs[blobIndex].filepath;
+                                link.download = `${outputs[blobIndex].filepath.split("/").pop()}`;
                                 link.click();
                             }}
                         >
@@ -431,7 +431,7 @@ export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
         <Dialog>
             <DialogTrigger asChild>
                 <Image
-                    src={blob.filename}
+                    src={blob.filepath}
                     alt={"Output image"}
                     unoptimized
                     width={100}
@@ -443,8 +443,8 @@ export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
                 <div className="inline-block">
                     <img
                         key={blob.id}
-                        src={blob.filename}
-                        alt={`${blob.filename}`}
+                        src={blob.filepath}
+                        alt={`${blob.filepath}`}
                         className="max-h-[85vh] w-auto object-contain rounded-md"
                     />
                 </div>
@@ -453,8 +453,8 @@ export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
                         className="w-full"
                         onClick={() => {
                             const link = document.createElement("a");
-                            link.href = blob.filename;
-                            link.download = `${blob.filename.split("/").pop()}`;
+                            link.href = blob.filepath;
+                            link.download = `${blob.filepath.split("/").pop()}`;
                             link.click();
                         }}
                     >
@@ -482,7 +482,7 @@ export function VideoDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
                         srcLang="en"
                         src="SUBTITLE_PATH"
                     />
-                    <source src={blob.filename} />
+                    <source src={blob.filepath} />
                 </video>
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
@@ -497,7 +497,7 @@ export function VideoDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
                         srcLang="en"
                         src="SUBTITLE_PATH"
                     />
-                    <source src={blob.filename} />
+                    <source src={blob.filepath} />
                 </video>
             </DialogContent>
         </Dialog>
