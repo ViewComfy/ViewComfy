@@ -79,5 +79,6 @@ jobs:
             NEXT_PUBLIC_USER_MANAGEMENT=true
             NEXT_PUBLIC_VIEW_MODE=false
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_CLOUD_WS_URL=${{ secrets.NEXT_PUBLIC_CLOUD_WS_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
