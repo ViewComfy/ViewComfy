@@ -72,6 +72,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setIsConnected(true);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onDisconnect = (reason: string, details: any) => {
       console.log("Socket disconnected", reason, details);
       setIsConnected(false);
