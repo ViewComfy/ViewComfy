@@ -72,9 +72,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setIsConnected(true);
     };
 
-    const onDisconnect = () => {
-      console.log("Socket disconnected");
+    const onDisconnect = (reason: string, details: any) => {
+      console.log("Socket disconnected", reason, details);
       setIsConnected(false);
+      if (reason !== "io client disconnect") {
+        const msg = {
+          prompt_id: "",
+          data: `Socket disconnected: ${reason}`
+        }
+        updateCurrentLog(msg);
+        throw new Error(`Socket disconnected unexpectedly: ${reason}`);
+      }
     };
 
     const onLogMessage = (data: IWSMessage) => {
@@ -139,16 +147,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socket.disconnect();
     });
 
-    socket.on('disconnect', (reason) => {
-      if (reason !== "io client disconnect") {
-        console.log(`Socket disconnected: ${reason}`);
-        const msg = {
-          prompt_id: "",
-          data: `Socket disconnected: ${reason}`
-        }
-        updateCurrentLog(msg);
-        throw new Error(`Socket disconnected unexpectedly: ${reason}`);
-      }
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
     });
 
     socket.on(InferEmitEventEnum.LogMessage, onLogMessage);
@@ -163,6 +163,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socket.off(InferEmitEventEnum.ErrorMessage, onErrorMessage);
       socket.off(InferEmitEventEnum.ExecutedMessage, onExecuteMessage);
       socket.off(InferEmitEventEnum.ResultMessage, onResultMessage);
+      socket.off('error', (error) => {
+        console.error('Socket error:', error);
+      });
     };
   }, []);
 
