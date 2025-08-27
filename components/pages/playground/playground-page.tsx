@@ -286,7 +286,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
             <div className="flex flex-col h-full">
                 <div className="md:grid md:grid-cols-2">
                     <div>
-                        <Header title={"Playground"} />
+                        <Header title={""} />
                     </div>
                     <div className="hidden pr-4 md:flex md:items-center md:justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={handleToggleCompareMode}>
