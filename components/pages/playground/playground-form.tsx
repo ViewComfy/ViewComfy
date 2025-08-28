@@ -23,7 +23,9 @@ export default function PlaygroundForm(props: {
     }
 
     const form = useForm<IViewComfyBase>({
-        defaultValues
+        defaultValues,
+        mode: "onChange",
+        reValidateMode: "onChange"
     });
 
     const inputFieldArray = useFieldArray({
