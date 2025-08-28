@@ -441,6 +441,15 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
         // @ts-ignore
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
+
+    function getErrorMsg(input: IInputField): string {
+        if (input.validations.errorMsg && input.validations.errorMsg != "") {
+            return input.validations.errorMsg
+        } else {
+            return "This field is required"
+        }
+    }
+
     return (
         <>
             {nestedFieldArray.fields.map((item, k) => {
@@ -452,9 +461,13 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
-                        render={({ field }) => (
+                        rules={{
+                            required: !editMode && input.validations.required ? getErrorMsg(input) : false
+                        }}
+                        render={({ field, fieldState: { error } }) => (
                             <>
                                 <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} />
+                                {error && <FormMessage>{error.message}</FormMessage>}
                             </>
                         )}
                     />

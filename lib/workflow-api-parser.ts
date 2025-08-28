@@ -12,7 +12,7 @@ export interface IInputField {
     workflowPath: string[];
     helpText?: string;
     valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select" | "audio" | "slider";
-    validations: { required: boolean };
+    validations: { required: boolean, errorMsg?: string };
     key: string;
     options?: { label: string, value: string }[];
     slider?: { min: number, max: number, step: number };
