@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info } from "lucide-react";
+import { Trash2, Info, Check } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -37,6 +37,19 @@ import {
 } from "@/components/ui/tooltip";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface IInputForm extends IInputField {
     id: string;
@@ -506,9 +519,15 @@ function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolea
     }
 
     if (input.valueType === "select") {
-        return (
-            <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
-        )
+        if (input.options && input.options.length < 6) {
+            return (
+                <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            )
+        } else {
+            return (
+                <FormComboboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            )
+        }
     }
 
     if (input.valueType === "slider") {
@@ -921,6 +940,100 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
         </FormItem>
     )
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
+    const { input, field, editMode, remove, index } = args;
+    const [open, setOpen] = useState(false);
+    const options = input.options || [{
+        label: "Missing Values",
+        value: "Missing Values"
+    }];
+    const defaultLabel = options.find((opt) => opt.value === field.value);
+    const [value, setValue] = useState(field.value);
+    const [label, setLabel] = useState(defaultLabel?.label);
+
+    const handleOnSelect = (opt: { label: string;  value: string}) => {
+        setValue(opt.value);
+        setLabel(opt.label);
+        field.onChange(opt);
+    }
+
+    return (
+        <FormItem key={input.id}>
+            <FormLabel className={FORM_STYLE.label}>{input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
+                {editMode && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={remove ? () => remove(index) : undefined}
+                    >
+                        <Trash2 className="size-5" />
+                    </Button>
+                )}
+            </FormLabel>
+            <FormControl>
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="justify-between"
+                        >
+                            {label}
+                            <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                        <Command>
+                            <CommandInput placeholder="Search..." className="h-9" />
+                            <CommandList>
+                                <CommandEmpty>No value found.</CommandEmpty>
+                                <CommandGroup>
+                                    {options.map((opt) => (
+                                        <CommandItem
+                                            key={opt.value}
+                                            value={opt.value}
+                                            onSelect={() => {
+                                                handleOnSelect(opt);
+                                                setOpen(false)
+                                            }}
+                                        >
+                                            {opt.label}
+                                            <Check
+                                                className={cn(
+                                                    "ml-auto",
+                                                    value.value === opt.value ? "opacity-100" : "opacity-0"
+                                                )}
+                                            />
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+            </FormControl>
+        </FormItem>
+    )
+}
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
