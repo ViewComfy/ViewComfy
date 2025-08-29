@@ -28,7 +28,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getComfyUIRandomSeed, cn } from "@/lib/utils";
 import {
     Tooltip,
@@ -945,6 +945,9 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
 function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
     const { input, field, editMode, remove, index } = args;
     const [open, setOpen] = useState(false);
+    const [buttonWidth, setButtonWidth] = useState<number>(0);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
     const options = input.options || [{
         label: "Missing Values",
         value: "Missing Values"
@@ -953,11 +956,18 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
     const [value, setValue] = useState(field.value);
     const [label, setLabel] = useState(defaultLabel?.label);
 
-    const handleOnSelect = (opt: { label: string;  value: string}) => {
+    const handleOnSelect = (opt: { label: string; value: string }) => {
         setValue(opt.value);
         setLabel(opt.label);
         field.onChange(opt);
     }
+
+    useEffect(() => {
+        if (buttonRef.current) {
+            const width = buttonRef.current.offsetWidth;
+            setButtonWidth(width);
+        }
+    }, [label, open]);
 
     return (
         <FormItem key={input.id}>
@@ -991,16 +1001,20 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                         <Button
+                            ref={buttonRef}
                             variant="outline"
                             role="combobox"
                             aria-expanded={open}
-                            className="justify-between"
+                            className="justify-between min-w-[200px]"
                         >
                             {label}
                             <ChevronsUpDown className="opacity-50" />
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
+                    <PopoverContent
+                        className="p-0"
+                        style={{ width: buttonWidth > 0 ? `${buttonWidth}px` : '400px' }}
+                    >
                         <Command>
                             <CommandInput placeholder="Search..." className="h-9" />
                             <CommandList>
