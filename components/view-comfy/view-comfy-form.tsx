@@ -50,6 +50,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { SelectableImage } from "@/components/comparison/selectable-image";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -707,7 +708,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
             <FormControl>
                 {media.src ? (
                     <div key={input.id} className="flex flex-col items-center gap-2">
-                        <div className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md">
+                        <SelectableImage imageUrl={media.src} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
                             {(input.valueType === "image") && (
                                 <img
                                     src={media.src}
@@ -727,7 +728,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                             {(input.valueType === "audio") && (
                                 <audio src={media.src} controls />
                             )}
-                        </div>
+                        </SelectableImage>
                         <Button
                             variant="secondary"
                             className="border-2 text-muted-foreground"
