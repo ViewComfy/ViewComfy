@@ -13,7 +13,6 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Fragment, useEffect, useState, useCallback } from "react";
-import { Header } from "@/components/header";
 import PlaygroundForm from "./playground-form";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
