@@ -2,8 +2,7 @@
 import {
     Settings,
     History,
-    Download,
-    Images
+    Download
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -38,10 +37,14 @@ import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import * as constants from "@/app/constants";
-import { ImgComparisonSlider } from '@img-comparison-slider/react';
 import { useSocket } from "@/app/providers/socket-provider";
 import { S3FilesData } from "@/app/models/prompt-result";
 import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-user";
+import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
+import { ComparisonButton } from "@/components/comparison/comparison-button";
+import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
+import { SelectableImage } from "@/components/comparison/selectable-image";
+import { ImgComparisonSlider } from "@img-comparison-slider/react";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -53,7 +56,6 @@ const UserContentWrapper = dynamic(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
-    // TODO: Use this to implement history retrieval
     const { doPost, loading, setLoading } = usePostPlaygroundUser();
     return <PlaygroundPageContent doPost={doPost} loading={loading} setLoading={setLoading} />;
 }
@@ -74,37 +76,6 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
     const [showOutputFileName, setShowOutputFileName] = useState(false);
-    const [selectedImagesForComparison, setSelectedImagesForComparison] = useState<string[]>([]);
-    const [isCompareModeActive, setIsCompareModeActive] = useState(false);
-
-    const handleImageSelectionForComparison = (imageUrl: string) => {
-        setSelectedImagesForComparison((prevSelected) => {
-            if (prevSelected.includes(imageUrl)) {
-                return prevSelected.filter((url) => url !== imageUrl);
-            } else if (prevSelected.length < 2) {
-                return [...prevSelected, imageUrl];
-            }
-            return prevSelected;
-        });
-    };
-
-    const handleClearSelectedImages = () => {
-        setSelectedImagesForComparison([]);
-    };
-
-    const handleToggleCompareMode = () => {
-        setIsCompareModeActive(prev => {
-            if (prev) {
-                handleClearSelectedImages();
-            }
-            return !prev;
-        });
-    };
-
-    const handleComparisonDialogClose = () => {
-        handleClearSelectedImages();
-        setIsCompareModeActive(false);
-    };
 
     useEffect(() => {
         if (viewMode) {
@@ -151,7 +122,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         if (!data) {
             return;
         }
-        
+
         const timestamp = Date.now();
         const newGeneration: { outputs: File | S3FilesData, url: string }[] = [];
 
@@ -285,20 +256,9 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         <>
             <div className="flex flex-col h-full">
                 <div className="md:grid md:grid-cols-2">
-                    <div>
-                        <Header title={""} />
-                    </div>
                     <div className="hidden pr-4 md:flex md:items-center md:justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={handleToggleCompareMode}>
-                            <Images className="h-4 w-4" />
-                            {isCompareModeActive ? "Cancel" : "Compare"}
-                        </Button>
-                        <ImageCompareDialog
-                            image1={selectedImagesForComparison[0]}
-                            image2={selectedImagesForComparison[1]}
-                            onClose={handleComparisonDialogClose}
-                            isOpen={selectedImagesForComparison.length === 2}
-                        />
+                        <ComparisonButton />
+                        <ComparisonDialog />
 
                         <Button
                             variant="outline"
@@ -389,9 +349,6 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
                                                             output={output}
                                                             showOutputFileName={showOutputFileName}
                                                             textOutputEnabled={textOutputEnabled}
-                                                            onSelectForComparison={handleImageSelectionForComparison}
-                                                            isSelectedForComparison={selectedImagesForComparison.includes(output.url)}
-                                                            isCompareModeActive={isCompareModeActive}
                                                         />
                                                     </Fragment>
                                                 ))}
@@ -419,16 +376,16 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
 export default function PlaygroundPage() {
     const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
 
-    // If user management is disabled, render without auth
-    if (!userManagement) {
-        return <PlaygroundWithoutAuth />;
-    }
-
-    // If user management is enabled, use the UserContentWrapper
-    return (
+    const content = !userManagement ? <PlaygroundWithoutAuth /> : (
         <UserContentWrapper>
             {(userId) => <PlaygroundWithAuth userId={userId} />}
         </UserContentWrapper>
+    );
+
+    return (
+        <ImageComparisonProvider>
+            {content}
+        </ImageComparisonProvider>
     );
 }
 
@@ -555,16 +512,10 @@ export function FileOutput({ output }: { output: { outputs: File | S3FilesData, 
 function OutputRenderer({
     output,
     textOutputEnabled,
-    onSelectForComparison,
-    isSelectedForComparison,
-    isCompareModeActive,
     showOutputFileName }:
     {
         output: { outputs: File | S3FilesData, url: string },
         textOutputEnabled: boolean,
-        onSelectForComparison: (imageUrl: string) => void,
-        isSelectedForComparison: boolean,
-        isCompareModeActive: boolean,
         showOutputFileName: boolean,
     }) {
 
@@ -573,17 +524,9 @@ function OutputRenderer({
 
         if (contentType.startsWith('image/') && contentType !== "image/vnd.adobe.photoshop") {
             return (
-                <div className="relative">
+                <SelectableImage imageUrl={output.url}>
                     <ImageDialog output={output} showOutputFileName={showOutputFileName} />
-                    {isCompareModeActive && (
-                        <input
-                            type="checkbox"
-                            className="absolute top-2 right-2 z-10 w-[20px] h-[20px]"
-                            checked={isSelectedForComparison}
-                            onChange={() => onSelectForComparison(output.url)}
-                        />
-                    )}
-                </div>
+                </SelectableImage>
             );
         } else if (contentType.startsWith('video/')) {
             return <VideoDialog output={output} />
