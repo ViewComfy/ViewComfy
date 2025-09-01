@@ -44,6 +44,7 @@ import { ComparisonButton } from "@/components/comparison/comparison-button";
 import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
 import { SelectableImage } from "@/components/comparison/selectable-image";
 import { ImgComparisonSlider } from "@img-comparison-slider/react";
+import { Header } from "@/components/header";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -255,6 +256,9 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         <>
             <div className="flex flex-col h-full">
                 <div className="md:grid md:grid-cols-2">
+                    <div>
+                        <Header title={""} />
+                    </div>
                     <div className="hidden pr-4 md:flex md:items-center md:justify-end gap-2">
                         <ComparisonButton />
                         <ComparisonDialog />
