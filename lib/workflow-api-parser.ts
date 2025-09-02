@@ -183,6 +183,11 @@ function parseInputField(args: { node: { key: string, value: any }, path: string
     if (Array.isArray(node.value)) {
         return undefined;
     }
+
+    const valueType = parseValueType(node.value);
+    const isRequired = () => {
+        return valueType !== "boolean";
+    }
     // TODO: Add error field to add errors like local urls for image inputs.
     try {
         if (node.value !== null && node.value !== undefined && typeof node.value !== 'object') {
@@ -194,8 +199,8 @@ function parseInputField(args: { node: { key: string, value: any }, path: string
                 workflowPath,
                 helpText: "Helper Text",
                 tooltip: "",
-                valueType: parseValueType(node.value),
-                validations: { required: true },
+                valueType,
+                validations: { required: isRequired() },
                 key: workflowPath.join("-"),
             };
         }

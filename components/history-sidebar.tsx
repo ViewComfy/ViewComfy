@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { History, Filter, ChevronRight, Check, Copy, FileType, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -19,7 +19,7 @@ import { DateRange } from "react-day-picker"
 import { subDays, format } from "date-fns"
 import { useWorkflowHistory } from "@/hooks/use-data"
 import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
-import Image from "next/image"
+import { default as NextImage } from "next/image"
 import { Play } from "lucide-react"
 import { ChevronLeft } from "lucide-react"
 import { IWorkflowHistoryModel, IWorkflowHistoryFileModel } from "@/app/interfaces/workflow-history"
@@ -27,6 +27,7 @@ import { toast } from "@/hooks/use-toast"
 import { ToastAction } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "./ui/skeleton"
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 
 interface HistorySidebarProps {
     open: boolean
@@ -249,14 +250,81 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
     )
 }
 
-
-
 function BlobPreview({
     outputs,
 }: {
     outputs: IWorkflowHistoryFileModel[] | null;
 }) {
     const [blobIndex, setBlobIndex] = useState(0);
+    const [container, setContainer] = useState<HTMLDivElement | null>(null);
+    const [containerWidth, setContainerWidth] = useState<number>(0);
+    const [containerHeight, setContainerHeight] = useState<number>(0);
+    const [imageNaturalWidth, setImageNaturalWidth] = useState<number>(0);
+    const [imageNaturalHeight, setImageNaturalHeight] = useState<number>(0);
+    const backgroundColor = "black";
+    const scaleUp = false;
+    const zoomFactor = 8;
+
+    const imageScale = useMemo((): number => {
+        if (
+            containerWidth === 0 ||
+            containerHeight === 0 ||
+            imageNaturalWidth === 0 ||
+            imageNaturalHeight === 0
+        )
+            return 0;
+        const scale = Math.min(
+            containerWidth / imageNaturalWidth,
+            containerHeight / imageNaturalHeight,
+        );
+        return scaleUp ? scale : Math.max(scale, 1);
+    }, [
+        scaleUp,
+        containerWidth,
+        containerHeight,
+        imageNaturalWidth,
+        imageNaturalHeight,
+    ]);
+
+    const isImageByMimeType = (file: IWorkflowHistoryFileModel) => {
+        return file.contentType.startsWith(
+            "image/",
+        ) && file.contentType !== "image/vnd.adobe.photoshop"
+    };
+
+    const handleResize = useCallback(() => {
+        if (container !== null) {
+            const rect = container.getBoundingClientRect();
+            setContainerWidth(rect.width);
+            setContainerHeight(rect.height);
+        } else {
+            setContainerWidth(0);
+            setContainerHeight(0);
+        }
+    }, [container]);
+
+    useEffect(() => {
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [handleResize]);
+
+    const handleImageOnLoad = (image: HTMLImageElement) => {
+        setImageNaturalWidth(image.naturalWidth);
+        setImageNaturalHeight(image.naturalHeight);
+    };
+
+    useEffect(() => {
+        if (!outputs || !isImageByMimeType(outputs[blobIndex])) {
+            return;
+        }
+        const image = new Image();
+        image.onload = () => handleImageOnLoad(image);
+        image.src = outputs[blobIndex].filepath;
+    }, [blobIndex]);
+
 
     if (!outputs || outputs.length === 0) {
         return null;
@@ -282,7 +350,7 @@ function BlobPreview({
                 <DialogTrigger asChild>
                     <div key={previewBlob.id + "blob-preview-trigger"}>
                         {previewBlob.contentType.startsWith("image/") && previewBlob.contentType !== "image/vnd.adobe.photoshop" && (
-                            <Image
+                            <NextImage
                                 src={previewBlob.filepath}
                                 alt={"Output image"}
                                 unoptimized
@@ -326,18 +394,39 @@ function BlobPreview({
                 </DialogTrigger>
                 <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                     <div className="relative">
-                        {outputs[blobIndex].contentType.startsWith(
-                            "image/",
-                        ) && outputs[blobIndex].contentType !== "image/vnd.adobe.photoshop" && (
-                                <div className="inline-block">
-                                    <img
-                                        key={outputs[blobIndex].id}
-                                        src={outputs[blobIndex].filepath}
-                                        alt={`${outputs[blobIndex].filename}`}
-                                        className="max-h-[85vh] w-auto object-contain rounded-md"
-                                    />
-                                </div>
-                            )}
+                        {isImageByMimeType(outputs[blobIndex]) && (
+                            <div
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    backgroundColor,
+                                    cursor: "zoom-in"
+                                }}
+                                ref={(el: HTMLDivElement | null) => setContainer(el)}
+                            >
+                                <TransformWrapper
+                                    key={`${containerWidth}x${containerHeight}`}
+                                    initialScale={imageScale}
+                                    minScale={imageScale}
+                                    maxScale={imageScale * zoomFactor}
+                                    centerOnInit
+                                >
+                                    <TransformComponent
+                                        wrapperStyle={{
+                                            width: "100%",
+                                            height: "100%",
+                                        }}
+                                    >
+                                        <img
+                                            key={outputs[blobIndex].id}
+                                            src={outputs[blobIndex].filepath}
+                                            alt={`${outputs[blobIndex].filename}`}
+                                            className="max-h-[85vh] w-auto object-contain rounded-md"
+                                        />
+                                    </TransformComponent>
+                                </TransformWrapper>
+                            </div>
+                        )}
                         {outputs[blobIndex].contentType.startsWith(
                             "video/",
                         ) && (
@@ -430,7 +519,7 @@ export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Image
+                <NextImage
                     src={blob.filepath}
                     alt={"Output image"}
                     unoptimized

@@ -45,22 +45,24 @@
     "react-day-picker": "^9.7.0",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
+    "react-zoom-pan-pinch": "^3.7.0",
     "react18-json-view": "^0.2.9-canary.8",
     "sass": "^1.79.3",
     "sharp": "^0.34.3",
+    "socket.io-client": "4.8.1",
     "swr": "^2.3.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "11.1.0",
     "vaul": "^0.9.2",
-    "zod": "^3.23.8",
-    "socket.io-client": "4.8.1",
-    "uuid": "11.1.0"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/uuid": "10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
     "cross-env": "^7.0.3",
@@ -68,7 +70,6 @@
     "eslint-config-next": "^14.2.23",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "@types/uuid": "10.0.0"
+    "typescript": "^5"
   }
 }
