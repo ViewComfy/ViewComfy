@@ -12,7 +12,7 @@ import {
     DrawerContent,
     DrawerTrigger,
 } from "@/components/ui/drawer"
-import { Fragment, useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback, useMemo } from "react";
 import PlaygroundForm from "./playground-form";
 import { usePostPlayground } from "@/hooks/playground/use-post-playground";
 import { ActionType, type IViewComfy, type IViewComfyWorkflow, useViewComfy } from "@/app/providers/view-comfy-provider";
@@ -45,6 +45,11 @@ import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
 import { SelectableImage } from "@/components/comparison/selectable-image";
 import { ImgComparisonSlider } from "@img-comparison-slider/react";
 import { Header } from "@/components/header";
+import {
+    TransformWrapper,
+    TransformComponent,
+
+} from "react-zoom-pan-pinch";
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -393,10 +398,73 @@ export default function PlaygroundPage() {
 }
 
 export function ImageDialog({ output, showOutputFileName }: { output: { outputs: File | S3FilesData, url: string }, showOutputFileName: boolean }) {
+    const backgroundColor = "black";
+    const scaleUp = false;
+    const zoomFactor = 8;
+
+    const [container, setContainer] = useState<HTMLDivElement | null>(null);
+
+    const [containerWidth, setContainerWidth] = useState<number>(0);
+    const [containerHeight, setContainerHeight] = useState<number>(0);
+
+    const [imageNaturalWidth, setImageNaturalWidth] = useState<number>(0);
+    const [imageNaturalHeight, setImageNaturalHeight] = useState<number>(0);
+
+    const imageScale = useMemo((): number => {
+        if (
+            containerWidth === 0 ||
+            containerHeight === 0 ||
+            imageNaturalWidth === 0 ||
+            imageNaturalHeight === 0
+        )
+            return 0;
+        const scale = Math.min(
+            containerWidth / imageNaturalWidth,
+            containerHeight / imageNaturalHeight,
+        );
+        return scaleUp ? scale : Math.max(scale, 1);
+    }, [
+        scaleUp,
+        containerWidth,
+        containerHeight,
+        imageNaturalWidth,
+        imageNaturalHeight,
+    ]);
+
+    const handleResize = useCallback(() => {
+        if (container !== null) {
+            const rect = container.getBoundingClientRect();
+            setContainerWidth(rect.width);
+            setContainerHeight(rect.height);
+        } else {
+            setContainerWidth(0);
+            setContainerHeight(0);
+        }
+    }, [container]);
+
+    useEffect(() => {
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [handleResize]);
+
+    const handleImageOnLoad = (image: HTMLImageElement) => {
+        setImageNaturalWidth(image.naturalWidth);
+        setImageNaturalHeight(image.naturalHeight);
+    };
+
+    useEffect(() => {
+        const image = new Image();
+        image.onload = () => handleImageOnLoad(image);
+        image.src = output.url;
+    }, [output]);
+
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-
                 <img
                     key={output.url}
                     src={output.url}
@@ -406,13 +474,35 @@ export function ImageDialog({ output, showOutputFileName }: { output: { outputs:
             </DialogTrigger>
             {showOutputFileName && parseFileName(output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name)}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
-                <div className="inline-block">
-                    <img
-                        key={output.url}
-                        src={output.url}
-                        alt={`${output.url}`}
-                        className="max-h-[85vh] w-auto object-contain rounded-md"
-                    />
+                <div
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor,
+                        cursor: "zoom-in"
+                    }}
+                    ref={(el: HTMLDivElement | null) => setContainer(el)}
+                >
+                    <TransformWrapper
+                        key={`${containerWidth}x${containerHeight}`}
+                        initialScale={imageScale}
+                        minScale={imageScale}
+                        maxScale={imageScale * zoomFactor}
+                        centerOnInit
+                    >
+                        <TransformComponent
+                            wrapperStyle={{
+                                width: "100%",
+                                height: "100%",
+                            }}
+                        >
+                            <img key={output.url}
+                                src={output.url}
+                                alt={`${output.url}`}
+                                className="max-h-[85vh] w-auto object-contain rounded-md"
+                            />
+                        </TransformComponent>
+                    </TransformWrapper>
                 </div>
                 <DialogFooter className="bg-transparent">
                     <Button className="w-full"
