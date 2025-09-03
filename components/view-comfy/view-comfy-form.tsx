@@ -1008,7 +1008,9 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                             aria-expanded={open}
                             className="justify-between min-w-[200px]"
                         >
-                            {label}
+                            {value
+                                ? options.find((opt) => opt.value === value)?.label
+                                : "Select..."}
                             <ChevronsUpDown className="opacity-50" />
                         </Button>
                     </PopoverTrigger>
@@ -1024,6 +1026,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                                     {options.map((opt) => (
                                         <CommandItem
                                             key={opt.value}
+                                            keywords={[opt.label]}
                                             value={opt.value}
                                             onSelect={() => {
                                                 handleOnSelect(opt);
@@ -1034,7 +1037,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                                             <Check
                                                 className={cn(
                                                     "ml-auto",
-                                                    value.value === opt.value ? "opacity-100" : "opacity-0"
+                                                    value === opt.value ? "opacity-100" : "opacity-0"
                                                 )}
                                             />
                                         </CommandItem>
