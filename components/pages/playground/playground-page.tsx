@@ -81,6 +81,39 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
     const [showOutputFileName, setShowOutputFileName] = useState(false);
+    const [permission, setPermission] = useState<NotificationPermission>(Notification.permission);
+    const [isRequesting, setIsRequesting] = useState(false);
+
+    const requestPermission = useCallback(async () => {
+        if (permission === 'default' && !isRequesting) {
+            setIsRequesting(true);
+            try {
+                const result = await Notification.requestPermission();
+                setPermission(result);
+                if ('Notification' in window) {
+                    setPermission(Notification.permission);
+                }
+            } catch (error) {
+                console.error('Error requesting notification permission:', error);
+                if ('Notification' in window) {
+                    setPermission(Notification.permission);
+                }
+            } finally {
+                setIsRequesting(false);
+            }
+        }
+    }, [permission, isRequesting]);
+
+    const sendNotification = useCallback(async () => {
+        if (permission === 'granted') {
+            new Notification('ViewComfy Generation Complete!', {
+                body: 'Your image generation has finished.',
+                icon: '/view_comfy_logo.svg',
+            });
+        } else if (permission === 'default') {
+            await requestPermission();
+        }
+    }, [permission, requestPermission]);
 
     useEffect(() => {
         if (viewMode) {
@@ -123,7 +156,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         }
     }, [viewMode, viewComfyStateDispatcher, appId]);
 
-    const onSetResults = useCallback((data: S3FilesData[] | File[]) => {
+    const onSetResults = useCallback(async (data: S3FilesData[] | File[]) => {
         if (!data) {
             return;
         }
@@ -146,7 +179,8 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
             }));
         }
         setLoading(false);
-    }, [setLoading]);
+        await sendNotification();
+    }, [setLoading, sendNotification]);
 
     const onSocketError = useCallback((error: Error) => {
         if (!error) {
