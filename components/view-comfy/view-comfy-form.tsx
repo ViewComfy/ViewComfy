@@ -960,7 +960,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
     const handleOnSelect = (opt: { label: string; value: string }) => {
         setValue(opt.value);
         setLabel(opt.label);
-        field.onChange(opt);
+        field.onChange(opt.value);
     }
 
     useEffect(() => {
