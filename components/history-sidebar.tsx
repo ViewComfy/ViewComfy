@@ -323,7 +323,7 @@ function BlobPreview({
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
         image.src = outputs[blobIndex].filepath;
-    }, [blobIndex]);
+    }, [blobIndex, outputs]);
 
 
     if (!outputs || outputs.length === 0) {
