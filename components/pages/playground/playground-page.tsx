@@ -81,30 +81,33 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
     const [showOutputFileName, setShowOutputFileName] = useState(false);
-    const [permission, setPermission] = useState<NotificationPermission>(Notification.permission);
+    const [permission, setPermission] = useState<"default" | "granted" | "denied">("default");
     const [isRequesting, setIsRequesting] = useState(false);
+    const isNotificationAvailable = 'Notification' in window
 
     const requestPermission = useCallback(async () => {
+        if (!isNotificationAvailable) {
+            return;
+        }
         if (permission === 'default' && !isRequesting) {
             setIsRequesting(true);
             try {
                 const result = await Notification.requestPermission();
                 setPermission(result);
-                if ('Notification' in window) {
-                    setPermission(Notification.permission);
-                }
+                setPermission(Notification.permission);
             } catch (error) {
                 console.error('Error requesting notification permission:', error);
-                if ('Notification' in window) {
-                    setPermission(Notification.permission);
-                }
+                setPermission(Notification.permission);
             } finally {
                 setIsRequesting(false);
             }
         }
-    }, [permission, isRequesting]);
+    }, [permission, isRequesting, isNotificationAvailable]);
 
     const sendNotification = useCallback(async () => {
+        if (!isNotificationAvailable) {
+            return;
+        }
         if (permission === 'granted') {
             new Notification('ViewComfy Generation Complete!', {
                 body: 'Your image generation has finished.',
@@ -113,17 +116,14 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         } else if (permission === 'default') {
             await requestPermission();
         }
-    }, [permission, requestPermission]);
+    }, [permission, requestPermission, isNotificationAvailable]);
 
     useEffect(() => {
         if (viewMode) {
             const fetchViewComfy = async () => {
                 try {
-
                     const apiUrl = appId ? `/api/playground?appId=${appId}` : "/api/playground";
-
                     const response = await fetch(apiUrl);
-
                     if (!response.ok) {
                         const responseError: ResponseError =
                             await response.json();
