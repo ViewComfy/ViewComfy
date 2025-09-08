@@ -47,7 +47,7 @@ export function HistorySidebar({ open, setOpen, className }: HistorySidebarProps
 }
 
 export function HistorySidebarContent({ open, setOpen, className }: HistorySidebarProps) {
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
     const { viewComfyState } = useViewComfy();
     const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy>(viewComfyState.viewComfys[0]);
     const today = new Date();
