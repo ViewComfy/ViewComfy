@@ -317,9 +317,14 @@ function BlobPreview({
     };
 
     useEffect(() => {
-        if (!outputs || !isImageByMimeType(outputs[blobIndex])) {
+        if (!outputs || !outputs[blobIndex]) {
             return;
         }
+
+        if (!isImageByMimeType(outputs[blobIndex])) {
+            return;
+        }
+
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
         image.src = outputs[blobIndex].filepath;
