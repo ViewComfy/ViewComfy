@@ -66,7 +66,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // This effect is for registering event listeners and runs only once.
     const onConnect = () => {
       console.log("Socket connected");
       setIsConnected(true);
@@ -82,7 +81,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           data: `Socket disconnected: ${reason}`
         }
         updateCurrentLog(msg);
-        throw new Error(`Socket disconnected unexpectedly: ${reason}`);
       }
     };
 
@@ -145,7 +143,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         data: `Connection error: ${err.message}`
       }
       updateCurrentLog(msg);
-      socket.disconnect();
+      setIsConnected(false);
     });
 
     socket.on('error', (error) => {
@@ -172,19 +170,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // This effect handles connection based on authentication status.
-    if (isSignedIn) {
+    if (isSignedIn && !isConnected) {
       const connectSocket = async () => {
         const token = await getToken({ template: "long_token" });
         if (token) {
           socket.auth = { authorization: token };
           socket.connect();
         }
+
       };
       connectSocket();
-    } else {
+    }
+
+    if (!isSignedIn) {
       socket.disconnect();
     }
-  }, [isSignedIn, getToken]);
+
+  }, [isSignedIn, getToken, isConnected]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, currentLog, clearCurrentLog, setResultCallback, setErrorCallback }}>
