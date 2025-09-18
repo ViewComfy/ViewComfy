@@ -51,10 +51,13 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { SelectableImage } from "@/components/comparison/selectable-image";
+import { SettingsService } from "@/app/services/settings-service";
 
 interface IInputForm extends IInputField {
     id: string;
 }
+
+const settingsService = new SettingsService();
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,10 +112,13 @@ export function ViewComfyForm(args: {
                                             <FormField
                                                 control={form.control}
                                                 name="viewcomfyEndpoint"
+                                                rules={{
+                                                    required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false
+                                                }}
                                                 render={({ field }) => (
                                                     <FormItem key="viewcomfyEndpoint" className="m-1">
                                                         <FormLabel>
-                                                            ViewComfy Endpoint (optional)
+                                                            ViewComfy Endpoint {!settingsService.getIsRunningInViewComfy() && <span>(optional)</span>}
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
                                                                     <Button
@@ -130,14 +136,14 @@ export function ViewComfyForm(args: {
                                                                 </TooltipTrigger>
                                                                 <TooltipContent className="max-w-[300px]">
                                                                     <p>
-                                                                        You can run your workflow on a cloud GPU by deploying it on ViewComfy first. To get started, select deploy on the left hand side menu.
-                                                                        <br /><br />
-                                                                        If you don&apos;t have an endpoint, please leave this field empty.
+                                                                        You can run your workflow on a cloud GPU by deploying it on ViewComfy first.
+                                                                        To get started, select deploy on the left hand side menu.
                                                                     </p>
                                                                 </TooltipContent>
                                                             </Tooltip>
                                                         </FormLabel>
-                                                        <FormControl>
+                                                        <FormControl
+                                                        >
                                                             <Input
                                                                 placeholder="ViewComfy endpoint" {...field} />
                                                         </FormControl>
