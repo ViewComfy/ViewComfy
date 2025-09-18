@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/nextjs";
 import useSWR from "swr";
+import useSWRImmutable from "swr/immutable";
 import { useCallback } from "react";
 import { UTCDate } from "@date-fns/utc";
 
@@ -18,7 +19,7 @@ const fetcherWithAuth = async (
         throw new Error("No token");
     }
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/${resource}`;
+    const url = `${settingsService.getApiUrl()}/${resource}`;
 
     const response = await fetch(url, {
         headers: {
@@ -82,6 +83,54 @@ export function useWorkflowHistory(params: {
 
     return {
         workflowHistory: result,
+        isLoading,
+        isError: error,
+    };
+}
+
+export function useRunningWorkflow() {
+    const fetchWithToken = useFetchWithToken();
+    const { data, error, isLoading } = useSWRImmutable(
+        "workflow/infer/running",
+        fetchWithToken
+    );
+
+    let result: IWorkflowHistoryModel[] = [];
+
+    if (data && !error) {
+        result = data as IWorkflowHistoryModel[];
+    }
+
+    return {
+        runningWorkflows: result,
+        isLoading,
+        isError: error,
+    };
+}
+
+export function useWorkflowByPromptIds(params: {
+    promptIds: string[];
+}) {
+    const fetchWithToken = useFetchWithToken();
+    const { promptIds } = params;
+
+    const urlParams = promptIds.length > 0
+        ? `?${promptIds.map(id => `prompt_ids=${encodeURIComponent(id)}`).join('&')}`
+        : '';
+
+    const { data, error, isLoading } = useSWR(
+        params.promptIds.length > 0 ? `workflow/infer/${urlParams}` : null,
+        fetchWithToken,
+    );
+
+    let result: IWorkflowHistoryModel[] = [];
+
+    if (data && !error) {
+        result = data as IWorkflowHistoryModel[];
+    }
+
+    return {
+        workflows: result,
         isLoading,
         isError: error,
     };

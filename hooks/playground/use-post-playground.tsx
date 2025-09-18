@@ -3,6 +3,7 @@ import { ErrorTypes, ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react";
 import { IUsePostPlayground, IPlaygroundParams } from "@/hooks/playground/interfaces";
 import { PromptResult } from "@/app/models/prompt-result";
+import { v4 as uuidv4 } from 'uuid';
 
 export const usePostPlayground = () => {
     const [loading, setLoading] = useState(false);
@@ -321,7 +322,7 @@ class Secret {
     }
 }
 
-const inferLocalComfy = async (params: IPlaygroundParams & { onSuccess: (outputs: File[]) => void }) => {
+const inferLocalComfy = async (params: IPlaygroundParams & { onSuccess: (params: { promptId: string, outputs: File[] }) => void }) => {
 
     const { viewComfy, workflow, viewcomfyEndpoint, onSuccess } = params;
 
@@ -419,8 +420,8 @@ const inferLocalComfy = async (params: IPlaygroundParams & { onSuccess: (outputs
     }
 
     if (output.length > 0) {
-        onSuccess(output);
+        onSuccess({ promptId: uuidv4(), outputs: output });
     } else {
-        onSuccess([]);
+        onSuccess({ promptId: uuidv4(), outputs: [] });
     }
 }

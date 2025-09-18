@@ -2,7 +2,8 @@
 import {
     Settings,
     History,
-    Download
+    Download,
+    CircleX
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +38,7 @@ import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import * as constants from "@/app/constants";
 import { useSocket } from "@/app/providers/socket-provider";
-import { S3FilesData } from "@/app/models/prompt-result";
+import { ISetResults, S3FilesData } from "@/app/models/prompt-result";
 import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-user";
 import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
 import { ComparisonButton } from "@/components/comparison/comparison-button";
@@ -50,6 +51,26 @@ import {
     TransformComponent,
 
 } from "react-zoom-pan-pinch";
+import { IWorkflowHistoryModel, IWorkflowResult } from "@/app/interfaces/workflow-history";
+import { useWorkflowData } from "@/app/providers/workflows-data-provider";
+
+
+export interface IOutput {
+    file: File | S3FilesData,
+    url: string
+}
+
+interface IGeneration {
+    status?: string | undefined;
+    outputs: IOutput[],
+    errorData?: string | undefined;
+}
+
+
+interface IResults {
+    [promptId: string]: IGeneration;
+}
+
 
 const apiErrorHandler = new ApiErrorHandler();
 
@@ -61,19 +82,28 @@ const UserContentWrapper = dynamic(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
-    const { doPost, loading, setLoading } = usePostPlaygroundUser();
-    return <PlaygroundPageContent doPost={doPost} loading={loading} setLoading={setLoading} />;
+    const { setLoading, ...params } = usePostPlaygroundUser();
+    const { runningWorkflows, workflowsCompleted } = useWorkflowData();
+
+    return <PlaygroundPageContent {...{ ...params, runningWorkflows, setLoading, workflowsCompleted }} />;
 }
 
 function PlaygroundWithoutAuth() {
-    const { doPost, loading, setLoading } = usePostPlayground();
-    return <PlaygroundPageContent doPost={doPost} loading={loading} setLoading={setLoading} />;
+    const params = usePostPlayground();
+    return <PlaygroundPageContent {...{ ...params, runningWorkflows: [], workflowsCompleted: [] }} />;
 }
 
-function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (params: IUsePostPlayground) => void, loading: boolean, setLoading: (loading: boolean) => void }) {
-    const [results, setResults] = useState<{ [key: string]: { outputs: File | S3FilesData, url: string }[] }>({});
+interface IPlaygroundPageContent {
+    doPost: (params: IUsePostPlayground) => void;
+    loading: boolean;
+    setLoading: (loading: boolean) => void;
+    runningWorkflows: IWorkflowHistoryModel[];
+    workflowsCompleted: IWorkflowResult[];
+}
+
+function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted }: IPlaygroundPageContent) {
+    const [results, setResults] = useState<IResults>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
-    const { currentLog, setResultCallback, setErrorCallback } = useSocket();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
     const searchParams = useSearchParams();
@@ -156,62 +186,59 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         }
     }, [viewMode, viewComfyStateDispatcher, appId]);
 
-    const onSetResults = useCallback(async (data: S3FilesData[] | File[]) => {
-        if (!data) {
-            return;
-        }
+    const onSetResults = useCallback(async (params: ISetResults) => {
+        const { promptId, status, errorData } = params;
+        const outputs = params.outputs || [];
+        const resultOutputs: {
+            file: File | S3FilesData,
+            url: string
+        }[] = [];
 
-        const timestamp = Date.now();
-        const newGeneration: { outputs: File | S3FilesData, url: string }[] = [];
-
-        for (const output of data) {
+        for (const output of outputs) {
+            let url;
             if (output instanceof S3FilesData) {
-                newGeneration.push({ outputs: output, url: output.filepath });
+                url = output.filepath;
             } else {
-                newGeneration.push({ outputs: output, url: URL.createObjectURL(output) });
+                url = URL.createObjectURL(output);
             }
+            resultOutputs.push({ file: output, url })
         }
 
-        if (newGeneration.length > 0) {
-            setResults((prevResults) => ({
-                [timestamp]: newGeneration,
-                ...prevResults
-            }));
-        }
+        const newGeneration: IResults = {
+            [promptId]: {
+                status: status,
+                outputs: resultOutputs,
+                errorData,
+            }
+        };
+
+        setResults((prevResults) => {
+            if (prevResults[promptId]) {
+                return prevResults;
+            }
+            return {
+                ...newGeneration,
+                ...prevResults,
+            };
+        });
         setLoading(false);
         await sendNotification();
     }, [setLoading, sendNotification]);
 
-    const onSocketError = useCallback((error: Error) => {
-        if (!error) {
+    useEffect(() => {
+        if (workflowsCompleted.length === 0) {
             return;
         }
+        const addWorkflows = async () => {
+            for (const w of workflowsCompleted) {
+                const outputs = w.outputs || [];
+                await onSetResults({ promptId: w.promptId, outputs, errorData: w.errorData, status: w.status });
+            };
+        }
+        addWorkflows();
 
-        setLoading(false);
+    }, [workflowsCompleted, onSetResults]);
 
-        const errorMessage = error?.message || error?.toString() || "Unknown socket error occurred";
-
-        setErrorAlertDialog({
-            open: true,
-            errorTitle: "Execution Error",
-            errorDescription: <>{errorMessage}</>,
-            onClose: () => {
-                setErrorAlertDialog({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
-            }
-        });
-    }, [setLoading]);
-
-    // Register the result and error callbacks with the socket provider
-    useEffect(() => {
-        setResultCallback(onSetResults);
-        setErrorCallback(onSocketError);
-
-        // Clean up callbacks on unmount
-        return () => {
-            setResultCallback(null);
-            setErrorCallback(null);
-        };
-    }, [setResultCallback, setErrorCallback, onSetResults, onSocketError]);
 
     function onSubmit(data: IViewComfyWorkflow) {
         const inputs: { key: string, value: unknown }[] = [];
@@ -247,8 +274,8 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
             viewComfy: generationData,
             workflow: viewComfyState.currentViewComfy?.workflowApiJSON,
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
-            onSuccess: (data: File[]) => {
-                onSetResults(data);
+            onSuccess: (params: { promptId: string, outputs: File[] }) => {
+                onSetResults({ ...params });
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
             }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
@@ -269,7 +296,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
     useEffect(() => {
         return () => {
             for (const generation of Object.values(results)) {
-                for (const output of generation) {
+                for (const output of generation.outputs) {
                     URL.revokeObjectURL(output.url);
                 }
             }
@@ -277,10 +304,24 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => { console.log(workflowsCompleted) }, [workflowsCompleted])
+    useEffect(() => { console.log(results) }, [results])
+
     const onSelectChange = (data: IViewComfy) => {
         return viewComfyStateDispatcher({
             type: ActionType.UPDATE_CURRENT_VIEW_COMFY,
             payload: { ...data }
+        });
+    }
+
+    const onShowErrorDialog = (error: string) => {
+        setErrorAlertDialog({
+            open: true,
+            errorTitle: "Error",
+            errorDescription: <> {error} </>,
+            onClose: () => {
+                setErrorAlertDialog({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
+            }
         });
     }
 
@@ -291,6 +332,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
             </div>
         </>;
     }
+
     return (
         <>
             <div className="flex flex-col h-full">
@@ -312,8 +354,6 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
                         </Button>
                     </div>
                 </div>
-
-
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
@@ -336,21 +376,19 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
                             </div>
                         )}
                         {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
-
                     </div>
                     <div className="relative flex h-full min-h-[50vh] rounded-xl bg-muted/50 p-1 lg:col-span-2">
                         <ScrollArea className="relative flex h-full w-full flex-1 flex-col">
-                            {(Object.keys(results).length === 0) && !loading && (
+                            {(Object.keys(results).length === 0) && runningWorkflows.length === 0 && !loading && (
                                 <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
                                     <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
                                 </div>
                                     <Badge variant="outline" className="absolute right-3 top-3">
-                                        Output
+                                        Output preview
                                     </Badge>
-
                                 </>
                             )}
-                            {(!loading || Object.keys(results).length > 0) && Object.keys(results).length > 0 && (
+                            {(Object.keys(results).length > 0) && (
                                 <div className="absolute right-3 top-3 flex gap-2">
                                     <Badge variant="outline">
                                         Output
@@ -359,33 +397,19 @@ function PlaygroundPageContent({ doPost, loading, setLoading }: { doPost: (param
                             )}
                             <div className="flex-1 h-full p-4 flex overflow-y-auto">
                                 <div className="flex flex-col w-full h-full">
-                                    {loading && (
-                                        <div className="flex flex-col gap-4 w-full">
-                                            <div className="flex flex-wrap w-full gap-4 pt-4">
-                                                <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
-                                                    <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                                        <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
-                                                            <div className="flex flex-col items-center gap-2">
-                                                                <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
-                                                                <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
-                                                            </div>
-                                                        </div>
-                                                    </BlurFade>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col gap-2">
-                                                <div className="text-xs text-muted-foreground">
-                                                    {currentLog?.data}
-                                                    {!currentLog && "Prompt Scheduled"}
-                                                </div>
-                                            </div>
-                                            <hr className="w-full py-4 border-gray-300" />
-                                        </div>
-                                    )}
-                                    {Object.entries(results).map(([timestamp, generation], index, array) => (
-                                        <div className="flex flex-col gap-4 w-full h-full" key={timestamp}>
-                                            <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={timestamp}>
-                                                {generation.map((output) => (
+                                    {runningWorkflows.length > 0 && <Generating loading={loading} runningWorkflows={runningWorkflows} />}
+                                    {Object.entries(results).map(([promptId, generation], index, array) => (
+                                        <div className="flex flex-col gap-4 w-full h-full" key={promptId}>
+                                            <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={promptId}>
+                                                {generation.status && generation.status === "error" &&
+                                                    <GenerationError
+                                                        generation={generation}
+                                                        onShowErrorDialog={onShowErrorDialog}
+                                                        promptId={promptId}
+
+                                                    />
+                                                }
+                                                {!(generation.status && generation.status === "error") && generation.outputs.map((output) => (
                                                     <Fragment key={output.url}>
                                                         <OutputRenderer
                                                             output={output}
@@ -431,7 +455,7 @@ export default function PlaygroundPage() {
     );
 }
 
-export function ImageDialog({ output, showOutputFileName }: { output: { outputs: File | S3FilesData, url: string }, showOutputFileName: boolean }) {
+export function ImageDialog({ output, showOutputFileName }: { output: { file: File | S3FilesData, url: string }, showOutputFileName: boolean }) {
     const backgroundColor = "black";
     const scaleUp = false;
     const zoomFactor = 8;
@@ -506,7 +530,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { outputs:
                     className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                 />
             </DialogTrigger>
-            {showOutputFileName && parseFileName(output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name)}
+            {showOutputFileName && parseFileName(output.file instanceof S3FilesData ? output.file.filename : output.file.name)}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div
                     style={{
@@ -553,7 +577,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { outputs:
     )
 }
 
-export function VideoDialog({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
+export function VideoDialog({ output }: { output: IOutput }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -580,7 +604,7 @@ export function VideoDialog({ output }: { output: { outputs: File | S3FilesData,
     )
 }
 
-export function AudioDialog({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
+export function AudioDialog({ output }: { output: IOutput }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -593,19 +617,19 @@ export function AudioDialog({ output }: { output: { outputs: File | S3FilesData,
     )
 }
 
-export function TextOutput({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
+export function TextOutput({ output }: { output: IOutput }) {
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
-        if (output.outputs instanceof File) {
-            output.outputs.text().then(setText);
+        if (output.file instanceof File) {
+            output.file.text().then(setText);
         } else {
             // For S3FilesData, we'd need to fetch the content from the URL
             fetch(output.url).then(response => response.text()).then(setText);
         }
-    }, [output.outputs, output.url]);
+    }, [output.file, output.url]);
 
-    const outputName = output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name;
+    const outputName = output.file instanceof S3FilesData ? output.file.filename : output.file.name;
 
     return (
         <div className="pt-4 w-full">
@@ -614,8 +638,8 @@ export function TextOutput({ output }: { output: { outputs: File | S3FilesData, 
     )
 }
 
-export function FileOutput({ output }: { output: { outputs: File | S3FilesData, url: string } }) {
-    const outputName = output.outputs instanceof S3FilesData ? output.outputs.filename : output.outputs.name;
+export function FileOutput({ output }: { output: IOutput }) {
+    const outputName = output.file instanceof S3FilesData ? output.file.filename : output.file.name;
 
     return (
         <div
@@ -641,13 +665,13 @@ function OutputRenderer({
     textOutputEnabled,
     showOutputFileName }:
     {
-        output: { outputs: File | S3FilesData, url: string },
+        output: IOutput,
         textOutputEnabled: boolean,
         showOutputFileName: boolean,
     }) {
 
     const getOutputComponent = () => {
-        const contentType = output.outputs instanceof S3FilesData ? output.outputs.content_type : output.outputs.type;
+        const contentType = output.file instanceof S3FilesData ? output.file.contentType : output.file.type;
 
         if (contentType.startsWith('image/') && contentType !== "image/vnd.adobe.photoshop") {
             return (
@@ -681,7 +705,7 @@ function OutputRenderer({
                 </div>
             )}
             {
-                ((output.outputs instanceof S3FilesData ? output.outputs.content_type : output.outputs.type).startsWith('text/') && textOutputEnabled) && (
+                ((output.file instanceof S3FilesData ? output.file.contentType : output.file.type).startsWith('text/') && textOutputEnabled) && (
                     <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         <TextOutput output={output} />
                     </BlurFade>
@@ -721,4 +745,98 @@ function parseFileName(filename: string): string {
     } else {
         return filename;
     }
+}
+
+const Generating = (props: {
+    runningWorkflows: IWorkflowHistoryModel[],
+    loading: boolean,
+}) => {
+    const { currentLog } = useSocket();
+    const { runningWorkflows, loading } = props;
+
+    if (runningWorkflows.length > 0) {
+        return runningWorkflows.map((w) => (
+            (<div key={w.promptId} className="flex flex-col gap-4 w-full">
+                <div className="flex flex-wrap w-full gap-4 pt-4">
+                    <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                        <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                            <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
+                                    <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+                                </div>
+                            </div>
+                        </BlurFade>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <div className="text-xs text-muted-foreground">
+                        {currentLog && currentLog[w.promptId] && (
+                            currentLog[w.promptId]
+                        )}
+                        {(!currentLog || !currentLog[w.promptId]) && (
+                            "Prompt Scheduled"
+                        )}
+                    </div>
+                </div>
+                <hr className="w-full py-4 border-gray-300" />
+            </div>)
+        ))
+    } else if (loading) {
+        return (<div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-wrap w-full gap-4 pt-4">
+                <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                    <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                        <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
+                                <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+                            </div>
+                        </div>
+                    </BlurFade>
+                </div>
+            </div>
+            <hr className="w-full py-4 border-gray-300" />
+        </div>)
+    } else {
+        return null
+    }
+}
+
+const GenerationError = (params: {
+    generation: IGeneration,
+    promptId: string,
+    onShowErrorDialog: (error: string) => void,
+}) => {
+    const { generation, promptId, onShowErrorDialog } = params;
+
+    const getErrorMessage = (gen: IGeneration): string => {
+        return gen.errorData || "Something went wrong running your workflow";
+    }
+
+    return (
+        <div key={promptId} className="flex flex-col gap-4 w-full">
+            <div className="flex flex-wrap w-full gap-4 pt-4">
+                <div key={`${promptId}-loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                    <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                        <div className="w-full h-64 rounded-md bg-muted flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2">
+                                {/* <div className="w-8 h-8 rounded-full bg-muted-foreground/20"></div> */}
+                                <CircleX color="#ff0000" />
+                                
+                                <span className="text-sm text-muted-foreground">
+                                    <Button
+                                        variant={"outline"}
+                                        onClick={() => onShowErrorDialog(getErrorMessage(generation))}>
+                                        Show Error
+                                    </Button>
+                                </span>
+                            </div>
+                        </div>
+                    </BlurFade>
+                </div>
+            </div>
+            {/* <hr className="w-full py-4 border-gray-300" /> */}
+        </div>
+    )
 }
