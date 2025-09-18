@@ -13,8 +13,6 @@ import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
 import { Input } from '@/components/ui/input';
-// import { BentoGridThirdDemo } from '@/components/images-preview';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 class WorkflowJSONError extends Error {
     constructor() {

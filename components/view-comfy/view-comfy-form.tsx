@@ -58,6 +58,10 @@ interface IInputForm extends IInputField {
 }
 
 const settingsService = new SettingsService();
+const validateViewComfyEndpoint = (endpoint: string | undefined) => {
+
+    return endpoint && endpoint.startsWith("https://viewcomfy");
+}
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,7 +117,10 @@ export function ViewComfyForm(args: {
                                                 control={form.control}
                                                 name="viewcomfyEndpoint"
                                                 rules={{
-                                                    required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false
+                                                    required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false,
+                                                    validate: {
+                                                        endpoint: (value) => validateViewComfyEndpoint(value) || "The API endpoint URL looks wrong, you can find it under 'Your Workflows' in the Dashboard",
+                                                    } 
                                                 }}
                                                 render={({ field }) => (
                                                     <FormItem key="viewcomfyEndpoint" className="m-1">
