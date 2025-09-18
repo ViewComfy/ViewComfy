@@ -304,9 +304,6 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => { console.log(workflowsCompleted) }, [workflowsCompleted])
-    useEffect(() => { console.log(results) }, [results])
-
     const onSelectChange = (data: IViewComfy) => {
         return viewComfyStateDispatcher({
             type: ActionType.UPDATE_CURRENT_VIEW_COMFY,
