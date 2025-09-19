@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info, Check } from "lucide-react";
+import { Trash2, Info, Check, SquarePen } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -52,6 +52,8 @@ import {
 } from "@/components/ui/popover"
 import { SelectableImage } from "@/components/comparison/selectable-image";
 import { SettingsService } from "@/app/services/settings-service";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface IInputForm extends IInputField {
     id: string;
@@ -62,7 +64,7 @@ const validateViewComfyEndpoint = (endpoint: string | undefined) => {
     if (!settingsService.getIsRunningInViewComfy()) {
         return true;
     }
-    
+
     return endpoint && endpoint.startsWith("https://viewcomfy");
 }
 
@@ -80,218 +82,223 @@ export function ViewComfyForm(args: {
 
 }) {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
+    const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
+
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
-                <div className="flex flex-row gap-x-2 flex-1 min-h-0">
-                    <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
-                        <div id="inputs-form" className="flex flex-col w-full h-full">
-                            <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}>
-                                <div className="grid w-full items-start gap-4">
-                                    {editMode && (
-                                        <div className="grid gap-2">
-                                            <FormField
-                                                control={form.control}
-                                                name="title"
-                                                render={({ field }) => (
-                                                    <FormItem key="title" className="m-1">
-                                                        <FormLabel>Title</FormLabel>
-                                                        <FormControl>
-                                                            <Input className="" placeholder="The name of your workflow" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="description"
-                                                render={({ field }) => (
-                                                    <FormItem key="description" className="ml-0.5 mr-0.5">
-                                                        <FormLabel>Description</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea placeholder="The description of your workflow" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="viewcomfyEndpoint"
-                                                rules={{
-                                                    required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false,
-                                                    validate: {
-                                                        endpoint: (value) => (validateViewComfyEndpoint(value)) || "The API endpoint URL looks wrong, you can find it under 'Your Workflows' in the Dashboard",
-                                                    }
-                                                }}
-                                                render={({ field }) => (
-                                                    <FormItem key="viewcomfyEndpoint" className="m-1">
-                                                        <FormLabel>
-                                                            ViewComfy Endpoint {!settingsService.getIsRunningInViewComfy() && <span>(optional)</span>}
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
+        <>
+            <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} />
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
+                    <div className="flex flex-row gap-x-2 flex-1 min-h-0">
+                        <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
+                            <div id="inputs-form" className="flex flex-col w-full h-full">
+                                <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}>
+                                    <div className="grid w-full items-start gap-4">
+                                        {editMode && (
+                                            <div className="grid gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="title"
+                                                    render={({ field }) => (
+                                                        <FormItem key="title" className="m-1">
+                                                            <FormLabel>Title</FormLabel>
+                                                            <FormControl>
+                                                                <Input className="" placeholder="The name of your workflow" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="description"
+                                                    render={({ field }) => (
+                                                        <FormItem key="description" className="ml-0.5 mr-0.5">
+                                                            <FormLabel>Description</FormLabel>
+                                                            <FormControl>
+                                                                <Textarea placeholder="The description of your workflow" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="viewcomfyEndpoint"
+                                                    rules={{
+                                                        required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false,
+                                                        validate: {
+                                                            endpoint: (value) => (validateViewComfyEndpoint(value)) || "The API endpoint URL looks wrong, you can find it under 'Your Workflows' in the Dashboard",
+                                                        }
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <FormItem key="viewcomfyEndpoint" className="m-1">
+                                                            <FormLabel>
+                                                                ViewComfy Endpoint {!settingsService.getIsRunningInViewComfy() && <span>(optional)</span>}
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Button
+                                                                            type="button"
+                                                                            size="icon"
+                                                                            variant="ghost"
+                                                                            className="text-muted-foreground"
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                            }}
+                                                                        >
+                                                                            <Info className="size-5" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className="max-w-[300px]">
+                                                                        <p>
+                                                                            You can run your workflow on a cloud GPU by deploying it on ViewComfy first.
+                                                                            To get started, select deploy on the left hand side menu.
+                                                                        </p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </FormLabel>
+                                                            <FormControl
+                                                            >
+                                                                <Input
+                                                                    placeholder="ViewComfy endpoint" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="textOutputEnabled"
+                                                    render={({ field }) => (
+                                                        <FormItem key="textOutputEnabled" className="">
+                                                            <FormControl>
+                                                                <div className={"flex ml-0.5 space-x-2 pt-2 mb-[-5px]"}>
+                                                                    <FormLabel>Enable text output</FormLabel>
+                                                                    <Checkbox
+                                                                        checked={field.value}
+                                                                        onCheckedChange={field.onChange}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormDescription className="pb-2">
+                                                                Text output is in beta and can lead to unexpected text being rendered
+                                                            </FormDescription>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="showOutputFileName"
+                                                    render={({ field }) => (
+                                                        <FormItem key="showOutputFileName" className="">
+                                                            <FormControl>
+                                                                <div className={"flex ml-0.5 space-x-2 mb-[-5px]"}>
+                                                                    <FormLabel>
+                                                                        Show file names on output
+                                                                    </FormLabel>
+                                                                    <Checkbox
+                                                                        checked={field.value}
+                                                                        onCheckedChange={field.onChange}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormDescription className="pb-2">
+                                                                Show the filename below the file, you can parse the display by surrounding the filename with __
+                                                                <br />
+                                                                __example__123.png =&gt; example
+                                                            </FormDescription>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {!editMode && (
+                                            <div id="workflow-title-description">
+                                                <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
+                                                <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                            </div>
+                                        )}
+                                        <fieldset disabled={isLoading} className="grid gap-4 rounded-lg p-1">
+                                            {editMode && (
+                                                <legend className="-ml-1 px-1 text-sm font-medium">
+                                                    Basic Inputs
+                                                </legend>
+                                            )}
+                                            {inputFieldArray.fields.map((field, index) => {
+                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                // @ts-ignore
+                                                if (field.inputs.length > 0) {
+                                                    if (editMode) {
+                                                        return (
+                                                            <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
+                                                                <legend className="-ml-1 px-1 text-sm font-medium">
+                                                                    {
+                                                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                                        // @ts-ignore
+                                                                        field.title
+                                                                    }
+
                                                                     <Button
-                                                                        type="button"
                                                                         size="icon"
                                                                         variant="ghost"
                                                                         className="text-muted-foreground"
-                                                                        onClick={(e) => {
-                                                                            e.preventDefault();
-                                                                            e.stopPropagation();
-                                                                        }}
+                                                                        onClick={() => inputFieldArray.remove(index)}
                                                                     >
-                                                                        <Info className="size-5" />
+                                                                        <Trash2 className="size-5" />
                                                                     </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent className="max-w-[300px]">
-                                                                    <p>
-                                                                        You can run your workflow on a cloud GPU by deploying it on ViewComfy first.
-                                                                        To get started, select deploy on the left hand side menu.
-                                                                    </p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </FormLabel>
-                                                        <FormControl
-                                                        >
-                                                            <Input
-                                                                placeholder="ViewComfy endpoint" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="textOutputEnabled"
-                                                render={({ field }) => (
-                                                    <FormItem key="textOutputEnabled" className="">
-                                                        <FormControl>
-                                                            <div className={"flex ml-0.5 space-x-2 pt-2 mb-[-5px]"}>
-                                                                <FormLabel>Enable text output</FormLabel>
-                                                                <Checkbox
-                                                                    checked={field.value}
-                                                                    onCheckedChange={field.onChange}
-                                                                />
-                                                            </div>
-                                                        </FormControl>
-                                                        <FormDescription className="pb-2">
-                                                            Text output is in beta and can lead to unexpected text being rendered
-                                                        </FormDescription>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="showOutputFileName"
-                                                render={({ field }) => (
-                                                    <FormItem key="showOutputFileName" className="">
-                                                        <FormControl>
-                                                            <div className={"flex ml-0.5 space-x-2 mb-[-5px]"}>
-                                                                <FormLabel>
-                                                                    Show file names on output
-                                                                </FormLabel>
-                                                                <Checkbox
-                                                                    checked={field.value}
-                                                                    onCheckedChange={field.onChange}
-                                                                />
-                                                            </div>
-                                                        </FormControl>
-                                                        <FormDescription className="pb-2">
-                                                            Show the filename below the file, you can parse the display by surrounding the filename with __
-                                                            <br />
-                                                            __example__123.png =&gt; example
-                                                        </FormDescription>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    )}
+                                                                </legend>
+                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                            </fieldset>
+                                                        )
+                                                    }
 
-                                    {!editMode && (
-                                        <div id="workflow-title-description">
-                                            <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                            <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
-                                        </div>
-                                    )}
-                                    <fieldset disabled={isLoading} className="grid gap-4 rounded-lg p-1">
-                                        {editMode && (
-                                            <legend className="-ml-1 px-1 text-sm font-medium">
-                                                Basic Inputs
-                                            </legend>
-                                        )}
-                                        {inputFieldArray.fields.map((field, index) => {
-                                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                            // @ts-ignore
-                                            if (field.inputs.length > 0) {
-                                                if (editMode) {
                                                     return (
-                                                        <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
-                                                            <legend className="-ml-1 px-1 text-sm font-medium">
-                                                                {
-                                                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                                    // @ts-ignore
-                                                                    field.title
-                                                                }
-
-                                                                <Button
-                                                                    size="icon"
-                                                                    variant="ghost"
-                                                                    className="text-muted-foreground"
-                                                                    onClick={() => inputFieldArray.remove(index)}
-                                                                >
-                                                                    <Trash2 className="size-5" />
-                                                                </Button>
-                                                            </legend>
-                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
+                                                        <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
                                                         </fieldset>
                                                     )
                                                 }
-
-                                                return (
-                                                    <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                        <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" />
-                                                    </fieldset>
-                                                )
-                                            }
-                                            return undefined;
-                                        })}
-                                    </fieldset>
-                                    {advancedFieldArray.fields.length > 0 && (
-                                        <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} />
-                                    )}
-                                    {editMode && (args.children)}
+                                                return undefined;
+                                            })}
+                                        </fieldset>
+                                        {advancedFieldArray.fields.length > 0 && (
+                                            <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
+                                        )}
+                                        {editMode && (args.children)}
+                                    </div>
+                                </ScrollArea>
+                                {!editMode && (
+                                    <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t z-10">
+                                        {args.children}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {editMode && (
+                            <ScrollArea className="h-full flex-1 rounded-md px-[5px] pr-4">
+                                <div className="">
+                                    <PreviewImagesInput form={form} />
                                 </div>
                             </ScrollArea>
-                            {!editMode && (
-                                <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t z-10">
-                                    {args.children}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    {editMode && (
-                        <ScrollArea className="h-full flex-1 rounded-md px-[5px] pr-4">
-                            <div className="">
-                                <PreviewImagesInput form={form} />
-                            </div>
-                        </ScrollArea>
-                    )}
-                </div>
-                {editMode && (
-                    <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
-                        <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
-                            Save Changes
-                        </Button>
-                        {downloadViewComfyJSON && (
-                            <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
-                                Download as ViewComfy JSON
-                            </Button>
                         )}
                     </div>
-                )}
-            </form>
-        </Form>
+                    {editMode && (
+                        <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
+                            <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(onSubmit)}>
+                                Save Changes
+                            </Button>
+                            {downloadViewComfyJSON && (
+                                <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                                    Download as ViewComfy JSON
+                                </Button>
+                            )}
+                        </div>
+                    )}
+                </form>
+            </Form>
+        </>
     )
 }
 
@@ -408,9 +415,16 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<any>, form: UseFormReturn<IViewComfyBase, any, undefined>, editMode: boolean, isLoading: boolean }) {
-    const { advancedFieldArray, form, editMode, isLoading } = args;
+function AdvancedInputSection(args: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    advancedFieldArray: UseFieldArrayReturn<any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: UseFormReturn<IViewComfyBase, any, undefined>,
+    editMode: boolean,
+    isLoading: boolean,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+}) {
+    const { advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -453,7 +467,7 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
                                     </Button>
                                 )}
                             </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" />
+                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
                         </fieldset>
                     ))}
                 </fieldset>
@@ -463,8 +477,8 @@ function AdvancedInputSection(args: { advancedFieldArray: UseFieldArrayReturn<an
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string }) {
-    const { form, nestedIndex, editMode, formFieldName } = args;
+function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -496,7 +510,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                         }}
                         render={({ field, fieldState: { error } }) => (
                             <>
-                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} />
+                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={setShowEditDialog} />
                                 {error && <FormMessage>{error.message}</FormMessage>}
                             </>
                         )}
@@ -507,60 +521,66 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function InputFieldToUI(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+
+function InputFieldToUI(args: {
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any,
+    editMode?: boolean,
+    remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void
+}) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
 
     if (input.valueType === "long-text") {
         return (
-            <FormTextAreaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormTextAreaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "boolean") {
         return (
-            <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
-            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "seed" || input.valueType === "noise_seed" || input.valueType === "rand_seed") {
         return (
-            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "select") {
         if (input.options && input.options.length < 6) {
             return (
-                <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+                <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
             )
         } else {
             return (
-                <FormComboboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+                <FormComboboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
             )
         }
     }
 
     if (input.valueType === "slider") {
         return (
-            <FormSliderInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+            <FormSliderInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     return (
-        <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} />
+        <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
     )
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     // The Number.MIN_VALUE is used to indicate that the input has been randomized
     const [isRandomized, setIsRandomized] = useState(field.value === Number.MIN_VALUE);
     const [storedValue] = useState(field.value);
@@ -599,14 +619,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -646,8 +659,8 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
@@ -711,14 +724,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -767,9 +773,15 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormTextAreaInput(args: {
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any, editMode?: boolean,
+    remove?: UseFieldArrayRemove,
+    index: number,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+}) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
 
     return (
         <FormItem key={input.id}>
@@ -791,14 +803,8 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
                     </Tooltip>)
                 }
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+
                 )}
             </FormLabel>
             <FormControl>
@@ -817,9 +823,17 @@ function FormTextAreaInput(args: { input: IInputForm, field: any, editMode?: boo
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+
+function FormCheckboxInput(args: {
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any,
+    editMode?: boolean,
+    remove?: UseFieldArrayRemove,
+    index: number,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+}) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
         <FormItem className="flex flex-row items-center space-x-3 space-y-0" key={input.id}>
             <FormControl>
@@ -851,22 +865,22 @@ function FormCheckboxInput(args: { input: IInputForm, field: any, editMode?: boo
                 </FormDescription> */}
             </div>
             {editMode && (
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    className="text-muted-foreground self-center"
-                    onClick={remove ? () => remove(index) : undefined}
-                >
-                    <Trash2 className="size-5" />
-                </Button>
+                <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} field={field} input={input} />
             )}
         </FormItem>
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormBasicInput(args: {
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any,
+    editMode?: boolean,
+    remove?: UseFieldArrayRemove,
+    index: number,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+}) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -886,14 +900,7 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
                     </Tooltip>)
                 }
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -909,8 +916,8 @@ function FormBasicInput(args: { input: IInputForm, field: any, editMode?: boolea
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -929,14 +936,7 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -959,8 +959,8 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [open, setOpen] = useState(false);
     const [buttonWidth, setButtonWidth] = useState<number>(0);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -1004,14 +1004,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1070,8 +1063,9 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number }) {
-    const { input, field, editMode, remove, index } = args;
+function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
+
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
 
     const onSliderChange = (value: number[]) => {
         field.onChange(value[0]);
@@ -1095,14 +1089,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={remove ? () => remove(index) : undefined}
-                    >
-                        <Trash2 className="size-5" />
-                    </Button>
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1113,5 +1100,88 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                 Min: {input.slider?.min} Max: {input.slider?.max} Step: {input.slider?.step}
             </FormDescription>
         </FormItem>
+    )
+}
+
+function FieldActionButtons(props: {
+    remove?: UseFieldArrayRemove, index: number,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any
+}) {
+
+    const { remove, index, setShowEditDialog, input, field } = props;
+
+    return (
+        <div className="flex items-center gap-1 ml-auto">
+            <Button
+                size="icon"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowEditDialog({
+                        index,
+                        input,
+                        field
+                    })
+                }}
+            >
+                <SquarePen className="size-5" />
+            </Button>
+            <Button
+                size="icon"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={remove ? () => remove(index) : undefined}
+            >
+                <Trash2 className="size-5" />
+            </Button>
+        </div>
+    )
+}
+
+interface IEditFieldDialog {
+    input: IInputForm,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any,
+    index: number,
+}
+
+function EditFieldDialog(props: {
+    showEditDialog: IEditFieldDialog | undefined,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+}) {
+
+    const { showEditDialog, setShowEditDialog } = props;
+
+    return (
+        <Dialog open={showEditDialog !== undefined} onOpenChange={() => setShowEditDialog(undefined)}>
+            <form>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Edit field</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4">
+                        <div className="grid gap-3">
+                            <Label htmlFor="name-1">Name</Label>
+                            <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="username-1">Username</Label>
+                            <Input id="username-1" name="username" defaultValue="@peduarte" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </form>
+        </Dialog>
     )
 }
