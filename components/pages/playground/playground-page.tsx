@@ -394,7 +394,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                             )}
                             <div className="flex-1 h-full p-4 flex overflow-y-auto">
                                 <div className="flex flex-col w-full h-full">
-                                    {runningWorkflows.length > 0 && <Generating loading={loading} runningWorkflows={runningWorkflows} />}
+                                    <Generating loading={loading} runningWorkflows={runningWorkflows} />
                                     {Object.entries(results).map(([promptId, generation], index, array) => (
                                         <div className="flex flex-col gap-4 w-full h-full" key={promptId}>
                                             <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={promptId}>
