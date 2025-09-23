@@ -32,4 +32,11 @@ export class SettingsService {
         }
         return process.env.COMFY_OUTPUT_DIR;
     }
+
+    public getIsRunningInViewComfy(): boolean {
+        if (process.env.NEXT_PUBLIC_IS_RUNNING_IN_VIEWCOMFY && process.env.NEXT_PUBLIC_IS_RUNNING_IN_VIEWCOMFY === "true") {
+            return true;
+        }
+        return false;
+    }
 }

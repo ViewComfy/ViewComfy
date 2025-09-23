@@ -14,18 +14,18 @@ export interface FilesData {
  */
 export class S3FilesData {
     filename: string;
-    content_type: string;
+    contentType: string;
     filepath: string;
     size: number;
 
     constructor(data: {
         filename: string;
-        content_type: string;
+        contentType: string;
         filepath: string;
         size: number;
     }) {
         this.filename = data.filename;
-        this.content_type = data.content_type;
+        this.contentType = data.contentType;
         this.filepath = data.filepath;
         this.size = data.size;
     }
@@ -104,4 +104,11 @@ export class PromptResult {
         this.prompt = prompt;
         this.outputs = fileOutputs;
     }
+}
+
+export interface ISetResults {
+    outputs: S3FilesData[] | File[],
+    promptId: string,
+    status?: string | undefined;
+    errorData?: string | undefined;
 }

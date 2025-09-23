@@ -1,10 +1,12 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { socket } from "@/lib/socket";
 import { S3FilesData } from "@/app/models/prompt-result";
+import { useWorkflowData } from "@/app/providers/workflows-data-provider";
+import { IWorkflowResult } from "@/app/interfaces/workflow-history";
 
 enum InferEmitEventEnum {
   LogMessage = "infer_log_message",
@@ -17,19 +19,13 @@ enum InferEmitEventEnum {
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
-  currentLog: IWSMessage | null;
-  clearCurrentLog: () => void;
-  setResultCallback: (callback: ((files: File[] | S3FilesData[]) => void) | null) => void;
-  setErrorCallback: (callback: ((error: Error) => void) | null) => void;
+  currentLog: ICurrentLog | null;
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket,
   isConnected: false,
   currentLog: null,
-  clearCurrentLog: () => { },
-  setResultCallback: () => { },
-  setErrorCallback: () => { },
 });
 
 export const useSocket = () => {
@@ -42,31 +38,26 @@ export interface IWSMessage {
   prompt_id: string;
 }
 
+export interface ICurrentLog {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [prompt_id: string]: any;
+}
+
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { getToken, isSignedIn } = useAuth();
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [currentLog, setCurrentLog] = useState<IWSMessage | null>(null);
-  const resultCallbackRef = useRef<((files: File[] | S3FilesData[]) => void) | null>(null);
-  const errorCallbackRef = useRef<((error: Error) => void) | null>(null);
-
-  const clearCurrentLog = () => {
-    setCurrentLog(null);
-  };
+  const [currentLog, setCurrentLog] = useState<ICurrentLog | null>(null);
+  const { addCompletedWorkflow } = useWorkflowData();
 
   const updateCurrentLog = (message: IWSMessage) => {
-    setCurrentLog(message);
-  };
-
-  const setResultCallback = (callback: ((files: File[] | S3FilesData[]) => void) | null) => {
-    resultCallbackRef.current = callback;
-  };
-
-  const setErrorCallback = (callback: ((error: Error) => void) | null) => {
-    errorCallbackRef.current = callback;
+    const updatedLog = { ...currentLog };
+    if (message.prompt_id) {
+      updatedLog[message.prompt_id] = message.data;
+    }
+    setCurrentLog(updatedLog);
   };
 
   useEffect(() => {
-    // This effect is for registering event listeners and runs only once.
     const onConnect = () => {
       console.log("Socket connected");
       setIsConnected(true);
@@ -82,25 +73,20 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           data: `Socket disconnected: ${reason}`
         }
         updateCurrentLog(msg);
-        throw new Error(`Socket disconnected unexpectedly: ${reason}`);
       }
     };
 
     const onLogMessage = (data: IWSMessage) => {
-      // console.log(data);
       updateCurrentLog(data);
     };
 
     const onErrorMessage = (wsMsg: IWSMessage) => {
       console.error(`error: ${JSON.stringify(wsMsg)}`);
-      const msg = {
-        prompt_id: wsMsg.prompt_id,
-        data: `${JSON.stringify(wsMsg)}`
-      }
-      updateCurrentLog(msg);
-      if (errorCallbackRef.current) {
-        errorCallbackRef.current(new Error(wsMsg.data));
-      }
+      // const msg = {
+      //   prompt_id: wsMsg.prompt_id,
+      //   data: `${JSON.stringify(wsMsg)}`
+      // };
+      // updateCurrentLog(msg);
     };
 
     const onExecuteMessage = (data: IWSMessage) => {
@@ -113,25 +99,45 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const onResultMessage = async (data: { [key: string]: any }) => {
-      console.log("Result message received.");
+    const onResultMessage = async (data: {
+      prompt_id: string,
+      completed: boolean,
+      status: string,
+      execution_time_seconds: number,
+      prompt: {
+        prompt_id: string,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [key: string]: any,
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [key: string]: any
+    }) => {
       const msg = {
         prompt_id: data.prompt_id,
         data: `Prompt executed, downloading the results...`
       };
       updateCurrentLog(msg);
-      if (data && resultCallbackRef.current) {
+      if (data) {
         const fileOutputs: S3FilesData[] = [];
         if (data.outputs) {
           for (const output of data.outputs) {
             if (output.hasOwnProperty("filepath")) {
-              fileOutputs.push(new S3FilesData({ ...output }));
+              fileOutputs.push(new S3FilesData({ ...output, contentType: output.content_type }));
             }
           }
         }
-        if (fileOutputs.length > 0) {
-          resultCallbackRef.current(fileOutputs);
+
+        const result: IWorkflowResult = {
+          completed: data.completed,
+          executionTimeSeconds: data.execution_time_seconds,
+          outputs: fileOutputs,
+          prompt: { ...data.prompt, promptId: data.prompt_id },
+          promptId: data.prompt_id,
+          status: data.status,
+          errorData: data.error_data
+
         }
+        addCompletedWorkflow(result);
       }
     };
 
@@ -145,7 +151,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         data: `Connection error: ${err.message}`
       }
       updateCurrentLog(msg);
-      socket.disconnect();
+      setIsConnected(false);
     });
 
     socket.on('error', (error) => {
@@ -157,6 +163,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socket.on(InferEmitEventEnum.ExecutedMessage, onExecuteMessage);
     socket.on(InferEmitEventEnum.ResultMessage, onResultMessage);
 
+    socket.io.on("reconnect_attempt", async () => {
+      try {
+        const token = await getToken({ template: "long_token" });
+        socket.auth = { authorization: token ?? "" };
+      } catch (e) {
+        console.error("Failed to refresh token on reconnect_attempt:", e);
+      }
+    });
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
@@ -164,30 +179,38 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socket.off(InferEmitEventEnum.ErrorMessage, onErrorMessage);
       socket.off(InferEmitEventEnum.ExecutedMessage, onExecuteMessage);
       socket.off(InferEmitEventEnum.ResultMessage, onResultMessage);
-      socket.off('error', (error) => {
-        console.error('Socket error:', error);
-      });
+      socket.off('error');
+      socket.io.off("reconnect_attempt");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // This effect handles connection based on authentication status.
-    if (isSignedIn) {
-      const connectSocket = async () => {
+    const connectWithAuth = async () => {
+      if (!isSignedIn) return;
+      try {
         const token = await getToken({ template: "long_token" });
         if (token) {
           socket.auth = { authorization: token };
-          socket.connect();
+          socket.connect(); // built-in reconnection will handle further attempts
         }
-      };
-      connectSocket();
-    } else {
+      } catch (error) {
+        console.error('Error getting token for socket connection:', error);
+      }
+    };
+
+    if (isSignedIn && !isConnected) {
+      connectWithAuth();
+    }
+
+    if (!isSignedIn) {
       socket.disconnect();
     }
-  }, [isSignedIn, getToken]);
+
+  }, [isSignedIn, getToken, isConnected]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected, currentLog, clearCurrentLog, setResultCallback, setErrorCallback }}>
+    <SocketContext.Provider value={{ socket, isConnected, currentLog }}>
       {children}
     </SocketContext.Provider>
   );

@@ -71,7 +71,6 @@ export type Action =
     | { type: ActionType.SET_APP_IMG; payload: string }
 
 function viewComfyReducer(state: IViewComfyState, action: Action): IViewComfyState {
-    console.log({ action });
     switch (action.type) {
         case ActionType.ADD_VIEW_COMFY: {
             const data = {

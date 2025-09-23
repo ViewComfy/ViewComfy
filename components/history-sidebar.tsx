@@ -50,6 +50,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
     const [showFilters, setShowFilters] = useState(true);
     const { viewComfyState } = useViewComfy();
     const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy>(viewComfyState.viewComfys[0]);
+    const [successWorkflows, setSuccessWorkflows] = useState<IWorkflowHistoryModel[]>([]);
     const today = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
         from: subDays(today, 1),
@@ -65,6 +66,13 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
         startDate: date?.from,
         endDate: date?.to,
     });
+
+    useEffect(() => {
+        if (!workflowHistory) {
+            return;
+        }
+        setSuccessWorkflows(workflowHistory.filter(w => w.status === "success"))
+    }, [workflowHistory])
 
     if (!open) {
         return null;
@@ -167,7 +175,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                 </div>
                             </div>
                         </div>
-                    ) : workflowHistory && workflowHistory.length === 0 ? (
+                    ) : successWorkflows && successWorkflows.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <History className="h-12 w-12 text-muted-foreground mb-4" />
                             <h3 className="text-lg font-medium">No history found</h3>
@@ -185,14 +193,14 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center space-y-4 mt-2">
-                            {workflowHistory?.map(
+                                        {successWorkflows?.map(
                                 (workflowHistory: IWorkflowHistoryModel) => (
                                     <div key={workflowHistory.id} >
                                         <div className="flex flex-col items-center justify-center">
                                             <BlurFade key={workflowHistory.id + "blur-fade"} delay={0.23} inView>
-                                                <BlobPreview key={workflowHistory.id + "blob-preview"}
+                                                {workflowHistory.outputs && <BlobPreview key={workflowHistory.id + "blob-preview"}
                                                     outputs={workflowHistory.outputs}
-                                                />
+                                                />}
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
@@ -317,9 +325,14 @@ function BlobPreview({
     };
 
     useEffect(() => {
-        if (!outputs || !isImageByMimeType(outputs[blobIndex])) {
+        if (!outputs || !outputs[blobIndex]) {
             return;
         }
+
+        if (!isImageByMimeType(outputs[blobIndex])) {
+            return;
+        }
+
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
         image.src = outputs[blobIndex].filepath;

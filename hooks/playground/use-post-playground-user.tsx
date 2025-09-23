@@ -1,26 +1,45 @@
-import { ResponseError } from "@/app/models/errors";
-import { useState, useCallback } from "react";
+import { ErrorTypes, ResponseError } from "@/app/models/errors";
+import { useState, useCallback, useEffect } from "react";
 import { IPlaygroundParams, IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { useSocket } from "@/app/providers/socket-provider";
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from "@clerk/nextjs";
+import { useWorkflowData } from "@/app/providers/workflows-data-provider";
+import { IWorkflowHistoryModel } from "@/app/interfaces/workflow-history";
 
 export const usePostPlaygroundUser = () => {
     const [loading, setLoading] = useState(false);
-    const { socket, clearCurrentLog } = useSocket();
+    const { socket, isConnected } = useSocket();
+    const { runningWorkflows, addRunningWorkflow } = useWorkflowData();
     const { getToken } = useAuth();
 
     const doPost = useCallback(async ({ viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError }: IUsePostPlayground) => {
         const params = { viewComfy, workflow, viewcomfyEndpoint, onSuccess, onError };
         setLoading(true);
         try {
-            clearCurrentLog();
-            await inferApiComfy({ ...params, socket, getToken });
+            // clearCurrentLog();
+            const data = await inferApiComfy({ ...params, socket, getToken });
+            if (data) {
+                addRunningWorkflow(data.workflow);
+            }
         } catch (error) {
             onError(error);
+        } finally {
             setLoading(false);
         }
     }, [socket, getToken]);
+
+    useEffect(() => {
+        if (runningWorkflows.length > 0 && isConnected) {
+            const doSubscribe = async () => {
+                await subscribeToRunningWorkflows({
+                    socket,
+                    getToken
+                })
+            };
+            doSubscribe();
+        }
+    }, [runningWorkflows, isConnected]);
 
     return { doPost, loading, setLoading };
 }
@@ -166,11 +185,11 @@ function buildFormDataWS(data: {
 
 
 const inferApiComfy = async (params: IPlaygroundParams & {
-    onSuccess: (outputs: File[]) => void;
-    socket: any; // Add socket parameter
-    getToken: () => Promise<string | null>; // Add getToken parameter
+    onSuccess: (params: { promptId: string, outputs: File[] }) => void;
+    socket: any;
+    getToken: () => Promise<string | null>;
 }) => {
-    // Remove hook calls and use passed parameters instead
+
     const { viewComfy, viewcomfyEndpoint, workflow, socket, getToken } = params;
 
     if (!viewcomfyEndpoint) {
@@ -198,16 +217,74 @@ const inferApiComfy = async (params: IPlaygroundParams & {
         prompt_id,
     });
 
+    let response;
+
+    try {
+        response = await fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        const args = {
+            errorMsg: "Something went wrong",
+            error: "Something when wrong calling our servers, please try again. if this error persist contact us: team@viewcomfy.com",
+            errorType: ErrorTypes.UNKNOWN
+        };
+        throw new ResponseError(args)
+    }
+
+    if (!response.ok) {
+        // const errMsg = `Failed to fetch viewComfy: ${response.statusText}, ${await response.text()}`;
+        const responseError: ResponseError = await response.json();
+        throw responseError;
+    }
+
+    const result = await response.json() as {
+        data: {
+            prompt_id: string,
+            message: string,
+            workflow: IWorkflowHistoryModel,
+        }
+    };
+    if (result && result.data) {
+        return {
+            "promptId": result.data.prompt_id,
+            "message": result.data.message,
+            "workflow": result.data.workflow
+        };
+    }
+};
+
+const subscribeToRunningWorkflows = async (params: {
+    socket: any;
+    getToken: () => Promise<string | null>;
+}) => {
+
+    const { socket, getToken } = params;
+
+    if (!socket) {
+        throw new Error("Socket object is missing, probably not connected");
+    };
+
+    const token = await getToken();
+
+    if (!token) {
+        throw new Error("user token is missing");
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/workflow/infer/subscribe/${socket.id!}`;
     const response = await fetch(url, {
         method: "POST",
-        body: formData,
         headers: {
             "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
         },
     });
 
     if (!response.ok) {
-        // const errMsg = `Failed to fetch viewComfy: ${response.statusText}, ${await response.text()}`;
         const responseError: ResponseError = await response.json();
         throw responseError;
     }

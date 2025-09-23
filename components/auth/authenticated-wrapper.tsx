@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import AppContent from "@/components/app-content";
 import { SocketProvider } from "@/app/providers/socket-provider";
+import { WorkflowDataProvider } from "@/app/providers/workflows-data-provider";
 
 export default function AuthenticatedWrapper() {
     const router = useRouter();
@@ -26,8 +27,10 @@ export default function AuthenticatedWrapper() {
 
     // Once authenticated, render the main app content
     return (
-        <SocketProvider>
-            <AppContent />
-        </SocketProvider>
+        <WorkflowDataProvider>
+            <SocketProvider>
+                <AppContent />
+            </SocketProvider>
+        </WorkflowDataProvider>
     );
 } 
