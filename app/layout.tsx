@@ -1,12 +1,22 @@
+import * as Sentry from '@sentry/nextjs';
 import type { Metadata } from "next";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "ViewComfy",
   description: "From ComfyUI to beautiful web apps",
 };
+
+export function generateMetadata(): Metadata {
+  return {
+    ...metadata,
+    other: {
+      ...Sentry.getTraceData()
+    }
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
