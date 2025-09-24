@@ -116,15 +116,42 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
                     }
 
                     break;
+                case "LoadVideo":
+                    const videoInput = inputs[0];
+                    videoInput.valueType = "video";
+                    videoInput.title = getTitleFromValue(value.class_type, value);
+                    videoInput.placeholder = getTitleFromValue(value.class_type, value);
+                    videoInput.value = null;
+                    finalInput = {
+                        title: getTitleFromValue(value.class_type, value),
+                        inputs: [videoInput],
+                        key: `${key}-${value.class_type}`
+                    };
+
+                    if (isViewComfyInput(value._meta?.title)) {
+                        basicViewComfyInputs.push(finalInput)
+                    } else {
+                        basicInputs.push(finalInput);
+                    }
+
+                    break;
+
                 case "LoadAudio":
                     const audioInput = inputs[0];
                     audioInput.valueType = "audio";
                     audioInput.value = null;
-                    basicInputs.push({
+                    finalInput = {
                         title: getTitleFromValue(value.class_type, value),
                         inputs: [audioInput],
                         key: `${key}-${value.class_type}`
-                    });
+                    };
+
+                    if (isViewComfyInput(value._meta?.title)) {
+                        basicViewComfyInputs.push(finalInput)
+                    } else {
+                        basicInputs.push(finalInput);
+                    }
+
                     break;
 
                 default:
