@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info, Check, SquarePen } from "lucide-react";
+import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -249,7 +249,7 @@ export function ViewComfyForm(args: {
                                         )}
                                         <fieldset disabled={isLoading} className="grid gap-4 rounded-lg p-1">
                                             {editMode && (
-                                                <legend className="-ml-1 px-1 text-sm font-medium">
+                                                <legend className="-ml-1 px-1 text-md font-medium">
                                                     Basic Inputs
                                                 </legend>
                                             )}
@@ -267,14 +267,53 @@ export function ViewComfyForm(args: {
                                                                         field.title
                                                                     }
 
-                                                                    <Button
-                                                                        size="icon"
-                                                                        variant="ghost"
-                                                                        className="text-muted-foreground"
-                                                                        onClick={() => inputFieldArray.remove(index)}
-                                                                    >
-                                                                        <Trash2 className="size-5" />
-                                                                    </Button>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                size="icon"
+                                                                                variant="ghost"
+                                                                                className="text-muted-foreground"
+                                                                                onClick={(e) => {
+                                                                                    e.preventDefault();
+                                                                                    e.stopPropagation();
+                                                                                    try {
+                                                                                        const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
+                                                                                        if (!group) return;
+                                                                                        // strip RHF internal id
+                                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                        const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
+                                                                                        advancedFieldArray.append(rest as unknown as never);
+                                                                                        inputFieldArray.remove(index);
+                                                                                    } catch (err) {
+                                                                                        console.error("Failed to move to advanced inputs", err);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <MoveDown />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Move to Advanced Inputs</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                size="icon"
+                                                                                variant="ghost"
+                                                                                className="text-muted-foreground"
+                                                                                onClick={() => inputFieldArray.remove(index)}
+                                                                            >
+                                                                                <Trash2 className="size-5" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Delete Input</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+
+
                                                                 </legend>
                                                                 <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
                                                             </fieldset>
@@ -291,7 +330,7 @@ export function ViewComfyForm(args: {
                                             })}
                                         </fieldset>
                                         {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
+                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
                                         )}
                                         {editMode && (args.children)}
                                     </div>
@@ -444,6 +483,8 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 
 function AdvancedInputSection(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    inputFieldArray: UseFieldArrayReturn<any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     advancedFieldArray: UseFieldArrayReturn<any>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<IViewComfyBase, any, undefined>,
@@ -451,7 +492,7 @@ function AdvancedInputSection(args: {
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
-    const { advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -471,7 +512,7 @@ function AdvancedInputSection(args: {
             <CollapsibleContent className="space-y-2">
                 <fieldset className="grid gap-2 rounded-lg p-1">
                     {editMode && (
-                        <legend className="-ml-1 px-1 text-sm font-medium">
+                        <legend className="-ml-1 px-1 text-md font-medium">
                             Advanced Inputs
                         </legend>
                     )}
@@ -484,14 +525,54 @@ function AdvancedInputSection(args: {
                                     advancedField.title
                                 }
                                 {editMode && (
-                                    <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="text-muted-foreground"
-                                        onClick={() => advancedFieldArray.remove(index)}
-                                    >
-                                        <Trash2 className="size-5" />
-                                    </Button>
+                                    <>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-muted-foreground"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        try {
+                                                            const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
+                                                            if (!group) return;
+                                                            // strip RHF internal id
+                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                            const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
+                                                            inputFieldArray.append(rest as unknown as never);
+                                                            advancedFieldArray.remove(index);
+                                                        } catch (err) {
+                                                            console.error("Failed to move to basic inputs", err);
+                                                        }
+                                                    }}
+                                                >
+                                                    <MoveUp />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Move to Basic Inputs</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-muted-foreground"
+                                                    onClick={() => advancedFieldArray.remove(index)}
+                                                >
+                                                    <Trash2 className="size-5" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Delete Input</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                    </>
+
                                 )}
                             </legend>
                             <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
