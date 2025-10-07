@@ -15,7 +15,7 @@ Easily deploy your applications on serverless infrastructure using [ViewComfy cl
 
 ## Installation and demo
 
-After installing ViewComfy, you will be able to connect it to your local installation of ComfyUI, or the workflows deployed on [ViewComfy cloud](https://www.viewcomfy.com/). 
+After installing ViewComfy, you will be able to connect it to your local installation of ComfyUI, or workflows deployed on [ViewComfy cloud](https://www.viewcomfy.com/). 
 
 You can also skip the installation by using the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/). When using the web-hosted version of the editor, you will need to first deploy the workflow on ViewComfy cloud and connect the app with the API endpoint to your workflow. 
 
