@@ -15,7 +15,9 @@ Easily deploy your applications on serverless infrastructure using [ViewComfy cl
 
 ## Installation and demo
 
-To skip the installation, you can use the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/).
+After installing ViewComfy, you will be able to connect it to your local installation of ComfyUI, or the workflows deployed on [ViewComfy cloud](https://www.viewcomfy.com/). 
+
+You can also skip the installation by using the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/). When using the web-hosted version of the editor, you will need to first deploy the workflow on ViewComfy cloud and connect the app with the API endpoint to your workflow. 
 
 ### Demo going through the installation
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
@@ -38,7 +40,7 @@ npm run dev
 ```
 
 ### Detailed installation guide
-For a  more detailed guide on how to set up ViewMode and share your app with ngrok you can refer to [our blog](https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app).
+For a  more detailed guide on how to set up playground mode and share your app with ngrok you can refer to [our blog](https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app).
 
 
 ## Deployment
@@ -84,15 +86,17 @@ For more details on how to use the editor with advanced Comfy workflows, you can
 
 ### Playground
 
-The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy cloud.
+The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy Cloud.
 
-### ViewMode
+### Playground Mode (aka ViewMode)
 
-ViewMode will only load the playground page and can easily be turned into a web app. This is convenient if you want to share your workflow with someone without sharing the workflow_api.json, and without them having to install ComfyUI.
+Playground Mode will only load the playground page and can easily be turned into a web app. This is convenient if you want to share your workflow with someone without sharing the workflow_api.json, and without them having to install ComfyUI. It also allows you to only expose the inputs you want to expose to the end user. 
 
-To use ViewMode you need to download the view_comfy.json that is generated when you use the form editor and place it in the root of the project along with the workflow_api.json.
+This mode is enabled by default when running apps on ViewComfy Cloud. To use it on your local you need to follow the following steps. 
 
-To enable ViewMode, edit the .env file in the root of the project:
+To use Playground Mode on your local, you need to download the view_comfy.json that is generated when you use the form editor and place it in the root of the project along with the workflow_api.json.
+
+To enable Playground Mode, edit the .env file in the root of the project and set NEXT_PUBLIC_VIEW_MODE to true:
 
 ```bash
 .env file ->
@@ -121,8 +125,6 @@ VIEW_COMFY_FILE_NAME="view_comfy.json" NEXT_PUBLIC_VIEW_MODE="true" npm run dev
 ### Form Editor Advanced
 
 You can also drop a view_comfy.json directly in the form editor to edit it without needing the workflow_api.json.
-
-Feel free to contribute with feedback, suggestions, issues or pull requests.
 
 ### User Management
 
@@ -157,3 +159,5 @@ docker run -it --name viewcomfy-container -p 3000:3000 viewcomfy
 ## Tech
 
 ViewComfy is a Next.js app - [Next.js Documentation](https://nextjs.org/docs)
+
+Feel free to contribute with feedback, suggestions, issues or pull requests.
