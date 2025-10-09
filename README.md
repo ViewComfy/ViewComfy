@@ -13,13 +13,16 @@ It can support multiple workflows in the same UI and image, video, and text outp
 
 Easily deploy your applications on serverless infrastructure using [ViewComfy cloud](https://www.viewcomfy.com/), or on the service of your choice. Applications hosted on ViewComfy cloud come with a user management system, billing tracking and shareable email links out of the box. More info in the [deployment section](#Deployment) and in the [docs](https://docs.viewcomfy.com/get_started/introduction).
 
-## Installation and demo
+## Demo
+[![Demo](https://github.com/user-attachments/assets/54269795-f67f-4b45-a50e-7992687375d5)](https://youtu.be/Su_rbjodvEI)
+
+## Installation
 
 After installing ViewComfy, you will be able to connect it to your local installation of ComfyUI, or workflows deployed on [ViewComfy cloud](https://www.viewcomfy.com/). 
 
 You can also skip the installation by using the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/). When using the web-hosted version of the editor, you will need to first deploy the workflow on ViewComfy cloud and connect the app with the API endpoint to your workflow. 
 
-### Demo going through the installation
+### Installation Video Guide
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
 
 ### Installation
