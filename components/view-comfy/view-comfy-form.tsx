@@ -1204,7 +1204,11 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
 
     return (
         <FormItem key={input.id}>
-            <FormLabel className="flex flex-row items-center gap-2"> {input.title}
+            <FormLabel className="flex flex-row items-center gap-2">
+                <div className="flex flex-row w-full justify-between">
+                    {input.title}
+                    <span className="border border-gray-300 rounded-md px-2 py-1 min-w-[40px] text-center">{field.value}</span>
+                </div>
                 {input.tooltip && (
                     <Tooltip>
                         <TooltipTrigger className="">
@@ -1226,10 +1230,10 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
             <FormControl>
                 <Slider onValueChange={onSliderChange} defaultValue={[field.value]} min={input.slider?.min} max={input.slider?.max} step={input.slider?.step} />
             </FormControl>
-            <FormDescription className="whitespace-pre-wrap">
+            {/* <FormDescription className="whitespace-pre-wrap">
                 Value: {field.value} <br />
                 Min: {input.slider?.min} Max: {input.slider?.max} Step: {input.slider?.step}
-            </FormDescription>
+            </FormDescription> */}
         </FormItem>
     )
 }
