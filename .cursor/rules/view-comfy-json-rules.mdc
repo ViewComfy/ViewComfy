@@ -1,0 +1,190 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are a Senior Full Stack Developer and an Expert. You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
+
+a view_comfy.json file is a json file that defines a how to render a Web UI from the properties inside of it.
+
+the structure of the view_comfy.json file is as follows:
+
+```json
+{
+    "file_type": "view_comfy",
+    "file_version": "1.0.0",
+    "appTitle": "My Awesome App",
+    "appImg": "https://viewcomfy-models-public.s3.us-east-1.amazonaws.com/template_covers/fast_flux_with_cache_cover.png",
+    "version": "0.0.1",
+    "workflows": [
+        {
+            "viewComfyJSON": {
+                "title": "My Awesome Workflow 1",
+                "description": "",
+                "previewImages": [
+                    null,
+                    null,
+                    null
+                ],
+                "inputs": [
+                    {
+                        "title": "CLIP Text Encode (Prompt)",
+                        "inputs": [
+                            {
+                                "title": "CLIP Text Encode (Prompt)",
+                                "placeholder": "CLIP Text Encode (Prompt)",
+                                "value": "photograph of victorian woman with wings, sky clouds, meadow grass\n",
+                                "workflowPath": [
+                                    "6",
+                                    "inputs",
+                                    "text"
+                                ],
+                                "helpText": "Helper Text",
+                                "valueType": "long-text",
+                                "validations": {
+                                    "required": true
+                                },
+                                "key": "6-inputs-text"
+                            }
+                        ],
+                        "key": "6-CLIPTextEncode"
+                    }
+                ],
+                "advancedInputs": [
+                    {
+                        "title": "Load Checkpoint",
+                        "inputs": [
+                            {
+                                "title": "Ckpt_name",
+                                "placeholder": "Ckpt_name",
+                                "value": "512-inpainting-ema.safetensors",
+                                "workflowPath": [
+                                    "14",
+                                    "inputs",
+                                    "ckpt_name"
+                                ],
+                                "helpText": "Helper Text",
+                                "valueType": "select",
+                                "options": [
+                                    {
+                                        "label": "Inpainting EMA",
+                                        "value": "512-inpainting-ema.safetensors"
+                                    },
+                                    {
+                                        "label": "Flux Dev",
+                                        "value": "flux_dev.safetensors"
+                                    }
+                                ],
+                                "validations": {
+                                    "required": true
+                                },
+                                "key": "14-inputs-ckpt_name"
+                            }
+                        ],
+                        "key": "14-CheckpointLoaderSimple"
+                    }
+                ]
+            },
+            "workflowApiJSON": {
+                "3": {
+                    "_meta": {
+                        "title": "KSampler"
+                    },
+                    "inputs": {
+                        "cfg": 8,
+                        "seed": 40741760227630,
+                        "model": [
+                            "14",
+                            0
+                        ],
+                        "steps": 20,
+                        "denoise": 0.87,
+                        "negative": [
+                            "7",
+                            0
+                        ],
+                        "positive": [
+                            "6",
+                            0
+                        ],
+                        "scheduler": "normal",
+                        "latent_image": [
+                            "12",
+                            0
+                        ],
+                        "sampler_name": "dpmpp_2m"
+                    },
+                    "class_type": "KSampler"
+                }
+            }
+        }
+    ]
+}
+
+```
+
+the structure of the view_comfy.json file is as follows:
+
+- "file_type": is always "view_comfy"
+- "file_version": is a string and can have any value
+- "appTitle": is an optional value and defines the title of the app
+- "appImg": is an optional value and is a url to an image.
+- "version": is a string and can have any value
+- "workflows": is an array of objects that contains two objects:
+    - "viewComfyJSON": is an object that defines the inputs for the web app to render
+    - "workflowApiJSON": is an object that defines the workflow API NEVER TOUCH THIS
+
+workflowApiJSON rules:
+
+- "title": is the title of the Web App
+- "description": is an optional value and is a string that defines the description of the App
+- "previewImages": is an array of urls to images and has a maximum of 3 images.
+- "inputs": is an array of objects that define the the inputs of the workflow is an input group.
+
+inputs rules:
+
+- "title": is the title of the input group
+- "inputs": is an array of objects that define the the inputs of the workflow.
+
+inputs rules:
+- "title": is the title of the input
+- "placeholder": is the placeholder of the input
+- "value": is the value of the input and is the default value of the input
+- "valueType": is the type of the input and it can be one of the follow values "string" | "number" | "bigint" | "boolean" | "float" | "image" | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select".
+- "options": is an array of objects that define the the options of the input.
+- "workflowPath": is an array of strings that define the path to the input in the workflowApiJSON.
+- "helpText": is an optional value and is a string that defines the help text of the input.
+- "validations": is an optional value and is an object that defines the validations of the input.
+- "tooltip": is an optional value and is a string that defines the tooltip of the input.
+
+advancedInputs rules are the same as the inputs rules and this used to render this inputs inside a expandable menu.
+
+If the valueType is "select" then the options array is required and should be an array of objects with the following properties:
+- "label": is the label of the option
+- "value": is the value of the option
+
+If the valueType is "slider" then the slider object is required and should be an object with the following properties:
+- "min": is the minimum value of the slider
+- "max": is the maximum value of the slider
+- "step": is the step of the slider
+
+If the user want to transform the value of an input to a select input and doesn't provide the label and value, then the label will be the value and the value will be the value and the value should be the first value of the options array and the valueType should be "select".
+
+if the user wants to move an input from the inputs array to the advancedInputs array, you should move the whole object to the advancedInputs array
+
+if they want to move an input from the advancedInputs array to the inputs array, you should move the whole object to the inputs array.
+
+if the user wants to remove an input from the inputs array, you should remove the whole object from the inputs array.
+
+if the user wants to remove an input from the advancedInputs array, you should remove the whole object from the advancedInputs array.
+
+if you're removing an input group, you should remove the whole object from the inputs array and the advancedInputs array.
+
+if the user want to edit the name of an input, you should edit the "title" property of the input.
+
+if the user want to edit the placeholder of an input, you should edit the "placeholder" property of the input.
+
+if the user want to edit the value of an input, you should edit the "value" property of the input.
+
+
+***NEVER TOUCH OR EDIT THE workflowApiJSON, ONLY EDIT THE viewComfyJSON***

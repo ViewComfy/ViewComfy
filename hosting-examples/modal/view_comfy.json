@@ -1,0 +1,358 @@
+{
+  "file_type": "view_comfy",
+  "file_version": "1.0.0",
+  "version": "0.0.1",
+  "workflows": [
+    {
+      "viewComfyJSON": {
+        "title": "My Awesome Workflow 1",
+        "description": "",
+        "viewcomfyEndpoint": "https://your-viewcomfy-endpoint.com",
+        "previewImages": [
+          null,
+          null,
+          null
+        ],
+        "inputs": [
+          {
+            "title": "CLIP Text Encode (Prompt)",
+            "inputs": [
+              {
+                "title": "CLIP Text Encode (Prompt)",
+                "placeholder": "CLIP Text Encode (Prompt)",
+                "value": "photograph of victorian woman with wings, sky clouds, meadow grass\n",
+                "workflowPath": [
+                  "6",
+                  "inputs",
+                  "text"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "long-text",
+                "validations": {
+                  "required": true
+                },
+                "key": "6-inputs-text"
+              }
+            ],
+            "key": "6-CLIPTextEncode"
+          },
+          {
+            "title": "CLIP Text Encode (Prompt)",
+            "inputs": [
+              {
+                "title": "CLIP Text Encode (Prompt)",
+                "placeholder": "CLIP Text Encode (Prompt)",
+                "value": "watermark, text\n",
+                "workflowPath": [
+                  "7",
+                  "inputs",
+                  "text"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "long-text",
+                "validations": {
+                  "required": true
+                },
+                "key": "7-inputs-text"
+              }
+            ],
+            "key": "7-CLIPTextEncode"
+          },
+          {
+            "title": "Load Image",
+            "inputs": [
+              {
+                "title": "Load Image",
+                "placeholder": "Load Image",
+                "value": null,
+                "workflowPath": [
+                  "10",
+                  "inputs",
+                  "image"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "image",
+                "validations": {
+                  "required": true
+                },
+                "key": "10-inputs-image"
+              }
+            ],
+            "key": "10-LoadImage"
+          }
+        ],
+        "advancedInputs": [
+          {
+            "title": "KSampler",
+            "inputs": [
+              {
+                "title": "Cfg",
+                "placeholder": "Cfg",
+                "value": 8,
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "cfg"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-cfg"
+              },
+              {
+                "title": "Seed",
+                "placeholder": "Seed",
+                "value": 40741760227630,
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "seed"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "seed",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-seed"
+              },
+              {
+                "title": "Steps",
+                "placeholder": "Steps",
+                "value": 20,
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "steps"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "number",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-steps"
+              },
+              {
+                "title": "Denoise",
+                "placeholder": "Denoise",
+                "value": 0.87,
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "denoise"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "float",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-denoise"
+              },
+              {
+                "title": "Scheduler",
+                "placeholder": "Scheduler",
+                "value": "normal",
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "scheduler"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-scheduler"
+              },
+              {
+                "title": "Sampler_name",
+                "placeholder": "Sampler_name",
+                "value": "dpmpp_2m",
+                "workflowPath": [
+                  "3",
+                  "inputs",
+                  "sampler_name"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "3-inputs-sampler_name"
+              }
+            ],
+            "key": "3-KSampler"
+          },
+          {
+            "title": "Save Image",
+            "inputs": [
+              {
+                "title": "Filename_prefix",
+                "placeholder": "Filename_prefix",
+                "value": "ComfyUI",
+                "workflowPath": [
+                  "9",
+                  "inputs",
+                  "filename_prefix"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "9-inputs-filename_prefix"
+              }
+            ],
+            "key": "9-SaveImage"
+          },
+          {
+            "title": "Load Checkpoint",
+            "inputs": [
+              {
+                "title": "Ckpt_name",
+                "placeholder": "Ckpt_name",
+                "value": "512-inpainting-ema.safetensors",
+                "workflowPath": [
+                  "14",
+                  "inputs",
+                  "ckpt_name"
+                ],
+                "helpText": "Helper Text",
+                "valueType": "string",
+                "validations": {
+                  "required": true
+                },
+                "key": "14-inputs-ckpt_name"
+              }
+            ],
+            "key": "14-CheckpointLoaderSimple"
+          }
+        ],
+        "id": "604b0166dcf0b"
+      },
+      "workflowApiJSON": {
+        "3": {
+          "_meta": {
+            "title": "KSampler"
+          },
+          "inputs": {
+            "cfg": 8,
+            "seed": 40741760227630,
+            "model": [
+              "14",
+              0
+            ],
+            "steps": 20,
+            "denoise": 0.87,
+            "negative": [
+              "7",
+              0
+            ],
+            "positive": [
+              "6",
+              0
+            ],
+            "scheduler": "normal",
+            "latent_image": [
+              "12",
+              0
+            ],
+            "sampler_name": "dpmpp_2m"
+          },
+          "class_type": "KSampler"
+        },
+        "6": {
+          "_meta": {
+            "title": "CLIP Text Encode (Prompt)"
+          },
+          "inputs": {
+            "clip": [
+              "14",
+              1
+            ],
+            "text": "photograph of victorian woman with wings, sky clouds, meadow grass\n"
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "7": {
+          "_meta": {
+            "title": "CLIP Text Encode (Prompt)"
+          },
+          "inputs": {
+            "clip": [
+              "14",
+              1
+            ],
+            "text": "watermark, text\n"
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "8": {
+          "_meta": {
+            "title": "VAE Decode"
+          },
+          "inputs": {
+            "vae": [
+              "14",
+              2
+            ],
+            "samples": [
+              "3",
+              0
+            ]
+          },
+          "class_type": "VAEDecode"
+        },
+        "9": {
+          "_meta": {
+            "title": "Save Image"
+          },
+          "inputs": {
+            "images": [
+              "8",
+              0
+            ],
+            "filename_prefix": "ComfyUI"
+          },
+          "class_type": "SaveImage"
+        },
+        "10": {
+          "_meta": {
+            "title": "Load Image"
+          },
+          "inputs": {
+            "image": "1733411610248.png",
+            "upload": "image"
+          },
+          "class_type": "LoadImage"
+        },
+        "12": {
+          "_meta": {
+            "title": "VAE Encode"
+          },
+          "inputs": {
+            "vae": [
+              "14",
+              2
+            ],
+            "pixels": [
+              "10",
+              0
+            ]
+          },
+          "class_type": "VAEEncode"
+        },
+        "14": {
+          "_meta": {
+            "title": "Load Checkpoint"
+          },
+          "inputs": {
+            "ckpt_name": "512-inpainting-ema.safetensors"
+          },
+          "class_type": "CheckpointLoaderSimple"
+        }
+      }
+    }
+  ]
+}
