@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown } from "lucide-react";
+import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Eraser } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -55,10 +55,12 @@ import { SettingsService } from "@/app/services/settings-service";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ActionType, useViewComfy } from "@/app/providers/view-comfy-provider";
+import { MaskEditor } from "@/components/ui/mask-editor";
 
 interface IInputForm extends IInputField {
     id: string;
 }
+
 
 const settingsService = new SettingsService();
 const validateViewComfyEndpoint = (endpoint: string | undefined) => {
@@ -85,6 +87,12 @@ export function ViewComfyForm(args: {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
+    const [maskEditorState, setMaskEditorState] = useState<{
+        isOpen: boolean;
+        imageUrl: string;
+        existingMask: File | null;
+        fieldOnChange: (maskFile: File) => void;
+    } | null>(null);
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
         try {
@@ -111,11 +119,50 @@ export function ViewComfyForm(args: {
         }
     };
 
+    const handleMaskEditorOpen = (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => {
+        setMaskEditorState({
+            isOpen: true,
+            imageUrl,
+            existingMask,
+            fieldOnChange,
+        });
+    };
+
+    const handleMaskEditorSave = (maskFile: File) => {
+        if (maskEditorState) {
+            maskEditorState.fieldOnChange(maskFile);
+            setMaskEditorState(null);
+        }
+    };
+
+    const handleMaskEditorCancel = () => {
+        setMaskEditorState(null);
+    };
+
     return (
         <>
+            {!editMode && maskEditorState?.isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-[5%]"
+                    onClick={handleMaskEditorCancel}
+                >
+                    <div 
+                        className="w-full h-full border bg-background rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <MaskEditor 
+                            imageUrl={maskEditorState.imageUrl}
+                            existingMask={maskEditorState.existingMask}
+                            onSave={handleMaskEditorSave}
+                            onCancel={handleMaskEditorCancel}
+                        />
+                    </div>
+                </div>
+            )}
             <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} form={form} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
+
                     <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                         <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                             <div id="inputs-form" className="flex flex-col w-full h-full">
@@ -315,14 +362,14 @@ export function ViewComfyForm(args: {
 
 
                                                                 </legend>
-                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
                                                             </fieldset>
                                                         )
                                                     }
 
                                                     return (
                                                         <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
                                                         </fieldset>
                                                     )
                                                 }
@@ -330,7 +377,7 @@ export function ViewComfyForm(args: {
                                             })}
                                         </fieldset>
                                         {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
+                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
                                         )}
                                         {editMode && (args.children)}
                                     </div>
@@ -491,8 +538,9 @@ function AdvancedInputSection(args: {
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleMaskEditorOpen } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -575,7 +623,7 @@ function AdvancedInputSection(args: {
 
                                 )}
                             </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
+                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
                         </fieldset>
                     ))}
                 </fieldset>
@@ -585,8 +633,8 @@ function AdvancedInputSection(args: {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
+function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
+    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog, handleMaskEditorOpen } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -638,7 +686,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                         }}
                         render={({ field, fieldState: { error } }) => (
                             <>
-                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
+                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} handleMaskEditorOpen={handleMaskEditorOpen} />
                                 {error && <FormMessage>{error.message}</FormMessage>}
                             </>
                         )}
@@ -655,9 +703,11 @@ function InputFieldToUI(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void
+    remove?: UseFieldArrayRemove, index: number, 
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
 
     if (input.valueType === "long-text") {
         return (
@@ -673,7 +723,7 @@ function InputFieldToUI(args: {
 
     if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
-            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
         )
     }
 
@@ -787,8 +837,8 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
@@ -879,13 +929,33 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                                 <audio src={media.src} controls />
                             )}
                         </SelectableImage>
-                        <Button
-                            variant="secondary"
-                            className="border-2 text-muted-foreground"
-                            onClick={onDelete}
-                        >
-                            <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
-                        </Button>
+                        {(input.valueType === "image") && (
+                            <div className="flex flex-row items-center gap-2">
+                                <Button
+                                    variant="secondary"
+                                    className="border-2 text-muted-foreground"
+                                    onClick={() => handleMaskEditorOpen(media.src, null, field.onChange)}
+                                >
+                                    <Eraser className="size-5 mr-2" /> Edit Mask
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    className="border-2 text-muted-foreground"
+                                    onClick={onDelete}
+                                >
+                                    <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
+                                </Button>
+                            </div>
+                        )}
+                        {(input.valueType !== "image") && (
+                            <Button
+                                variant="secondary"
+                                className="border-2 text-muted-foreground"
+                                onClick={onDelete}
+                            >
+                                <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
+                            </Button>
+                        )}
                     </div>
                 ) : (
                     <Dropzone
