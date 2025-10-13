@@ -73,6 +73,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     img.src = imageUrl;
   }, [imageUrl, existingMask]);
 
+
   const initializeCanvas = async (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -100,35 +101,56 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
         const tempCtx = tempCanvas.getContext('2d');
         if (!tempCtx) return;
 
-        // Draw mask image
-        tempCtx.drawImage(maskImg, 0, 0);
-        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+  // Draw mask image
+  tempCtx.drawImage(maskImg, 0, 0);
+  const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
 
-        // Extract alpha and invert back to mask
-        // Saved format: white drawn → alpha inverted (255 - opacity)
-        // Need to restore: white with original opacity
-        const maskData = ctx.createImageData(canvas.width, canvas.height);
-        for (let i = 0; i < imageData.data.length; i += 4) {
-          const alpha = imageData.data[i + 3];
-          // Invert alpha back: saved alpha 0 (was full white) → restore alpha 255
-          const maskOpacity = 255 - alpha;
+  // Extract alpha and invert back to mask
+  const maskData = ctx.createImageData(canvas.width, canvas.height);
+  
+  // ALSO: Create a version of the image without transparency for display
+  const opaqueImageData = tempCtx.createImageData(canvas.width, canvas.height);
+  
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const alpha = imageData.data[i + 3];
+    const maskOpacity = 255 - alpha;
 
-          // Set white RGB with restored opacity
-          maskData.data[i] = 255;           // R = white
-          maskData.data[i + 1] = 255;       // G = white
-          maskData.data[i + 2] = 255;       // B = white
-          maskData.data[i + 3] = maskOpacity; // A = restored opacity
-        }
+    // Set white RGB with restored opacity for mask
+    maskData.data[i] = 255;           
+    maskData.data[i + 1] = 255;       
+    maskData.data[i + 2] = 255;       
+    maskData.data[i + 3] = maskOpacity;
+    
+    // Copy RGB but make fully opaque for background image
+    opaqueImageData.data[i] = imageData.data[i];       
+    opaqueImageData.data[i + 1] = imageData.data[i + 1]; 
+    opaqueImageData.data[i + 2] = imageData.data[i + 2]; 
+    opaqueImageData.data[i + 3] = 255; // Force fully opaque
+  }
 
-        ctx.putImageData(maskData, 0, 0);
-        saveToHistory(ctx);
-      };
-      maskImg.src = URL.createObjectURL(existingMask);
-    } else {
-      // Save initial empty state
-      saveToHistory(ctx);
-    }
+  // Update the background image to be opaque
+  const opaqueCanvas = document.createElement('canvas');
+  opaqueCanvas.width = canvas.width;
+  opaqueCanvas.height = canvas.height;
+  const opaqueCtx = opaqueCanvas.getContext('2d');
+  if (opaqueCtx) {
+    opaqueCtx.putImageData(opaqueImageData, 0, 0);
+    const opaqueImg = new Image();
+    opaqueImg.onload = () => {
+      setImage(opaqueImg); // Replace the transparent image with opaque version
+    };
+    opaqueImg.src = opaqueCanvas.toDataURL();
+  }
+
+  ctx.putImageData(maskData, 0, 0);
+  saveToHistory(ctx);
   };
+  maskImg.src = URL.createObjectURL(existingMask);
+  } else {
+  // Save initial empty state
+  saveToHistory(ctx);
+  }
+};
 
   const saveToHistory = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current;
@@ -213,6 +235,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     }
   };
 
+  // TODO: FIX THE CLEAR MASK FUNCTION SO THAT IT CLEARS ALREADY EXISTING MASKS
   const clearMask = () => {
     const canvas = canvasRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -556,33 +579,33 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     }
     imageWithAlphaCtx.putImageData(imageData, 0, 0);
 
-    // Create preview (original + red overlay)
-    const previewCanvas = document.createElement('canvas');
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
-    const previewCtx = previewCanvas.getContext('2d');
-    if (!previewCtx) return;
+    // // Create preview (original + red overlay)
+    // const previewCanvas = document.createElement('canvas');
+    // previewCanvas.width = canvas.width;
+    // previewCanvas.height = canvas.height;
+    // const previewCtx = previewCanvas.getContext('2d');
+    // if (!previewCtx) return;
 
-    previewCtx.drawImage(image, 0, 0);
-    const previewData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
+    // previewCtx.drawImage(image, 0, 0);
+    // const previewData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
 
-    for (let i = 0; i < previewData.data.length; i += 4) {
-      if (maskData.data[i] > 128) {
-        previewData.data[i] = Math.min(255, previewData.data[i] * 0.6 + 255 * 0.4);
-        previewData.data[i + 1] = Math.floor(previewData.data[i + 1] * 0.6);
-        previewData.data[i + 2] = Math.floor(previewData.data[i + 2] * 0.6);
-      }
-    }
-    previewCtx.putImageData(previewData, 0, 0);
+    // for (let i = 0; i < previewData.data.length; i += 4) {
+    //   if (maskData.data[i] > 128) {
+    //     previewData.data[i] = Math.min(255, previewData.data[i] * 0.6 + 255 * 0.4);
+    //     previewData.data[i + 1] = Math.floor(previewData.data[i + 1] * 0.6);
+    //     previewData.data[i + 2] = Math.floor(previewData.data[i + 2] * 0.6);
+    //   }
+    // }
+    // previewCtx.putImageData(previewData, 0, 0);
 
     // Convert to files
     const imageWithAlphaBlob = await new Promise<Blob>((resolve) => {
       imageWithAlphaCanvas.toBlob((blob) => resolve(blob!), 'image/png');
     });
 
-    const maskFile = new File([imageWithAlphaBlob], 'masked_image.png', { type: 'image/png' });
+    const maskedImageFile = new File([imageWithAlphaBlob], 'masked_image.png', { type: 'image/png' });
 
-    onSave(maskFile);
+    onSave(maskedImageFile);
   };
 
   return (
@@ -669,8 +692,9 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
               </TooltipTrigger>
               <TooltipContent>Brush (Draw Mask)</TooltipContent>
             </Tooltip>
-
-            <Tooltip>
+          {/*  
+          // TODO: THIS FUNCTION HAS THE SAME PROBLEM AS THE CLEAR MASK FUNCTION
+            {/* <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
@@ -681,7 +705,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Eraser</TooltipContent>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -781,7 +805,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
               </Tooltip>
             </div>
 
-            <Tooltip>
+            {/* <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
@@ -794,7 +818,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Clear Mask</TooltipContent>
-            </Tooltip>
+            </Tooltip> */}
           </div>
 
           {/* Zoom */}

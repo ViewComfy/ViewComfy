@@ -91,7 +91,7 @@ export function ViewComfyForm(args: {
         isOpen: boolean;
         imageUrl: string;
         existingMask: File | null;
-        fieldOnChange: (maskFile: File) => void;
+        fieldOnChange: (maskedImageFile: File) => void;
     } | null>(null);
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
@@ -128,9 +128,9 @@ export function ViewComfyForm(args: {
         });
     };
 
-    const handleMaskEditorSave = (maskFile: File) => {
+    const handleMaskEditorSave = (maskedImageFile: File) => {
         if (maskEditorState) {
-            maskEditorState.fieldOnChange(maskFile);
+            maskEditorState.fieldOnChange(maskedImageFile);
             setMaskEditorState(null);
         }
     };
@@ -317,6 +317,7 @@ export function ViewComfyForm(args: {
                                                                     <Tooltip>
                                                                         <TooltipTrigger asChild>
                                                                             <Button
+                                                                                type="button"
                                                                                 size="icon"
                                                                                 variant="ghost"
                                                                                 className="text-muted-foreground"
@@ -347,6 +348,7 @@ export function ViewComfyForm(args: {
                                                                     <Tooltip>
                                                                         <TooltipTrigger asChild>
                                                                             <Button
+                                                                                type="button"
                                                                                 size="icon"
                                                                                 variant="ghost"
                                                                                 className="text-muted-foreground"
@@ -403,7 +405,7 @@ export function ViewComfyForm(args: {
                                 Save Changes
                             </Button>
                             {downloadViewComfyJSON && (
-                                <Button variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                                <Button type="button" variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
                                     Download as ViewComfy JSON
                                 </Button>
                             )}
@@ -487,6 +489,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                                 onLoad={() => handleImageLoad(index, field.value)}
                                             />
                                             <Button
+                                                type="button"
                                                 variant="secondary"
                                                 className="border-2 text-muted-foreground"
                                                 onClick={() => {
@@ -550,7 +553,7 @@ function AdvancedInputSection(args: {
         >
             {!editMode && (<div className="flex items-center space-x-4 px-4">
                 <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="default" className="w-full">
+                    <Button type="button" variant="ghost" size="default" className="w-full">
                         Advanced Inputs
                         <ChevronsUpDown className="size-5" />
                     </Button>
@@ -577,6 +580,7 @@ function AdvancedInputSection(args: {
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button
+                                                    type="button"
                                                     size="icon"
                                                     variant="ghost"
                                                     className="text-muted-foreground"
@@ -606,6 +610,7 @@ function AdvancedInputSection(args: {
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button
+                                                    type="button"
                                                     size="icon"
                                                     variant="ghost"
                                                     className="text-muted-foreground"
@@ -932,13 +937,15 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                         {(input.valueType === "image") && (
                             <div className="flex flex-row items-center gap-2">
                                 <Button
+                                    type="button"
                                     variant="secondary"
                                     className="border-2 text-muted-foreground"
-                                    onClick={() => handleMaskEditorOpen(media.src, null, field.onChange)}
+                                    onClick={() => handleMaskEditorOpen(media.src, field.value, field.onChange)}
                                 >
                                     <Eraser className="size-5 mr-2" /> Edit Mask
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="secondary"
                                     className="border-2 text-muted-foreground"
                                     onClick={onDelete}
@@ -949,6 +956,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                         )}
                         {(input.valueType !== "image") && (
                             <Button
+                                type="button"
                                 variant="secondary"
                                 className="border-2 text-muted-foreground"
                                 onClick={onDelete}
@@ -1212,6 +1220,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                         <Button
+                            type="button"
                             ref={buttonRef}
                             variant="outline"
                             role="combobox"
@@ -1317,6 +1326,7 @@ function FieldActionButtons(props: {
     return (
         <div className="flex items-center gap-1 ml-auto">
             <Button
+                type="button"
                 size="icon"
                 variant="ghost"
                 className="text-muted-foreground"
@@ -1333,6 +1343,7 @@ function FieldActionButtons(props: {
                 <SquarePen className="size-5" />
             </Button>
             <Button
+                type="button"
                 size="icon"
                 variant="ghost"
                 className="text-muted-foreground"
