@@ -6,10 +6,10 @@ import { Button } from './button';
 import { Slider } from './slider';
 import {
   Pencil,
-  Eraser,
+  // Eraser,
   Undo2,
   Redo2,
-  Trash2,
+  // Trash2,
   Download,
   ZoomIn,
   ZoomOut,
@@ -150,7 +150,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   // Save initial empty state
   saveToHistory(ctx);
   }
-};
+  };
 
   const saveToHistory = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current;
@@ -236,20 +236,20 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   };
 
   // TODO: FIX THE CLEAR MASK FUNCTION SO THAT IT CLEARS ALREADY EXISTING MASKS
-  const clearMask = () => {
-    const canvas = canvasRef.current;
-    const displayCanvas = displayCanvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    const displayCtx = displayCanvas?.getContext('2d');
-    if (!ctx || !canvas || !displayCanvas || !displayCtx) return;
+  // const clearMask = () => {
+  //   const canvas = canvasRef.current;
+  //   const displayCanvas = displayCanvasRef.current;
+  //   const ctx = canvas?.getContext('2d');
+  //   const displayCtx = displayCanvas?.getContext('2d');
+  //   if (!ctx || !canvas || !displayCanvas || !displayCtx) return;
 
-    // Clear both the mask canvas and display canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+  //   // Clear both the mask canvas and display canvas
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
     
-    // Save to history
-    saveToHistory(ctx);
-  };
+  //   // Save to history
+  //   saveToHistory(ctx);
+  // };
 
   const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
