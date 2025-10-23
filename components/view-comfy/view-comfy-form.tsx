@@ -734,7 +734,7 @@ function InputFieldToUI(args: {
 
     if (input.valueType === "image-mask") {
         return (
-            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
+            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
         )
     }
 
@@ -849,7 +849,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
