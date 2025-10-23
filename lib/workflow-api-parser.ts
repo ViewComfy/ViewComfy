@@ -11,7 +11,7 @@ export interface IInputField {
     value: any;
     workflowPath: string[];
     helpText?: string;
-    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select" | "audio" | "slider";
+    valueType: InputValueType | "long-text" | "video" | "seed" | "noise_seed" | "rand_seed" | "select" | "audio" | "slider" | "image-mask";
     validations: { required: boolean, errorMsg?: string };
     key: string;
     options?: { label: string, value: string }[];
