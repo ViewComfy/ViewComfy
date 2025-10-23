@@ -142,15 +142,15 @@ export function ViewComfyForm(args: {
     return (
         <>
             {!editMode && maskEditorState?.isOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-[5%]"
                     onClick={handleMaskEditorCancel}
                 >
-                    <div 
+                    <div
                         className="w-full h-full border bg-background rounded-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <MaskEditor 
+                        <MaskEditor
                             imageUrl={maskEditorState.imageUrl}
                             existingMask={maskEditorState.existingMask}
                             onSave={handleMaskEditorSave}
@@ -708,7 +708,7 @@ function InputFieldToUI(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove, index: number, 
+    remove?: UseFieldArrayRemove, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void
 }) {
@@ -729,6 +729,12 @@ function InputFieldToUI(args: {
     if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
             <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
+        )
+    }
+
+    if (input.valueType === "image-mask") {
+        return (
+            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
         )
     }
 
@@ -843,7 +849,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
@@ -913,37 +919,43 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
             <FormControl>
                 {media.src ? (
                     <div key={input.id} className="flex flex-col items-center gap-2">
-                        <SelectableImage imageUrl={media.src} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
-                            {(input.valueType === "image") && (
-                                <img
-                                    src={media.src}
-                                    alt={media.name}
-                                    className="max-w-full max-h-full object-contain"
-                                />
-                            )}
-                            {(input.valueType === "video") && (
-                                <video
-                                    className="max-w-full max-h-full object-contain"
-                                    controls
-                                >
-                                    <track default kind="captions" srcLang="en" src="" />
-                                    <source src={media.src} />
-                                </video>
-                            )}
-                            {(input.valueType === "audio") && (
-                                <audio src={media.src} controls />
-                            )}
-                        </SelectableImage>
                         {(input.valueType === "image") && (
-                            <div className="flex flex-row items-center gap-2">
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    className="border-2 text-muted-foreground"
-                                    onClick={() => handleMaskEditorOpen(media.src, field.value, field.onChange)}
-                                >
-                                    <Eraser className="size-5 mr-2" /> Edit Mask
-                                </Button>
+                            <>
+                                <SelectableImage imageUrl={media.src} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
+                                    <img
+                                        src={media.src}
+                                        alt={media.name}
+                                        className="max-w-full max-h-full object-contain"
+                                    />
+                                </SelectableImage>
+                                <div className="flex flex-row items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        className="border-2 text-muted-foreground"
+                                        onClick={onDelete}
+                                    >
+                                        <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                        {(input.valueType !== "image") && (
+                            <>
+                                <div className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
+                                    {(input.valueType === "video") && (
+                                        <video
+                                            className="max-w-full max-h-full object-contain"
+                                            controls
+                                        >
+                                            <track default kind="captions" srcLang="en" src="" />
+                                            <source src={media.src} />
+                                        </video>
+                                    )}
+                                    {(input.valueType === "audio") && (
+                                        <audio src={media.src} controls />
+                                    )}
+                                </div>
                                 <Button
                                     type="button"
                                     variant="secondary"
@@ -952,9 +964,104 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                                 >
                                     <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
                                 </Button>
-                            </div>
+                            </>
                         )}
-                        {(input.valueType !== "image") && (
+                    </div>
+                ) : (
+                    <Dropzone
+                        key={input.id}
+                        onChange={field.onChange}
+                        fileExtensions={fileExtensions}
+                        className="form-dropzone"
+                        inputPlaceholder={field.value?.name}
+                    />
+                )}
+            </FormControl>
+        </FormItem>
+    )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
+    const [media, setMedia] = useState({
+        src: "",
+        name: "",
+    });
+
+    const fileExtensions: string[] = ['png', 'jpg', 'jpeg'];
+
+    useEffect(() => {
+        if (field.value && field.value instanceof File) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const name = field.value.name
+                    setMedia({
+                        src: content,
+                        name: name
+                    });
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    setMedia({
+                        src: "",
+                        name: ""
+                    });
+                }
+            };
+            reader.readAsDataURL(field.value);
+        }
+    }, [field.value]);
+
+    const onDelete = () => {
+        field.onChange(null);
+        setMedia({
+            src: "",
+            name: ""
+        });
+    }
+
+    return (
+        <FormItem key={input.id}>
+            <FormLabel className={FORM_STYLE.label}>{input.title}
+                {input.tooltip && (
+                    <Tooltip>
+                        <TooltipTrigger className="">
+                            <Info className="h-4 w-4" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }} />
+                        </TooltipTrigger>
+                        <TooltipContent className="text-center whitespace-pre-wrap">
+                            <p>
+                                {input.tooltip}
+                            </p>
+                        </TooltipContent>
+                    </Tooltip>)}
+                {editMode && (
+                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                )}
+            </FormLabel>
+            <FormControl>
+                {media.src ? (
+                    <div key={input.id} className="flex flex-col items-center gap-2">
+                        <SelectableImage imageUrl={media.src} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
+                            <img
+                                src={media.src}
+                                alt={media.name}
+                                className="max-w-full max-h-full object-contain"
+                            />
+                        </SelectableImage>
+                        <div className="flex flex-row items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                className="border-2 text-muted-foreground"
+                                onClick={() => handleMaskEditorOpen(media.src, field.value, field.onChange)}
+                            >
+                                <Eraser className="size-5 mr-2" /> Edit Mask
+                            </Button>
                             <Button
                                 type="button"
                                 variant="secondary"
@@ -963,7 +1070,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                             >
                                 <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
                             </Button>
-                        )}
+                        </div>
                     </div>
                 ) : (
                     <Dropzone
