@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Eraser } from "lucide-react";
+import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Brush } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -56,6 +56,8 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Label } from "@/components/ui/label";
 import { ActionType, useViewComfy } from "@/app/providers/view-comfy-provider";
 import { MaskEditor } from "@/components/ui/mask-editor";
+import { ImageMasked } from "@/app/models/prompt-result";
+
 
 interface IInputForm extends IInputField {
     id: string;
@@ -87,12 +89,7 @@ export function ViewComfyForm(args: {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
-    const [maskEditorState, setMaskEditorState] = useState<{
-        isOpen: boolean;
-        imageUrl: string;
-        existingMask: File | null;
-        fieldOnChange: (maskedImageFile: File) => void;
-    } | null>(null);
+
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
         try {
@@ -119,46 +116,8 @@ export function ViewComfyForm(args: {
         }
     };
 
-    const handleMaskEditorOpen = (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => {
-        setMaskEditorState({
-            isOpen: true,
-            imageUrl,
-            existingMask,
-            fieldOnChange,
-        });
-    };
-
-    const handleMaskEditorSave = (maskedImageFile: File) => {
-        if (maskEditorState) {
-            maskEditorState.fieldOnChange(maskedImageFile);
-            setMaskEditorState(null);
-        }
-    };
-
-    const handleMaskEditorCancel = () => {
-        setMaskEditorState(null);
-    };
-
     return (
         <>
-            {!editMode && maskEditorState?.isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-[5%]"
-                    onClick={handleMaskEditorCancel}
-                >
-                    <div
-                        className="w-full h-full border bg-background rounded-lg"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <MaskEditor
-                            imageUrl={maskEditorState.imageUrl}
-                            existingMask={maskEditorState.existingMask}
-                            onSave={handleMaskEditorSave}
-                            onCancel={handleMaskEditorCancel}
-                        />
-                    </div>
-                </div>
-            )}
             <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} form={form} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
@@ -364,14 +323,14 @@ export function ViewComfyForm(args: {
 
 
                                                                 </legend>
-                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
+                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
                                                             </fieldset>
                                                         )
                                                     }
 
                                                     return (
                                                         <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
                                                         </fieldset>
                                                     )
                                                 }
@@ -379,7 +338,7 @@ export function ViewComfyForm(args: {
                                             })}
                                         </fieldset>
                                         {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleMaskEditorOpen={handleMaskEditorOpen} />
+                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
                                         )}
                                         {editMode && (args.children)}
                                     </div>
@@ -541,9 +500,8 @@ function AdvancedInputSection(args: {
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-    handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleMaskEditorOpen } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -628,7 +586,7 @@ function AdvancedInputSection(args: {
 
                                 )}
                             </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
+                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
                         </fieldset>
                     ))}
                 </fieldset>
@@ -638,8 +596,8 @@ function AdvancedInputSection(args: {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
-    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog, handleMaskEditorOpen } = args;
+function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -691,7 +649,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                         }}
                         render={({ field, fieldState: { error } }) => (
                             <>
-                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} handleMaskEditorOpen={handleMaskEditorOpen} />
+                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
                                 {error && <FormMessage>{error.message}</FormMessage>}
                             </>
                         )}
@@ -710,9 +668,8 @@ function InputFieldToUI(args: {
     editMode?: boolean,
     remove?: UseFieldArrayRemove, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-    handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
 
     if (input.valueType === "long-text") {
         return (
@@ -728,13 +685,13 @@ function InputFieldToUI(args: {
 
     if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
-            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
+            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "image-mask") {
         return (
-            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} handleMaskEditorOpen={handleMaskEditorOpen} />
+            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
@@ -848,7 +805,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
@@ -982,26 +939,110 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, handleMaskEditorOpen: (imageUrl: string, existingMask: File | null, fieldOnChange: (file: File) => void) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog, handleMaskEditorOpen } = args;
+function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
     });
 
+    const [maskFile, setMaskFile] = useState<File | undefined>(undefined);
     const fileExtensions: string[] = ['png', 'jpg', 'jpeg'];
+    const [showMaskEditor, setShowMaskEditor] = useState(false);
+    const [fileInput, setFileInput] = useState<File | null>(null);
+    const [maskImg, setMaskImg] = useState({
+        src: "",
+        name: "",
+    });
+
+    const onSaveMask = (mask: File | undefined) => {
+        setMaskFile(mask);
+        setShowMaskEditor(false);
+    }
+
+    const handleMaskEditorCancel = () => {
+        setShowMaskEditor(false);
+    };
 
     useEffect(() => {
-        if (field.value && field.value instanceof File) {
+        console.log({ field })
+    }, [field]);
+
+
+    const setFieldValue = () => {
+
+        if (fileInput && fileInput instanceof File) {
+            if (maskFile && maskFile instanceof File) {
+                field.onChange(new ImageMasked({
+                    image: fileInput,
+                    mask: maskFile,
+                }));
+                return;
+            } else {
+                field.onChange(fileInput);
+            }
+        }
+        else {
+            field.onChange(null);
+        }
+    }
+
+    useEffect(() => {
+        if (maskFile && maskFile instanceof File) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const content = e.target?.result as string;
-                    const name = field.value.name
+                    const name = maskFile.name
+                    setMaskImg({
+                        src: content,
+                        name: name
+                    });
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    setMaskImg({
+                        src: "",
+                        name: ""
+                    });
+                }
+            };
+            reader.readAsDataURL(maskFile);
+        } else {
+            setMaskImg({
+                src: "",
+                name: ""
+            });
+        }
+        setFieldValue();
+    }, [maskFile]);
+
+
+    useEffect(() => {
+        if (!fileInput) {
+            setMedia({
+                src: "",
+                name: ""
+            });
+            field.onChange(null);
+            setMaskImg({
+                src: "",
+                name: ""
+            });
+            return;
+        }
+
+        if (fileInput && fileInput instanceof File) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const name = fileInput.name
                     setMedia({
                         src: content,
                         name: name
                     });
+                    field.onChange(fileInput);
+                    setMaskFile(undefined);
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     setMedia({
@@ -1010,79 +1051,97 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
                     });
                 }
             };
-            reader.readAsDataURL(field.value);
+            reader.readAsDataURL(fileInput);
         }
-    }, [field.value]);
+    }, [fileInput]);
 
     const onDelete = () => {
-        field.onChange(null);
-        setMedia({
-            src: "",
-            name: ""
-        });
+        setFileInput(null);
+    };
+
+    const getDisplayImg = () => {
+        return maskImg.src || media.src;
     }
 
     return (
-        <FormItem key={input.id}>
-            <FormLabel className={FORM_STYLE.label}>{input.title}
-                {input.tooltip && (
-                    <Tooltip>
-                        <TooltipTrigger className="">
-                            <Info className="h-4 w-4" onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }} />
-                        </TooltipTrigger>
-                        <TooltipContent className="text-center whitespace-pre-wrap">
-                            <p>
-                                {input.tooltip}
-                            </p>
-                        </TooltipContent>
-                    </Tooltip>)}
-                {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
-                )}
-            </FormLabel>
-            <FormControl>
-                {media.src ? (
-                    <div key={input.id} className="flex flex-col items-center gap-2">
-                        <SelectableImage imageUrl={media.src} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
-                            <img
-                                src={media.src}
-                                alt={media.name}
-                                className="max-w-full max-h-full object-contain"
-                            />
-                        </SelectableImage>
-                        <div className="flex flex-row items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                className="border-2 text-muted-foreground"
-                                onClick={() => handleMaskEditorOpen(media.src, field.value, field.onChange)}
-                            >
-                                <Eraser className="size-5 mr-2" /> Edit Mask
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                className="border-2 text-muted-foreground"
-                                onClick={onDelete}
-                            >
-                                <Trash2 className="size-5 mr-2" /> Remove {input.valueType}
-                            </Button>
+        <>
+            <FormItem key={input.id}>
+                <FormLabel className={FORM_STYLE.label}>{input.title}
+                    {input.tooltip && (
+                        <Tooltip>
+                            <TooltipTrigger className="">
+                                <Info className="h-4 w-4" onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }} />
+                            </TooltipTrigger>
+                            <TooltipContent className="text-center whitespace-pre-wrap">
+                                <p>
+                                    {input.tooltip}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>)}
+                    {editMode && (
+                        <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    )}
+                </FormLabel>
+                <FormControl>
+                    {media.src ? (
+                        <div key={input.id} className="flex flex-col items-center gap-2">
+                            <SelectableImage imageUrl={getDisplayImg()} className="max-w-full h-48 flex items-center justify-center overflow-hidden border rounded-md relative">
+                                <img
+                                    src={getDisplayImg()}
+                                    alt={media.name}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            </SelectableImage>
+                            <div className="flex flex-row items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="border-2 text-muted-foreground"
+                                    onClick={() => setShowMaskEditor(true)}
+                                >
+                                    <Brush className="size-5 mr-2" /> Edit Mask
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="border-2 text-muted-foreground"
+                                    onClick={onDelete}
+                                >
+                                    <Trash2 className="size-5 mr-2" /> Remove Image
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <Dropzone
-                        key={input.id}
-                        onChange={field.onChange}
-                        fileExtensions={fileExtensions}
-                        className="form-dropzone"
-                        inputPlaceholder={field.value?.name}
-                    />
-                )}
-            </FormControl>
-        </FormItem>
+                    ) : (
+                        <Dropzone
+                            key={input.id}
+                            onChange={setFileInput}
+                            fileExtensions={fileExtensions}
+                            className="form-dropzone"
+                            inputPlaceholder={fileInput?.name}
+                        />
+                    )}
+                </FormControl>
+            </FormItem>
+            {!editMode && showMaskEditor &&
+                (
+                    <Dialog open={showMaskEditor}
+                        onOpenChange={setShowMaskEditor}
+                    >
+                        <DialogContent className="w-[calc(80vw-1rem)] h-[calc(80vh-1rem)] max-w-none border bg-background rounded-lg p-0">
+                            <MaskEditor
+                                imageUrl={media.src}
+                                existingMask={maskFile}
+                                onSave={onSaveMask}
+                                onCancel={handleMaskEditorCancel}
+                            />
+                        </DialogContent>
+                    </Dialog>
+                )
+            }
+        </>
     )
 }
 
@@ -1570,16 +1629,16 @@ function EditFieldDialog(props: {
     const typeOptions = [
         { label: "Text", value: "string" },
         { label: "Long text", value: "long-text" },
-        { label: "Number", value: "number" },
-        { label: "Float", value: "float" },
-        { label: "Boolean", value: "boolean" },
         { label: "Image", value: "image" },
+        { label: "Image with Mask Editor", value: "image-mask" },
         { label: "Video", value: "video" },
         { label: "Audio", value: "audio" },
-        { label: "Seed", value: "seed" },
         { label: "Select", value: "select" },
-        // { label: "Combobox", value: "combobox" },
         { label: "Slider", value: "slider" },
+        { label: "Number", value: "number" },
+        { label: "Float", value: "float" },
+        { label: "CheckBox", value: "boolean" },
+        { label: "Seed", value: "seed" },
     ];
 
     const parseSelectOptions = (text: string): { label: string, value: string }[] => {
@@ -1667,6 +1726,7 @@ function EditFieldDialog(props: {
                 break;
             }
             case "image":
+            case "image-mask":
             case "video":
             case "audio": {
                 break;
@@ -1730,6 +1790,7 @@ function EditFieldDialog(props: {
                 break;
             }
             case "image":
+            case "image-mask":
             case "video":
             case "audio": {
                 computedDefault = null;

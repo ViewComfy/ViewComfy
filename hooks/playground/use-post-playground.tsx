@@ -2,7 +2,7 @@ import { IViewComfy } from "@/app/interfaces/comfy-input";
 import { ErrorTypes, ResponseError } from "@/app/models/errors";
 import { useState, useCallback } from "react";
 import { IUsePostPlayground, IPlaygroundParams } from "@/hooks/playground/interfaces";
-import { PromptResult } from "@/app/models/prompt-result";
+import { ImageMasked, PromptResult } from "@/app/models/prompt-result";
 import { v4 as uuidv4 } from 'uuid';
 
 export const usePostPlayground = () => {
@@ -54,6 +54,9 @@ function buildFormData(data: {
         const value = params[key];
         if (value instanceof File) {
             formData.set(key, value);
+        } else if (value instanceof ImageMasked) {
+            formData.set(key, value.image);
+            formData.set(`${key}-viewcomfymask`, value.mask);
         } else {
             params_str[key] = value;
         }

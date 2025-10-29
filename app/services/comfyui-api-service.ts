@@ -261,4 +261,109 @@ export class ComfyUIAPIService {
             }
         }
     }
+
+    public async uploadMask(params: {
+        maskFile: File,
+        maskFileName: string,
+        originalFileRef: string,
+    }) {
+        const { maskFile, maskFileName, originalFileRef } = params;
+        const formData = new FormData()
+        formData.append('image', maskFile, maskFileName)
+        formData.append(
+            'original_ref',
+            JSON.stringify({
+                "filename": originalFileRef,
+                "subfolder": "clipspace",
+                "type": "input",
+            })
+        )
+        formData.append('type', 'input')
+        formData.append('subfolder', 'clipspace')
+        const response = await fetch(`${this.getUrl("http")}/upload/mask`, {
+            method: 'POST',
+            body: formData,
+        });
+        if (!response.ok) {
+
+            let resError: IComfyUIError | string;
+            try {
+                const responseError = await response.json();
+                if (responseError.error?.message) {
+                    resError = {
+                        message: responseError.error.message,
+                        node_errors: responseError.node_errors || [],
+                    }
+                } else {
+                    resError = responseError;
+                }
+            } catch (error) {
+                console.error("cannot parse response", error);
+                throw error;
+            }
+            console.error(resError);
+            throw resError;
+
+        }
+
+        if (!response.body) {
+            throw new Error("No response body");
+        }
+
+        return await response.json();
+
+    }
+
+    public async uploadImage(params: {
+        imageFile: File,
+        imageFileName: string,
+        originalFileRef: string,
+    }) {
+        const { imageFile, imageFileName, originalFileRef } = params;
+        const formData = new FormData()
+        formData.append('image', imageFile, imageFileName)
+        formData.append(
+            'original_ref',
+            JSON.stringify({
+                "filename": originalFileRef,
+                "subfolder": "",
+                "type": "input",
+            })
+        )
+        formData.append('type', 'input')
+        formData.append('subfolder', 'clipspace')
+        const response = await fetch(`${this.getUrl("http")}/upload/image`, {
+            method: 'POST',
+            body: formData,
+        });
+        if (!response.ok) {
+
+            let resError: IComfyUIError | string;
+            try {
+                const responseError = await response.json();
+                if (responseError.error?.message) {
+                    resError = {
+                        message: responseError.error.message,
+                        node_errors: responseError.node_errors || [],
+                    }
+                } else {
+                    resError = responseError;
+                }
+            } catch (error) {
+                console.error("cannot parse response", error);
+                throw error;
+            }
+            console.error(resError);
+            throw resError;
+
+        }
+
+        if (!response.body) {
+            throw new Error("No response body");
+        }
+
+        return await response.json();
+
+    }
+
 }
