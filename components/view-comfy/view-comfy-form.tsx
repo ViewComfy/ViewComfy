@@ -964,11 +964,6 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
         setShowMaskEditor(false);
     };
 
-    useEffect(() => {
-        console.log({ field })
-    }, [field]);
-
-
     const setFieldValue = () => {
 
         if (fileInput && fileInput instanceof File) {
