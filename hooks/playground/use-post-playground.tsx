@@ -340,6 +340,9 @@ const inferLocalComfy = async (params: IPlaygroundParams & { onSuccess: (params:
     for (const { key, value } of viewComfy.inputs) {
         if (value instanceof File) {
             formData.append(key, value);
+        } else if (value instanceof ImageMasked) {
+            formData.set(key, value.image);
+            formData.set(`${key}-viewcomfymask`, value.mask);
         } else {
             viewComfyJSON.inputs.push({ key, value });
         }
