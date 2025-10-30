@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from "@clerk/nextjs";
 import { useWorkflowData } from "@/app/providers/workflows-data-provider";
 import { IWorkflowHistoryModel } from "@/app/interfaces/workflow-history";
+import { ImageMasked } from "@/app/models/prompt-result";
 
 export const usePostPlaygroundUser = () => {
     const [loading, setLoading] = useState(false);
@@ -44,114 +45,6 @@ export const usePostPlaygroundUser = () => {
     return { doPost, loading, setLoading };
 }
 
-/**
- * Represents the output file data from a prompt execution
- */
-export interface FilesData {
-    filename: string;
-    content_type: string;
-    data: string;
-    size: number;
-}
-
-/**
- * Represents the output file with a link to download the data from a prompt execution
- */
-export class S3FilesData {
-    filename: string;
-    content_type: string;
-    filepath: string;
-    size: number;
-
-    constructor(data: {
-        filename: string;
-        content_type: string;
-        filepath: string;
-        size: number;
-    }) {
-        this.filename = data.filename;
-        this.content_type = data.content_type;
-        this.filepath = data.filepath;
-        this.size = data.size;
-    }
-}
-
-
-/**
- * Creates a PromptResult object from the response
- *
- * @param data Raw prompt result data
- * @returns A properly formatted PromptResult with File objects
- */
-export class PromptResult {
-    /** Unique identifier for the prompt */
-    prompt_id: string;
-
-    /** Current status of the prompt execution */
-    status: string;
-
-    /** Whether the prompt execution is complete */
-    completed: boolean;
-
-    /** Time taken to execute the prompt in seconds */
-    execution_time_seconds: number;
-
-    /** The original prompt configuration */
-    prompt: Record<string, any>;
-
-    /** List of output files */
-    outputs: (File | S3FilesData)[];
-
-    constructor(data: {
-        prompt_id: string;
-        status: string;
-        completed: boolean;
-        execution_time_seconds: number;
-        prompt: Record<string, any>;
-        outputs?: FilesData[] | S3FilesData[];
-    }) {
-        const {
-            prompt_id,
-            status,
-            completed,
-            execution_time_seconds,
-            prompt,
-            outputs = [],
-        } = data;
-
-        // Convert output data to File objects
-        const fileOutputs: (File | S3FilesData)[] = outputs.map((output: FilesData | S3FilesData) => {
-            if (output instanceof S3FilesData) {
-                return output;
-            } else {
-                const binaryData = atob(output.data);
-                const arrayBuffer = new ArrayBuffer(binaryData.length);
-                const uint8Array = new Uint8Array(arrayBuffer);
-
-                for (let i = 0; i < binaryData.length; i++) {
-                    uint8Array[i] = binaryData.charCodeAt(i);
-                }
-
-                const blob = new Blob([arrayBuffer], { type: output.content_type });
-
-                // Create File object from Blob
-                return new File([blob], output.filename, {
-                    type: output.content_type,
-                    lastModified: new Date().getTime(),
-                });
-            }
-        });
-
-        this.prompt_id = prompt_id;
-        this.status = status;
-        this.completed = completed;
-        this.execution_time_seconds = execution_time_seconds;
-        this.prompt = prompt;
-        this.outputs = fileOutputs;
-    }
-}
-
-
 function buildFormDataWS(data: {
     params: Array<{ [key: string]: any }>;
     override_workflow_api?: Record<string, any> | undefined;
@@ -166,7 +59,11 @@ function buildFormDataWS(data: {
     for (const { key, value } of params) {
         if (value instanceof File) {
             formData.set(key, value);
-        } else {
+        } else if (value instanceof ImageMasked) {
+            formData.set(key, value.image);
+            formData.set(`${key}-viewcomfymask`, value.mask);
+        }
+        else {
             params_str[key] = value;
         }
     }

@@ -40,7 +40,6 @@ import * as constants from "@/app/constants";
 import { useSocket } from "@/app/providers/socket-provider";
 import { ISetResults, S3FilesData } from "@/app/models/prompt-result";
 import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-user";
-import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
 import { ComparisonButton } from "@/components/comparison/comparison-button";
 import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
 import { SelectableImage } from "@/components/comparison/selectable-image";
@@ -445,11 +444,7 @@ export default function PlaygroundPage() {
         </UserContentWrapper>
     );
 
-    return (
-        <ImageComparisonProvider>
-            {content}
-        </ImageComparisonProvider>
-    );
+    return content;
 }
 
 export function ImageDialog({ output, showOutputFileName }: { output: { file: File | S3FilesData, url: string }, showOutputFileName: boolean }) {

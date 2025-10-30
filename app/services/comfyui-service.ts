@@ -30,7 +30,7 @@ export class ComfyUIService {
         }
 
         const comfyWorkflow = new ComfyWorkflow(workflow);
-        await comfyWorkflow.setViewComfy(args.viewComfy.inputs);
+        await comfyWorkflow.setViewComfy(args.viewComfy.inputs, this.comfyUIAPIService);
 
         try {
 

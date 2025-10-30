@@ -6,15 +6,14 @@ import { Button } from './button';
 import { Slider } from './slider';
 import {
   Pencil,
-  // Eraser,
   Undo2,
   Redo2,
-  // Trash2,
-  Download,
+  Trash2,
   ZoomIn,
   ZoomOut,
   Move,
-  Maximize2
+  Maximize2,
+  Save
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -26,7 +25,7 @@ import {
 interface MaskEditorProps {
   imageUrl: string;
   existingMask?: File | null;
-  onSave: (maskFile: File) => void;
+  onSave: (maskFile: File | undefined) => void;
   onCancel: () => void;
   className?: string;
 }
@@ -60,11 +59,8 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number; size: number } | null>(null);
 
-  
-  
   useEffect(() => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload = () => {
       setImage(img);
       initializeCanvas(img);
@@ -72,7 +68,6 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     };
     img.src = imageUrl;
   }, [imageUrl, existingMask]);
-
 
   const initializeCanvas = async (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
@@ -84,7 +79,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     displayCanvas.width = img.width;
     displayCanvas.height = img.height;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     // Clear canvas first
@@ -98,58 +93,58 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = img.width;
         tempCanvas.height = img.height;
-        const tempCtx = tempCanvas.getContext('2d');
+        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true, });
         if (!tempCtx) return;
 
-  // Draw mask image
-  tempCtx.drawImage(maskImg, 0, 0);
-  const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        // Draw mask image
+        tempCtx.drawImage(maskImg, 0, 0);
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
 
-  // Extract alpha and invert back to mask
-  const maskData = ctx.createImageData(canvas.width, canvas.height);
-  
-  // ALSO: Create a version of the image without transparency for display
-  const opaqueImageData = tempCtx.createImageData(canvas.width, canvas.height);
-  
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    const alpha = imageData.data[i + 3];
-    const maskOpacity = 255 - alpha;
+        // Extract alpha and invert back to mask
+        const maskData = ctx.createImageData(canvas.width, canvas.height);
 
-    // Set white RGB with restored opacity for mask
-    maskData.data[i] = 255;           
-    maskData.data[i + 1] = 255;       
-    maskData.data[i + 2] = 255;       
-    maskData.data[i + 3] = maskOpacity;
-    
-    // Copy RGB but make fully opaque for background image
-    opaqueImageData.data[i] = imageData.data[i];       
-    opaqueImageData.data[i + 1] = imageData.data[i + 1]; 
-    opaqueImageData.data[i + 2] = imageData.data[i + 2]; 
-    opaqueImageData.data[i + 3] = 255; // Force fully opaque
-  }
+        // ALSO: Create a version of the image without transparency for display
+        const opaqueImageData = tempCtx.createImageData(canvas.width, canvas.height);
 
-  // Update the background image to be opaque
-  const opaqueCanvas = document.createElement('canvas');
-  opaqueCanvas.width = canvas.width;
-  opaqueCanvas.height = canvas.height;
-  const opaqueCtx = opaqueCanvas.getContext('2d');
-  if (opaqueCtx) {
-    opaqueCtx.putImageData(opaqueImageData, 0, 0);
-    const opaqueImg = new Image();
-    opaqueImg.onload = () => {
-      setImage(opaqueImg); // Replace the transparent image with opaque version
-    };
-    opaqueImg.src = opaqueCanvas.toDataURL();
-  }
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const alpha = imageData.data[i + 3];
+          const maskOpacity = 255 - alpha;
 
-  ctx.putImageData(maskData, 0, 0);
-  saveToHistory(ctx);
-  };
-  maskImg.src = URL.createObjectURL(existingMask);
-  } else {
-  // Save initial empty state
-  saveToHistory(ctx);
-  }
+          // Set white RGB with restored opacity for mask
+          maskData.data[i] = 255;
+          maskData.data[i + 1] = 255;
+          maskData.data[i + 2] = 255;
+          maskData.data[i + 3] = maskOpacity;
+
+          // Copy RGB but make fully opaque for background image
+          opaqueImageData.data[i] = imageData.data[i];
+          opaqueImageData.data[i + 1] = imageData.data[i + 1];
+          opaqueImageData.data[i + 2] = imageData.data[i + 2];
+          opaqueImageData.data[i + 3] = 255; // Force fully opaque
+        }
+
+        // Update the background image to be opaque
+        const opaqueCanvas = document.createElement('canvas');
+        opaqueCanvas.width = canvas.width;
+        opaqueCanvas.height = canvas.height;
+        const opaqueCtx = opaqueCanvas.getContext('2d', { willReadFrequently: true, });
+        if (opaqueCtx) {
+          opaqueCtx.putImageData(opaqueImageData, 0, 0);
+          const opaqueImg = new Image();
+          opaqueImg.onload = () => {
+            setImage(opaqueImg); // Replace the transparent image with opaque version
+          };
+          opaqueImg.src = opaqueCanvas.toDataURL();
+        }
+
+        ctx.putImageData(maskData, 0, 0);
+        saveToHistory(ctx);
+      };
+      maskImg.src = URL.createObjectURL(existingMask);
+    } else {
+      // Save initial empty state
+      saveToHistory(ctx);
+    }
   };
 
   const saveToHistory = (ctx: CanvasRenderingContext2D) => {
@@ -225,7 +220,9 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   const redo = () => {
     if (historyStep < history.length - 1) {
       const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
+      const ctx = canvas?.getContext('2d', {
+        willReadFrequently: true,
+      });
       if (!ctx || !canvas) return;
 
       const nextState = history[historyStep + 1];
@@ -236,20 +233,16 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   };
 
   // TODO: FIX THE CLEAR MASK FUNCTION SO THAT IT CLEARS ALREADY EXISTING MASKS
-  // const clearMask = () => {
-  //   const canvas = canvasRef.current;
-  //   const displayCanvas = displayCanvasRef.current;
-  //   const ctx = canvas?.getContext('2d');
-  //   const displayCtx = displayCanvas?.getContext('2d');
-  //   if (!ctx || !canvas || !displayCanvas || !displayCtx) return;
+  const clearMask = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx || !canvas) return;
 
-  //   // Clear both the mask canvas and display canvas
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //   displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
-    
-  //   // Save to history
-  //   saveToHistory(ctx);
-  // };
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Save to history
+    saveToHistory(ctx);
+  };
 
   const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -538,16 +531,30 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     if (!canvas || !image) return;
 
     // Get mask data
+    const maskCtx = canvas.getContext('2d');
+    if (!maskCtx) return;
+
+    const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // Check if the canvas is clear
+    const isCanvasClear = maskData.data.every(channel => channel === 0);
+
+    if (isCanvasClear) {
+      // If the canvas is clear, call onSave with null
+      onSave(undefined);
+      return;
+    }
+
     const maskCanvas = document.createElement('canvas');
     maskCanvas.width = canvas.width;
     maskCanvas.height = canvas.height;
-    const maskCtx = maskCanvas.getContext('2d');
-    if (!maskCtx) return;
+    const maskCtx2 = maskCanvas.getContext('2d');
+    if (!maskCtx2) return;
 
-    maskCtx.fillStyle = 'black';
-    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-    maskCtx.drawImage(canvas, 0, 0);
-    const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+    maskCtx2.fillStyle = 'black';
+    maskCtx2.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+    maskCtx2.drawImage(canvas, 0, 0);
+    const maskData2 = maskCtx2.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
 
     // Create image with alpha channel for ComfyUI LoadImage
     // ComfyUI code: mask = 1. - torch.from_numpy(alpha/255)
@@ -565,14 +572,14 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     imageWithAlphaCtx.globalCompositeOperation = 'copy';
     imageWithAlphaCtx.drawImage(image, 0, 0);
     imageWithAlphaCtx.globalCompositeOperation = 'source-over'; // Reset to default
-    
+
     const imageData = imageWithAlphaCtx.getImageData(0, 0, imageWithAlphaCanvas.width, imageWithAlphaCanvas.height);
 
     // Apply mask to alpha channel only, preserving RGB values from the image
     // This ensures transparent areas from previous masks don't become white
     for (let i = 0; i < imageData.data.length; i += 4) {
-      const maskValue = maskData.data[i]; // white=255 (masked area), black=0 (unmasked)
-      
+      const maskValue = maskData2.data[i]; // white=255 (masked area), black=0 (unmasked)
+
       // Apply mask by inverting: white drawn areas → transparent (alpha=0)
       // unmasked areas → opaque (alpha=255)
       imageData.data[i + 3] = 255 - maskValue;
@@ -580,23 +587,23 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     imageWithAlphaCtx.putImageData(imageData, 0, 0);
 
     // // Create preview (original + red overlay)
-    // const previewCanvas = document.createElement('canvas');
-    // previewCanvas.width = canvas.width;
-    // previewCanvas.height = canvas.height;
-    // const previewCtx = previewCanvas.getContext('2d');
-    // if (!previewCtx) return;
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width = canvas.width;
+    previewCanvas.height = canvas.height;
+    const previewCtx = previewCanvas.getContext('2d');
+    if (!previewCtx) return;
 
-    // previewCtx.drawImage(image, 0, 0);
-    // const previewData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
+    previewCtx.drawImage(image, 0, 0);
+    const previewData = previewCtx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
 
-    // for (let i = 0; i < previewData.data.length; i += 4) {
-    //   if (maskData.data[i] > 128) {
-    //     previewData.data[i] = Math.min(255, previewData.data[i] * 0.6 + 255 * 0.4);
-    //     previewData.data[i + 1] = Math.floor(previewData.data[i + 1] * 0.6);
-    //     previewData.data[i + 2] = Math.floor(previewData.data[i + 2] * 0.6);
-    //   }
-    // }
-    // previewCtx.putImageData(previewData, 0, 0);
+    for (let i = 0; i < previewData.data.length; i += 4) {
+      if (maskData.data[i] > 128) {
+        previewData.data[i] = Math.min(255, previewData.data[i] * 0.6 + 255 * 0.4);
+        previewData.data[i + 1] = Math.floor(previewData.data[i + 1] * 0.6);
+        previewData.data[i + 2] = Math.floor(previewData.data[i + 2] * 0.6);
+      }
+    }
+    previewCtx.putImageData(previewData, 0, 0);
 
     // Convert to files
     const imageWithAlphaBlob = await new Promise<Blob>((resolve) => {
@@ -692,8 +699,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
               </TooltipTrigger>
               <TooltipContent>Brush (Draw Mask)</TooltipContent>
             </Tooltip>
-          {/*  
-          // TODO: THIS FUNCTION HAS THE SAME PROBLEM AS THE CLEAR MASK FUNCTION
+            {/* // TODO: THIS FUNCTION HAS THE SAME PROBLEM AS THE CLEAR MASK FUNCTION */}
             {/* <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -805,7 +811,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
               </Tooltip>
             </div>
 
-            {/* <Tooltip>
+            <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="sm"
@@ -818,7 +824,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Clear Mask</TooltipContent>
-            </Tooltip> */}
+            </Tooltip>
           </div>
 
           {/* Zoom */}
@@ -865,7 +871,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
             onClick={handleSave}
             className="w-full"
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 mr-2" />
             Save Mask
           </Button>
           <Button

@@ -31,6 +31,19 @@ export class S3FilesData {
     }
 }
 
+export class ImageMasked {
+    image: File;
+    mask: File;
+
+    constructor({ image, mask }: {
+        image: File,
+        mask: File
+    }) {
+        this.image = image;
+        this.mask = mask;
+    }
+}
+
 
 /**
  * Creates a PromptResult object from the response
