@@ -445,11 +445,7 @@ export default function PlaygroundPage() {
         </UserContentWrapper>
     );
 
-    return (
-        <ImageComparisonProvider>
-            {content}
-        </ImageComparisonProvider>
-    );
+    return content;
 }
 
 export function ImageDialog({ output, showOutputFileName }: { output: { file: File | S3FilesData, url: string }, showOutputFileName: boolean }) {

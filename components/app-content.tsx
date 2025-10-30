@@ -8,6 +8,7 @@ import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeployDialog } from "@/components/deploy/deploy-dialog";
+import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
 
 export default function AppContent() {
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
@@ -22,8 +23,10 @@ export default function AppContent() {
                     <div className="flex flex-1 overflow-x-auto overflow-y-hidden">
                         {!viewMode && <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} deployWindow={deployWindow} onDeployWindow={setDeployWindow} />}
                         <main className="flex-1 overflow-x-auto overflow-y-hidden">
+                            <ImageComparisonProvider>
                             {currentTab === TabValue.Playground && <Suspense><PlaygroundPage /></Suspense>}
                             {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
+                            </ImageComparisonProvider>
                         </main>
                     </div>
                 </div>
