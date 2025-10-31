@@ -616,8 +616,21 @@ export function TextOutput({ output }: { output: IOutput }) {
         if (output.file instanceof File) {
             output.file.text().then(setText);
         } else {
-            // For S3FilesData, we'd need to fetch the content from the URL
-            fetch(output.url).then(response => response.text()).then(setText);
+            const fetchText = async () => {
+                try {
+                    const response = await fetch(`/api/text-proxy?url=${encodeURIComponent(output.url)}`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch text: ${response.status}`);
+                    }
+                    const textData = await response.text();
+                    setText(textData);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                } catch (e: any) {
+                    setText("");
+                }
+            };
+
+            fetchText();
         }
     }, [output.file, output.url]);
 
@@ -815,7 +828,7 @@ const GenerationError = (params: {
                             <div className="flex flex-col items-center gap-2">
                                 {/* <div className="w-8 h-8 rounded-full bg-muted-foreground/20"></div> */}
                                 <CircleX color="#ff0000" />
-                                
+
                                 <span className="text-sm text-muted-foreground">
                                     <Button
                                         variant={"outline"}
