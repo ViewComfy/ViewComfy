@@ -42,6 +42,7 @@ export class ComfyUIAPIService {
     private httpBaseUrl: string;
     private wsBaseUrl: string;
     private outputFiles: Array<{ [key: string]: string }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private comfyExecutionError: { [key: string]: any } | undefined;
 
     constructor(clientId: string) {
