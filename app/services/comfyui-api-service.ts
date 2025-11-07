@@ -42,6 +42,8 @@ export class ComfyUIAPIService {
     private httpBaseUrl: string;
     private wsBaseUrl: string;
     private outputFiles: Array<{ [key: string]: string }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private comfyExecutionError: { [key: string]: any } | undefined;
 
     constructor(clientId: string) {
         this.secure = process.env.COMFYUI_SECURE === "true";
@@ -49,6 +51,7 @@ export class ComfyUIAPIService {
         this.wsBaseUrl = this.secure ? "wss://" : "ws://";
         this.baseUrl = process.env.COMFYUI_API_URL || "127.0.0.1:8188";
         this.clientId = clientId;
+        this.comfyExecutionError = undefined;
         try {
             this.ws = new WebSocket(`${this.getUrl("ws")}/ws?clientId=${this.clientId}`);
             this.connect();
@@ -123,9 +126,17 @@ export class ComfyUIAPIService {
                 this.workflowStatus = event.type;
                 break;
             case "execution_error":
+                // data error shape
+                // data = {
+                //     exception_message: "",
+                //     exception_type: "",
+                //     node_type: "",
+                //     prompt_id: ""
+                // }
                 // console.log("Execution error:", event.data);
                 this.isPromptRunning = false;
                 this.workflowStatus = event.type;
+                this.comfyExecutionError = event.data;
                 break;
             case "execution_success":
                 // console.log("Execution success:", event.data);
@@ -179,6 +190,16 @@ export class ComfyUIAPIService {
             }
 
             const responseData = await response.json();
+
+            if (responseData.hasOwnProperty("node_errors") && Object.keys(responseData.node_errors).length > 0) {
+                const resError: IComfyUIError = {
+                    message: "Something went wrong executing your workflow",
+                    node_errors: responseData.node_errors,
+                }
+                throw resError;
+            }
+
+
             this.promptId = responseData.prompt_id;
 
             if (this.promptId === undefined) {
@@ -192,9 +213,13 @@ export class ComfyUIAPIService {
             }
 
             if (this.workflowStatus === "execution_error") {
+                let errorMsg = this.comfyExecutionError?.exception_message || "Something went wrong while your workflow was executing";
+                if (this.comfyExecutionError?.node_type) {
+                    errorMsg = `${this.comfyExecutionError?.node_type}: ${errorMsg}`;
+                }
                 throw new ComfyWorkflowError({
                     message: "ComfyUI workflow execution error",
-                    errors: []
+                    errors: [errorMsg]
                 });
             }
             return { outputFiles: this.outputFiles, promptId: this.promptId };
