@@ -77,6 +77,7 @@ export function workflowAPItoViewComfy(source: WorkflowApiJSON): IViewComfyBase 
 
                 case "LoadImage":
                 case "LoadImageMask":
+                case "LoadImage_ViewComfy":
                     const input = inputs[0];
                     input.valueType = "image";
                     input.title = getTitleFromValue(value.class_type, value);
