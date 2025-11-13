@@ -11,7 +11,7 @@ interface TooltipButtonProps {
     icon: React.ReactNode;
     label: string;
     tooltipContent: string;
-    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    variant?: "default" | "destructive" | "outline-solid" | "secondary" | "ghost" | "link";
     size?: "default" | "sm" | "lg" | "icon";
     className?: string;
     onClick?: () => void;
