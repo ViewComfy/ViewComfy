@@ -44,6 +44,10 @@ export class ComfyUIAPIService {
     private outputFiles: Array<{ [key: string]: string }>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private comfyExecutionError: { [key: string]: any } | undefined;
+    private workflowCompletionPromise: {
+        resolve: (value: unknown) => void;
+        reject: (reason?: unknown) => void;
+    } | undefined;
 
     constructor(clientId: string) {
         this.secure = process.env.COMFYUI_SECURE === "true";
@@ -137,11 +141,19 @@ export class ComfyUIAPIService {
                 this.isPromptRunning = false;
                 this.workflowStatus = event.type;
                 this.comfyExecutionError = event.data;
+                if (this.workflowCompletionPromise) {
+                    this.workflowCompletionPromise.resolve(true);
+                    this.workflowCompletionPromise = undefined;
+                }
                 break;
             case "execution_success":
                 // console.log("Execution success:", event.data);
                 this.isPromptRunning = false;
                 this.workflowStatus = event.type;
+                if (this.workflowCompletionPromise) {
+                    this.workflowCompletionPromise.resolve(true);
+                    this.workflowCompletionPromise = undefined;
+                }
                 break;
             default:
                 // console.log("Unknown event type:", event.type);
@@ -207,16 +219,34 @@ export class ComfyUIAPIService {
             }
 
             this.isPromptRunning = true;
+            this.comfyExecutionError = undefined; // Reset error before new prompt
+            this.workflowStatus = undefined;     // Reset status before new prompt
 
-            while (this.isPromptRunning) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+            // Create a new promise and store its resolve/reject methods
+            const completionPromise = new Promise((resolve, reject) => {
+                this.workflowCompletionPromise = { resolve, reject };
+            });
+
+            await completionPromise; // Wait for the workflow to complete
 
             if (this.workflowStatus === "execution_error") {
-                let errorMsg = this.comfyExecutionError?.exception_message || "Something went wrong while your workflow was executing";
-                if (this.comfyExecutionError?.node_type) {
-                    errorMsg = `${this.comfyExecutionError?.node_type}: ${errorMsg}`;
+                const errorMessage =
+                    (this.comfyExecutionError && "exception_message" in this.comfyExecutionError)
+                        ? (this.comfyExecutionError as { exception_message?: string }).exception_message
+                        : undefined;
+                const nodeType =
+                    (this.comfyExecutionError && "node_type" in this.comfyExecutionError)
+                        ? (this.comfyExecutionError as { node_type?: string }).node_type
+                        : undefined;
+
+                let errorMsg =
+                    errorMessage ||
+                    "Something went wrong while your workflow was executing";
+                
+                if (nodeType) {
+                    errorMsg = `${nodeType}: ${errorMsg}`;
                 }
+
                 throw new ComfyWorkflowError({
                     message: "ComfyUI workflow execution error",
                     errors: [errorMsg]
