@@ -8,19 +8,51 @@ ViewComfy is an open source tool to help you create beautiful web apps from Comf
 [![Twitter](https://img.shields.io/twitter/follow/ViewComfy)](https://x.com/ViewComfy)
 
 
-![Group 21](https://github.com/user-attachments/assets/ad9a98e6-6c4c-4bf5-85db-4d03ab682f9b)
-It can support multiple workflows in the same UI and image, video, and text outputs and is optimized to work well on desktop and mobile.
+![Open Source project to turn ComfyUI workflows to web apps](https://github.com/user-attachments/assets/1e30bf5d-7186-4eee-94aa-2e2fe8bfeaa9)
+It can support multiple workflows in the same UI and works well with image, video, and text outputs.
 
 Easily deploy your applications on serverless infrastructure using [ViewComfy cloud](https://www.viewcomfy.com/), or on the service of your choice. Applications hosted on ViewComfy cloud come with a user management system, billing tracking and shareable email links out of the box. More info in the [deployment section](#Deployment) and in the [docs](https://docs.viewcomfy.com/get_started/introduction).
 
 ## Demo
 [![Demo](https://github.com/user-attachments/assets/54269795-f67f-4b45-a50e-7992687375d5)](https://youtu.be/Su_rbjodvEI)
 
+## Features
+
+### Input Editor
+Only show the inputs users need access to. 
+![ViewComfy input editor](https://github.com/user-attachments/assets/009e3cb1-2a72-4a97-8c5d-b691ab679cae)
+
+Supported input types:
+- Text
+- Numbers
+- Dropdowns (Select)
+- Sliders
+- Check boxes
+- Images
+- Videos
+- Audio
+
+Inputs can be required or optional. It is also possible to add helper text to guide users. 
+
+### Mask Editor 
+Easily add masks to image inputs. 
+![ViewComfy mask editor](https://github.com/user-attachments/assets/f459b3da-9599-40c8-982f-4a6c3cd18c0c)
+
+### API connection
+Run the workflows on serverless infrastructure and connect them via API. 
+
+### Enable complex behaviours with ViewComfy utils node pack
+Create complex app behaviours like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
+
+### History
+Built-in user output history for apps deployed on ViewComfy Cloud. 
+
+
 ## Installation
 
 After installing ViewComfy, you will be able to connect it to your local installation of ComfyUI, or workflows deployed on [ViewComfy cloud](https://www.viewcomfy.com/). 
 
-You can also skip the installation by using the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/). When using the web-hosted version of the editor, you will need to first deploy the workflow on ViewComfy cloud and connect the app with the API endpoint to your workflow. 
+You can also skip the installation by using the web-hosted version of the [ViewComfy app editor](https://editor.viewcomfy.com/). When using the web-hosted version of the editor, you will need to first deploy the workflow on ViewComfy cloud and connect the app with the workflow's API endpoint. 
 
 ### Installation Guide
 [![Installation Guide](https://github.com/user-attachments/assets/8b6f6b0d-859a-4a98-80b5-664591160512)](https://youtu.be/sG2elA1bdrg)
@@ -43,20 +75,18 @@ npm run dev
 ```
 
 ### Detailed installation guide
-For a  more detailed guide on how to set up playground mode and share your app with ngrok you can refer to [our blog](https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app).
+For a more detailed guide on how to set up playground mode and share your app with ngrok you can refer to [our blog](https://www.viewcomfy.com/blog/turn-a-comfyui-workflow-into-an-app).
 
 
 ## Deployment
 
-You can deploy ViewComfy apps on the service of your choice, but by far the easiest way to do it is by using [ViewComfy Cloud]([https://app.viewcomfy.com/](https://www.viewcomfy.com/)). 
+You can deploy ViewComfy apps on the service of your choice, but by far the easiest way to do it is by using [ViewComfy Cloud](https://www.viewcomfy.com/). 
 
-ViewComfy Cloud is designed to make the whole deployment process feel like a breeze. It's as simple as uploading your workflow; everything else is taken care of for you - no need to worry about setting up volumes, docker images, or anything like that. 
-
-### Set up the Comfy server 
+### Set up the Comfy server
 
 The first thing you need to do to deploy your app is set up the Comfy server and get your API endpoint. This [guide](https://youtu.be/pIODXFU9sHw) goes over how to do that.
 
-Once set up, the workflow will be running on the serverless infrastructure and be accessible via the standard Comfy interface and an API endpoint. 
+Once set up, the workflow will be running on serverless infrastructure and be accessible via the standard Comfy interface and an API endpoint. 
 
 To link your endpoint to your workflow inside your ViewComfy app, you just need to copy it into the right field:
 
@@ -78,7 +108,7 @@ The easiest way to do this is to navigate to the ViewComfy Apps tab on the ViewC
 
 ![deploy a viewcomfy app](https://github.com/user-attachments/assets/23988845-2526-4a16-b93d-89a3d1a365b9)
 
-But ultimately, you can deploy your app on the hosting service of your choice. For example, there are some details on how to host the app on modal in the hosting-examples/modal folder.
+But ultimately, you can deploy your app on the hosting service of your choice. For example, there are some details on how to host the app on Modal in the hosting-examples/modal folder.
 
 ## Usage
 ### Form Editor
@@ -118,7 +148,7 @@ NEXT_PUBLIC_VIEW_MODE="true"
 npm run dev
 ```
 
-e.g with the command line:
+e.g. with the command line:
 
 ```bash
 
