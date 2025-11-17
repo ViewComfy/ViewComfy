@@ -19,7 +19,7 @@ Easily deploy your applications on serverless infrastructure using [ViewComfy cl
 ## Features
 
 ### Input Editor
-Configure the way your workflow's inputs are displayed and only show the ones users need access to. 
+Configure how each workflow input appears and expose only what your users need.
 ![ViewComfy input editor](https://github.com/user-attachments/assets/009e3cb1-2a72-4a97-8c5d-b691ab679cae)
 
 Supported input types:
@@ -39,15 +39,16 @@ Easily add masks to image inputs.
 ![ViewComfy mask editor](https://github.com/user-attachments/assets/f459b3da-9599-40c8-982f-4a6c3cd18c0c)
 
 ### History
-![ViewComfy app user history](https://github.com/user-attachments/assets/123d68d4-eaed-43c1-80fa-81684c125fb3)
 Built-in user output history for apps deployed on ViewComfy Cloud. 
+![ViewComfy app user history](https://github.com/user-attachments/assets/123d68d4-eaed-43c1-80fa-81684c125fb3)
+
 
 ### User management and Analytics
-![ViewComfy usage data](https://github.com/user-attachments/assets/2e4bd980-8e9b-4791-97a9-01a6f5de87f9)
 Built-in user management and analytics for apps deployed on ViewComfy Cloud. 
+![ViewComfy usage data](https://github.com/user-attachments/assets/2e4bd980-8e9b-4791-97a9-01a6f5de87f9)
 
-### API connection
-Run the workflows on serverless infrastructure and connect them via API. 
+### Serverless API connection
+Run workflows on serverless infrastructure and connect them via API to your apps. 
 
 ### Enable complex workflow behaviours
 Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
