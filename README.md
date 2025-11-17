@@ -14,7 +14,7 @@ It can support multiple workflows in the same UI and works well with image, vide
 Easily deploy your applications on serverless infrastructure using [ViewComfy cloud](https://www.viewcomfy.com/), or on the service of your choice. Applications hosted on ViewComfy cloud come with a user management system, billing tracking and shareable email links out of the box. More info in the [deployment section](#Deployment) and in the [docs](https://docs.viewcomfy.com/get_started/introduction).
 
 ## Demo
-[![Demo](https://github.com/user-attachments/assets/ca6a3956-d579-4006-9391-719e36574bea)](https://youtu.be/Su_rbjodvEI)
+[![Demo](https://github.com/user-attachments/assets/15bc8549-e798-4edb-a728-1d26680d17e8)](https://youtu.be/Su_rbjodvEI)
 
 ## Features
 
