@@ -14,12 +14,12 @@ It can support multiple workflows in the same UI and works well with image, vide
 Easily deploy your applications on serverless infrastructure using [ViewComfy cloud](https://www.viewcomfy.com/), or on the service of your choice. Applications hosted on ViewComfy cloud come with a user management system, billing tracking and shareable email links out of the box. More info in the [deployment section](#Deployment) and in the [docs](https://docs.viewcomfy.com/get_started/introduction).
 
 ## Demo
-[![Demo](https://github.com/user-attachments/assets/54269795-f67f-4b45-a50e-7992687375d5)](https://youtu.be/Su_rbjodvEI)
+[![Demo](https://github.com/user-attachments/assets/ca6a3956-d579-4006-9391-719e36574bea)](https://youtu.be/Su_rbjodvEI)
 
 ## Features
 
 ### Input Editor
-Only show the inputs users need access to. 
+Configure the way your workflow's inputs are displayed and only show the ones users need access to. 
 ![ViewComfy input editor](https://github.com/user-attachments/assets/009e3cb1-2a72-4a97-8c5d-b691ab679cae)
 
 Supported input types:
@@ -38,14 +38,20 @@ Inputs can be required or optional. It is also possible to add helper text to gu
 Easily add masks to image inputs. 
 ![ViewComfy mask editor](https://github.com/user-attachments/assets/f459b3da-9599-40c8-982f-4a6c3cd18c0c)
 
+### History
+![ViewComfy app user history](https://github.com/user-attachments/assets/123d68d4-eaed-43c1-80fa-81684c125fb3)
+Built-in user output history for apps deployed on ViewComfy Cloud. 
+
+### User management and Analytics
+![ViewComfy usage data](https://github.com/user-attachments/assets/2e4bd980-8e9b-4791-97a9-01a6f5de87f9)
+Built-in user management and analytics for apps deployed on ViewComfy Cloud. 
+
 ### API connection
 Run the workflows on serverless infrastructure and connect them via API. 
 
-### Enable complex behaviours with ViewComfy utils node pack
-Create complex app behaviours like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
+### Enable complex workflow behaviours
+Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
 
-### History
-Built-in user output history for apps deployed on ViewComfy Cloud. 
 
 
 ## Installation
@@ -119,7 +125,7 @@ For more details on how to use the editor with advanced Comfy workflows, you can
 
 ### Playground
 
-The Playground is a simplified UI where you can run your workflows. It can easily be turned into a sharable web app using a service like ngrok or ViewComfy Cloud.
+The Playground is a simplified UI where you can run your workflows. It can easily be turned into a shareable web app using a service like ngrok or ViewComfy Cloud.
 
 ### Playground Mode (aka ViewMode)
 
