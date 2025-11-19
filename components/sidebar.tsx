@@ -103,7 +103,7 @@ export function Sidebar({ currentTab, onTabChange, deployWindow, onDeployWindow 
                             icon={<LifeBuoy className="size-5" />}
                             label="Help"
                             tooltipContent="Help"
-                            variant="outline-solid"
+                            variant="outline"
                         />
                     ) : (
                         <Button variant="outline" className="w-full justify-start">
