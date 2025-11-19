@@ -1,11 +1,16 @@
+"use client";
 import { useAuth } from "@clerk/nextjs";
 import useSWR from "swr";
 import useSWRImmutable from "swr/immutable";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { UTCDate } from "@date-fns/utc";
 
 import { IWorkflowHistoryModel } from "@/app/interfaces/workflow-history";
 import { SettingsService } from "@/app/services/settings-service";
+import { IViewComfyApp } from "@/app/models/viewcomfy-app";
+import { useRouter } from "next/navigation";
+import { IUser } from "@/app/interfaces/user";
+import { ApiResponseError } from "@/app/models/errors";
 
 const settingsService = new SettingsService();
 
@@ -131,6 +136,66 @@ export function useWorkflowByPromptIds(params: {
 
     return {
         workflows: result,
+        isLoading,
+        isError: error,
+    };
+}
+
+export function useViewComfyApps({
+    teamId
+}: { teamId: number | undefined; }) {
+    const fetchWithToken = useFetchWithToken();
+
+    const { data, error, isLoading, mutate } = useSWR(teamId ? `viewcomfy-app/playground/apps/${teamId}` : undefined,
+        fetchWithToken,
+        {
+            refreshInterval: 5000,
+        },
+    );
+
+    let result: IViewComfyApp[] | null = null;
+
+    if (data && !error) {
+        result = data as IViewComfyApp[];
+    } else {
+        result = null;
+    }
+
+    return {
+        viewComfyApps: result,
+        isLoading,
+        isError: error,
+        mutateViewComfyApps: mutate,
+    };
+}
+
+export function useUser() {
+    const fetchWithToken = useFetchWithToken();
+    const router = useRouter();
+    const { signOut } = useAuth();
+
+    const { data, error, isLoading } = useSWR(
+        `user/playground/me`,
+        fetchWithToken,
+        {
+            refreshInterval: 60000,
+        },
+    );
+
+    useEffect(() => {
+        if (error) {
+            if (error instanceof ApiResponseError) {
+                const logout = async () => {
+                    await signOut();
+                    router.push("/login");
+                };
+                logout();
+            }
+        }
+    }, [error, router, signOut]);
+
+    return {
+        user: data as IUser | null,
         isLoading,
         isError: error,
     };

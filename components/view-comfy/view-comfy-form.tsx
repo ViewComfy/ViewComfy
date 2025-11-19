@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+ 
 import React from "react";
 import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
@@ -125,7 +125,7 @@ export function ViewComfyForm(args: {
                     <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                         <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                             <div id="inputs-form" className="flex flex-col w-full h-full">
-                                <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}>
+                                <ScrollArea className={"flex-1 px-[5px] pr-4"}>
                                     <div className="grid w-full items-start gap-4">
                                         {editMode && (
                                             <div className="grid gap-2">
@@ -518,7 +518,7 @@ function AdvancedInputSection(args: {
                 </CollapsibleTrigger>
             </div>
             )}
-            <CollapsibleContent className="space-y-2">
+            <CollapsibleContent className="space-y-2 pb-20">
                 <fieldset className="grid gap-2 rounded-lg p-1">
                     {editMode && (
                         <legend className="-ml-1 px-1 text-md font-medium">

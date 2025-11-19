@@ -39,4 +39,8 @@ export class SettingsService {
         }
         return false;
     }
+
+    public getIsViewMode(): boolean {
+        return Boolean((process.env.NEXT_PUBLIC_VIEW_MODE && process.env.NEXT_PUBLIC_VIEW_MODE === "true"))
+    }
 }

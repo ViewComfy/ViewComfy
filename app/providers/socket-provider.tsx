@@ -98,7 +98,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       updateCurrentLog(msg);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const onResultMessage = async (data: {
       prompt_id: string,
       completed: boolean,

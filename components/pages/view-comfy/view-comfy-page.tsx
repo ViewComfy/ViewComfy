@@ -5,7 +5,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ViewComfyFormEditor from '@/components/pages/view-comfy/view-comfy-form-editor';
 import { workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
 import { Trash2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import JsonView from 'react18-json-view'
 import 'react18-json-view/src/style.css'
 import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
@@ -176,7 +176,7 @@ export default function ViewComfyPage() {
         <div className="flex flex-col h-full overflow-hidden">
             <Header title="Editor">
             </Header>
-            <main className="flex-1 overflow-hidden p-2">
+            <main className="flex-1 overflow-hidden p-2 pb-12">
                 {showDropZone() && (
                     <div className="flex flex-col w-full h-full overflow-hidden">
                         <div className="w-full mt-10 sm:w-1/2 sm:h-1/2 mx-auto">

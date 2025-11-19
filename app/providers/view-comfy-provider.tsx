@@ -1,5 +1,6 @@
+"use client"
 import type { IMultiValueInput } from '@/lib/workflow-api-parser';
-import React, { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react';
+import { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react';
 
 export interface IViewComfyBase {
     title: string;

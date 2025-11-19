@@ -10,6 +10,7 @@ interface ViewComfyFormEditorProps {
     viewComfyJSON: IViewComfyBase;
 }
 
+
 export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEditorProps) {
 
     const { viewComfyState } = useViewComfy();

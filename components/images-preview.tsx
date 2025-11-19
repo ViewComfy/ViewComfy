@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+ 
 "use client";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect } from "react";
@@ -63,7 +63,7 @@ export function PreviewOutputsImageGallery({
                 initial="initial"
                 animate="animate"
                 whileHover="hover"
-                className="flex w-full min-h-[6rem] dark:bg-dot-white/[0.2] bg-dot-black/[0.2] flex-row space-x-2 items-center justify-center p-4"
+                className="flex w-full min-h-24 dark:bg-dot-white/[0.2] bg-dot-black/[0.2] flex-row space-x-2 items-center justify-center p-4"
             >
                 {(image1) && (
                     <motion.div
