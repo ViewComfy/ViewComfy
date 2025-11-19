@@ -67,7 +67,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     function downloadViewComfyJSON(data: any) {
         onSubmit(data);
         setDownloadJson(true);

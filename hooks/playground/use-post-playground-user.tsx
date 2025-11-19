@@ -46,9 +46,9 @@ export const usePostPlaygroundUser = () => {
 }
 
 function buildFormDataWS(data: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     params: Array<{ [key: string]: any }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     override_workflow_api?: Record<string, any> | undefined;
     prompt_id: string;
     view_comfy_api_url: string;
@@ -56,7 +56,7 @@ function buildFormDataWS(data: {
 }): FormData {
     const { params, override_workflow_api, prompt_id, view_comfy_api_url, sid } = data;
     const formData = new FormData();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const paramsStr: { [key: string]: any } = {};
 
     for (const { key, value } of params) {
@@ -86,7 +86,7 @@ function buildFormDataWS(data: {
 
 const inferApiComfy = async (params: IPlaygroundParams & {
     onSuccess: (params: { promptId: string, outputs: File[] }) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     socket: any;
     getToken: () => Promise<string | null>;
 }) => {
@@ -128,7 +128,6 @@ const inferApiComfy = async (params: IPlaygroundParams & {
                 "Authorization": `Bearer ${token}`,
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         const args = {
             errorMsg: "Something went wrong",
@@ -161,7 +160,6 @@ const inferApiComfy = async (params: IPlaygroundParams & {
 };
 
 const subscribeToRunningWorkflows = async (params: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     socket: any;
     getToken: () => Promise<string | null>;
 }) => {

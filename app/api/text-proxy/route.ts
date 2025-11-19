@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
                 'Access-Control-Allow-Origin': '*',
             },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } catch (error: any) {
         console.error('Error fetching text:', error);
         return new NextResponse(JSON.stringify({ error: error.message }), {

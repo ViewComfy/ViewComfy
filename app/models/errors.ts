@@ -40,7 +40,7 @@ export class ResponseError {
 }
 
 export class ErrorResponseFactory {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     public getErrorResponse(error: any): ResponseError {
         if (error.errorType) {
             return new ResponseError({

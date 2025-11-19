@@ -133,7 +133,8 @@ export class ComfyUIService {
             const filePath = path.join(process.cwd(), viewComfyFileName);
             const fileContent = await fs.readFile(filePath, "utf8");
             workflow = JSON.parse(fileContent);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_error) {
             throw missingWorkflowError;
         }

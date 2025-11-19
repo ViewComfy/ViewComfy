@@ -164,7 +164,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     }
                     const data = await response.json();
                     viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                 } catch (error: any) {
                     if (error.errorType) {
                         const responseError =
@@ -202,7 +202,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             if (output instanceof File) {
                 try {
                     url = URL.createObjectURL(output);
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (error) {
                     console.error("cannot parse output to URL")
                     console.log({ output });
@@ -292,7 +292,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (params: { promptId: string, outputs: File[] }) => {
                 onSetResults({ ...params });
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
             }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -643,7 +643,7 @@ export function TextOutput({ output }: { output: IOutput }) {
                     }
                     const textData = await response.text();
                     setText(textData);
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                     
                 } catch (e: any) {
                     setText("");
                 }

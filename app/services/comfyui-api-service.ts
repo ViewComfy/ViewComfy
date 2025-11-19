@@ -42,7 +42,7 @@ export class ComfyUIAPIService {
     private httpBaseUrl: string;
     private wsBaseUrl: string;
     private outputFiles: Array<{ [key: string]: string }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     private comfyExecutionError: { [key: string]: any } | undefined;
     private workflowCompletionPromise: {
         resolve: (value: unknown) => void;
@@ -254,7 +254,7 @@ export class ComfyUIAPIService {
             }
             return { outputFiles: this.outputFiles, promptId: this.promptId };
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
         } catch (error: any) {
             console.error(error);
             if (error?.cause?.code === "ECONNREFUSED") {
@@ -288,7 +288,7 @@ export class ComfyUIAPIService {
             const blob = await response.blob();
             return new File([blob], file.filename, { type: mime.lookup(file.filename) || "application/octet-stream" });
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
         } catch (error: any) {
             console.error(error);
             if (error?.cause?.code === "ECONNREFUSED") {
@@ -308,7 +308,7 @@ export class ComfyUIAPIService {
 
         const output = data.output as { [key: string]: unknown } | undefined;
         for (const key in output) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
             for (const dict of output[key] as any[]) {
                 if (dict.type !== "temp") {
                     this.outputFiles.push(dict)

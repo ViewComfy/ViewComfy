@@ -33,13 +33,13 @@ export const useSocket = () => {
 };
 
 export interface IWSMessage {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   data: any;
   prompt_id: string;
 }
 
 export interface ICurrentLog {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   [prompt_id: string]: any;
 }
 
@@ -63,7 +63,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setIsConnected(true);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const onDisconnect = (reason: string, details: any) => {
       console.log("Socket disconnected", reason, details);
       setIsConnected(false);
@@ -106,10 +106,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       execution_time_seconds: number,
       prompt: {
         prompt_id: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         [key: string]: any,
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       [key: string]: any
     }) => {
       const msg = {

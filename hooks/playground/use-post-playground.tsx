@@ -44,9 +44,9 @@ function findSubarray(arr: Uint8Array, separator: Uint8Array): number {
 
 function buildFormData(data: {
     logs: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     params: Record<string, any>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     override_workflow_api?: Record<string, any> | undefined;
 }): FormData {
     const { params, override_workflow_api, logs } = data;
@@ -79,9 +79,9 @@ function buildFormData(data: {
 
 interface Infer {
     apiUrl: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     params: Record<string, any>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     override_workflow_api?: Record<string, any> | undefined;
     secret: Secret;
 }
