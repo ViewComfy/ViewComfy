@@ -28,7 +28,7 @@ export const usePostPlaygroundUser = () => {
         } finally {
             setLoading(false);
         }
-    }, [socket, getToken]);
+    }, [socket, getToken, addRunningWorkflow]);
 
     useEffect(() => {
         if (runningWorkflows.length > 0 && isConnected) {
@@ -40,7 +40,7 @@ export const usePostPlaygroundUser = () => {
             };
             doSubscribe();
         }
-    }, [runningWorkflows, isConnected]);
+    }, [runningWorkflows, isConnected, socket, getToken]);
 
     return { doPost, loading, setLoading };
 }
@@ -161,6 +161,7 @@ const inferApiComfy = async (params: IPlaygroundParams & {
 };
 
 const subscribeToRunningWorkflows = async (params: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     socket: any;
     getToken: () => Promise<string | null>;
 }) => {

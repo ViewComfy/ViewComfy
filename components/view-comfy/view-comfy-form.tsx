@@ -75,7 +75,7 @@ const validateViewComfyEndpoint = (endpoint: string | undefined) => {
 
 export function ViewComfyForm(args: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>,
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSubmit: (data: any) => void,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
