@@ -12,7 +12,7 @@ import { ImageComparisonProvider } from "@/components/comparison/image-compariso
 import dynamic from "next/dynamic";
 import { TeamSwitch } from "@/components/team-switcher";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
+import { Suspense } from "react";
 
 const settingsService = new SettingsService();
 
@@ -48,7 +48,7 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
   }, [pathname, router, userManagement, appId]);
 
   const content = (
-    <>
+    <Suspense>
       <ImageComparisonProvider>
         <div className="flex flex-col h-screen w-full overflow-hidden" style={{ '--top-nav-height': '57px', '--sidebar-width': '12rem' } as React.CSSProperties}>
           <TopNav />
@@ -66,7 +66,7 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
         <DeployDialog open={deployWindow} setOpen={setDeployWindow} />
         <Toaster />
       </ImageComparisonProvider>
-    </>
+    </Suspense>
   );
 
   return content;
