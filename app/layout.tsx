@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import ClientRootLayout from './layout-client';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { ViewComfyProvider } from './providers/view-comfy-provider';
+import { Suspense } from 'react';
 
 const metadata: Metadata = {
   title: "ViewComfy",
@@ -21,7 +25,6 @@ export function generateMetadata(): Metadata {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
 
-  // Conditionally wrap the app with ClerkProvider based on the environment variable
   const content = (
     <ThemeProvider
       attribute="class"
@@ -29,11 +32,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <TooltipProvider>
+        <ViewComfyProvider>
+          <Suspense>
+          <ClientRootLayout>
+            {children}
+            </ClientRootLayout>
+          </Suspense>
+        </ViewComfyProvider>
+      </TooltipProvider>
     </ThemeProvider>
   );
 
-  // Only wrap with ClerkProvider if user management is enabled
   return (
     <html lang="en" suppressHydrationWarning>
       <head />

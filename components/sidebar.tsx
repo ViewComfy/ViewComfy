@@ -1,18 +1,14 @@
-import { SquareTerminal, LifeBuoy, FileJson, Cloud } from "lucide-react"
+import { SquareTerminal, LifeBuoy, FileJson, Cloud, SquarePlay } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TooltipButton } from "@/components/ui/tooltip-button"
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { SettingsService } from "@/app/services/settings-service";
 
 export enum TabValue {
     Playground = 'playground',
-    Models = 'models',
-    API = 'api',
-    Documentation = 'documentation',
-    Settings = 'settings',
-    Help = 'help',
-    Account = 'account',
-    WorkflowApi = 'workflow_api'
+    Apps = 'apps',
+    Editor = 'editor'
 }
 
 interface SidebarProps {
@@ -21,6 +17,8 @@ interface SidebarProps {
     deployWindow: boolean;
     onDeployWindow: (deployWindow: boolean) => void;
 }
+
+const settingsService = new SettingsService();
 
 const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void, isSmallScreen: boolean }) => {
     if (isSmallScreen) {
@@ -47,30 +45,40 @@ const SidebarButton = ({ icon, label, isActive, onClick, isSmallScreen }: { icon
 }
 
 export function Sidebar({ currentTab, onTabChange, deployWindow, onDeployWindow }: SidebarProps) {
-    const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
+    // const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
     const isSmallScreen = useMediaQuery("(max-width: 1024px)");
 
     return (
         <aside className={`flex flex-col h-full overflow-y-auto border-r bg-background transition-all duration-300 ${isSmallScreen ? 'w-12' : 'w-48'}`}>
-            <nav className="flex-grow space-y-2 p-2">
-                {viewMode ? (
-                    <SidebarButton
-                        icon={<SquareTerminal className="size-5" />}
-                        label="Playground"
-                        isActive={currentTab === TabValue.Playground}
-                        onClick={() => onTabChange(TabValue.Playground)}
-                        isSmallScreen={isSmallScreen}
-                    />
+            <nav className="grow space-y-2 p-2">
+                {settingsService.getIsViewMode() ? (
+                    <>
+                        {settingsService.getIsRunningInViewComfy() &&
+                            <SidebarButton
+                                icon={<SquarePlay className="size-5" />}
+                                label="Apps"
+                                isActive={currentTab === TabValue.Apps}
+                                onClick={() => onTabChange(TabValue.Apps)}
+                                isSmallScreen={isSmallScreen}
+                            />
+                        }
+                        <SidebarButton
+                            icon={<SquareTerminal className="size-5" />}
+                            label="Playground"
+                            isActive={currentTab === TabValue.Playground}
+                            onClick={() => onTabChange(TabValue.Playground)}
+                            isSmallScreen={isSmallScreen}
+                        />
+                    </>
                 ) : (
                     <>
                         <SidebarButton
                             icon={<FileJson className="size-5" />}
                             label="Editor"
-                            isActive={currentTab === TabValue.WorkflowApi}
-                            onClick={() => onTabChange(TabValue.WorkflowApi)}
+                            isActive={currentTab === TabValue.Editor}
+                            onClick={() => onTabChange(TabValue.Editor)}
                             isSmallScreen={isSmallScreen}
                         />
-                        {/* <PlaygroundButton currentTab={currentTab} onTabChange={onTabChange} /> */}
                         <SidebarButton
                             icon={<SquareTerminal className="size-5" />}
                             label="Playground"

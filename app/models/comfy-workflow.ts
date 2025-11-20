@@ -10,7 +10,7 @@ const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
 const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
 
 export class ComfyWorkflow {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private workflow: { [key: string]: any };
   private workflowFileName: string;
   private workflowFilePath: string;
@@ -27,7 +27,7 @@ export class ComfyWorkflow {
     try {
       for (const input of viewComfy) {
         const path = input.key.split("-");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         let obj: any = this.workflow;
         for (let i = 0; i < path.length - 1; i++) {
           if (i === path.length - 1) {
@@ -114,7 +114,7 @@ export class ComfyWorkflow {
     const { maskKeyParam, maskFile, viewComfy, comfyUIService } = params;
     const originalFilePath = maskKeyParam.slice(0, "-viewcomfymask".length)
     const originalFilePathKeys = originalFilePath.split("-");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let obj: any = this.workflow;
     for (let i = 0; i < originalFilePathKeys.length - 1; i++) {
       if (i === originalFilePathKeys.length - 1) {

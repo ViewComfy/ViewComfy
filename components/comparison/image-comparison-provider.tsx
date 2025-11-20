@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ImageComparisonContextType {
     selectedImages: string[];
@@ -16,7 +16,7 @@ export function ImageComparisonProvider({ children }: { children: ReactNode }) {
     const [isCompareModeActive, setIsCompareModeActive] = useState(false);
 
     const handleImageSelection = (imageUrl: string) => {
-        setSelectedImages((prevSelected) => {
+    setSelectedImages((prevSelected) => {
             if (prevSelected.includes(imageUrl)) {
                 return prevSelected.filter((url) => url !== imageUrl);
             } else if (prevSelected.length < 2) {

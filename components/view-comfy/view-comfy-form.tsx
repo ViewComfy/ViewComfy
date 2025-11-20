@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+ 
 import React from "react";
 import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
@@ -74,11 +74,11 @@ const validateViewComfyEndpoint = (endpoint: string | undefined) => {
 }
 
 export function ViewComfyForm(args: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
+     
     onSubmit: (data: any) => void,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
     downloadViewComfyJSON?: (data: IViewComfyBase) => void,
@@ -125,7 +125,7 @@ export function ViewComfyForm(args: {
                     <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                         <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                             <div id="inputs-form" className="flex flex-col w-full h-full">
-                                <ScrollArea className={!editMode ? "flex-1 px-[5px] pr-4 pb-24" : "flex-1 px-[5px] pr-4"}>
+                                <ScrollArea className={"flex-1 px-[5px] pr-4"}>
                                     <div className="grid w-full items-start gap-4">
                                         {editMode && (
                                             <div className="grid gap-2">
@@ -260,7 +260,7 @@ export function ViewComfyForm(args: {
                                                 </legend>
                                             )}
                                             {inputFieldArray.fields.map((field, index) => {
-                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                 
                                                 // @ts-ignore
                                                 if (field.inputs.length > 0) {
                                                     if (editMode) {
@@ -268,7 +268,7 @@ export function ViewComfyForm(args: {
                                                             <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
-                                                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                                         
                                                                         // @ts-ignore
                                                                         field.title
                                                                     }
@@ -287,7 +287,7 @@ export function ViewComfyForm(args: {
                                                                                         const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                                                         if (!group) return;
                                                                                         // strip RHF internal id
-                                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                         
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
                                                                                         inputFieldArray.remove(index);
@@ -344,7 +344,7 @@ export function ViewComfyForm(args: {
                                     </div>
                                 </ScrollArea>
                                 {!editMode && (
-                                    <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t z-10">
+                                    <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t z-10">
                                         {args.children}
                                     </div>
                                 )}
@@ -410,7 +410,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+             
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];
@@ -491,12 +491,12 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 }
 
 function AdvancedInputSection(args: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     inputFieldArray: UseFieldArrayReturn<any>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     advancedFieldArray: UseFieldArrayReturn<any>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<IViewComfyBase, any, undefined>,
+     
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
@@ -518,7 +518,7 @@ function AdvancedInputSection(args: {
                 </CollapsibleTrigger>
             </div>
             )}
-            <CollapsibleContent className="space-y-2">
+            <CollapsibleContent className="space-y-2 pb-20">
                 <fieldset className="grid gap-2 rounded-lg p-1">
                     {editMode && (
                         <legend className="-ml-1 px-1 text-md font-medium">
@@ -529,7 +529,7 @@ function AdvancedInputSection(args: {
                         <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
                             <legend className="-ml-1 px-1 text-sm font-medium">
                                 {
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                     
                                     // @ts-ignore
                                     advancedField.title
                                 }
@@ -549,7 +549,7 @@ function AdvancedInputSection(args: {
                                                             const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                             if (!group) return;
                                                             // strip RHF internal id
-                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                             
                                                             const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                             inputFieldArray.append(rest as unknown as never);
                                                             advancedFieldArray.remove(index);
@@ -595,12 +595,12 @@ function AdvancedInputSection(args: {
     </>)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undefined>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+ 
+function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+         
         // @ts-ignore
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
@@ -626,7 +626,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
             applyUpdate: (patch: Partial<IInputField>) => {
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                 
                 // @ts-ignore
                 nestedFieldArray.update(idx, updated);
             }
@@ -641,7 +641,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
                     <FormField
                         key={input.id}
                         control={form.control}
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                         
                         // @ts-ignore
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
@@ -663,7 +663,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, undef
 
 function InputFieldToUI(args: {
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove, index: number,
@@ -724,7 +724,7 @@ function InputFieldToUI(args: {
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     // The Number.MIN_VALUE is used to indicate that the input has been randomized
@@ -804,7 +804,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
@@ -938,7 +938,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
@@ -1142,7 +1142,7 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
 
 function FormTextAreaInput(args: {
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any, editMode?: boolean,
     remove?: UseFieldArrayRemove,
     index: number,
@@ -1193,7 +1193,7 @@ function FormTextAreaInput(args: {
 
 function FormCheckboxInput(args: {
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove,
@@ -1240,7 +1240,7 @@ function FormCheckboxInput(args: {
 
 function FormBasicInput(args: {
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove,
@@ -1282,7 +1282,7 @@ function FormBasicInput(args: {
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
@@ -1328,7 +1328,7 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [open, setOpen] = useState(false);
@@ -1433,7 +1433,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
 }
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
 
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
@@ -1482,7 +1482,7 @@ function FieldActionButtons(props: {
     remove?: UseFieldArrayRemove, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any
 }) {
 
@@ -1522,7 +1522,7 @@ function FieldActionButtons(props: {
 
 interface IEditFieldDialog {
     input: IInputForm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     field: any,
     index: number,
     formFieldName?: string,
@@ -1533,8 +1533,8 @@ interface IEditFieldDialog {
 function EditFieldDialog(props: {
     showEditDialog: IEditFieldDialog | undefined,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form?: UseFormReturn<IViewComfyBase, any, undefined>,
+     
+    form?: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
 }) {
 
     const { showEditDialog, setShowEditDialog, form } = props;
@@ -1545,7 +1545,7 @@ function EditFieldDialog(props: {
     const [sliderMin, setSliderMin] = useState<number>(0);
     const [sliderMax, setSliderMax] = useState<number>(100);
     const [sliderStep, setSliderStep] = useState<number>(1);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const [defaultValue, setDefaultValue] = useState<any>("");
     const [fieldTitle, setFieldTitle] = useState<string>("");
     const [helpText, setHelpText] = useState<string>("");
@@ -1796,10 +1796,10 @@ function EditFieldDialog(props: {
                 break;
             }
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         patch.value = computedDefault as any;
         if (patch.value === undefined && showEditDialog.field && typeof showEditDialog.field.value !== 'undefined') {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
             patch.value = showEditDialog.field.value as any;
         }
 
@@ -1822,34 +1822,34 @@ function EditFieldDialog(props: {
         try {
             if (form && showEditDialog.formFieldName && typeof showEditDialog.nestedIndex === 'number') {
                 const base = `${showEditDialog.formFieldName}[${showEditDialog.nestedIndex}].inputs[${showEditDialog.index}]`;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 (form as any).setValue(`${base}.valueType`, patch.valueType);
                 if (patch.value !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.value`, patch.value);
                 }
                 if (patch.title !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.title`, patch.title);
                 }
                 if (patch.options !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.options`, patch.options);
                 }
                 if (patch.slider !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.slider`, patch.slider);
                 }
                 if (patch.helpText !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.helpText`, patch.helpText);
                 }
                 if (patch.tooltip !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.tooltip`, patch.tooltip);
                 }
                 if (patch.validations !== undefined) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (form as any).setValue(`${base}.validations`, patch.validations);
                 }
             }

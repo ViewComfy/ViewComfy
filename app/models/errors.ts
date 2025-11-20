@@ -40,7 +40,7 @@ export class ResponseError {
 }
 
 export class ErrorResponseFactory {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     public getErrorResponse(error: any): ResponseError {
         if (error.errorType) {
             return new ResponseError({
@@ -82,3 +82,22 @@ export enum ErrorTypes {
     VIEW_MODE_TIMEOUT = "ViewModeTimeoutError",
 }
 
+export type ErrorType = "UnAuthorizedException" | "DomainException";
+
+export class ApiResponseError extends Error {
+    public errorMsg: string;
+    public errorDetails: string | string[];
+    public errorType: ErrorType;
+
+    constructor(args: {
+        errorMsg: string;
+        error: string | string[];
+        errorType: ErrorType;
+    }) {
+        super(args.errorMsg);
+        this.errorMsg = args.errorMsg;
+        this.errorDetails = args.error;
+        this.errorType = args.errorType;
+        Object.setPrototypeOf(this, ApiResponseError.prototype);
+    }
+}

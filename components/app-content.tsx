@@ -1,38 +1,22 @@
 "use client"
-import { Sidebar, TabValue } from "@/components/sidebar";
-import { TopNav } from "@/components/top-nav"
-import { Suspense, useState } from "react"
-import PlaygroundPage from "@/components/pages/playground/playground-page";
-import ViewComfyPage from "@/components/pages/view-comfy/view-comfy-page";
-import { ViewComfyProvider } from "@/app/providers/view-comfy-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { DeployDialog } from "@/components/deploy/deploy-dialog";
-import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function AppContent() {
-    const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
-    const [currentTab, setCurrentTab] = useState(viewMode ? TabValue.Playground : TabValue.WorkflowApi);
-    const [deployWindow, setDeployWindow] = useState<boolean>(false);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const appId: string | null | undefined = searchParams?.get("appId");
+    const pathname = usePathname();
+
+    if (appId) {
+        router.push(`/playground?appId=${appId}`);
+    }
+
+    if (pathname === "/" && !appId) {
+        router.push("/apps");
+    }
 
     return (
-        <TooltipProvider>
-            <ViewComfyProvider>
-                <div className="flex flex-col h-screen w-full overflow-x-auto overflow-y-hidden">
-                    <TopNav />
-                    <div className="flex flex-1 overflow-x-auto overflow-y-hidden">
-                        {!viewMode && <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} deployWindow={deployWindow} onDeployWindow={setDeployWindow} />}
-                        <main className="flex-1 overflow-x-auto overflow-y-hidden">
-                            <ImageComparisonProvider>
-                            {currentTab === TabValue.Playground && <Suspense><PlaygroundPage /></Suspense>}
-                            {currentTab === TabValue.WorkflowApi && <ViewComfyPage />}
-                            </ImageComparisonProvider>
-                        </main>
-                    </div>
-                </div>
-                <DeployDialog open={deployWindow} setOpen={setDeployWindow} />
-                <Toaster />
-            </ViewComfyProvider>
-        </TooltipProvider>
+        <>
+        </>
     );
 }

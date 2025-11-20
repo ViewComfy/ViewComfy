@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client"
 
 import React, { useRef, useState, useEffect } from 'react';
@@ -59,15 +59,7 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
   const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 });
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number; size: number } | null>(null);
 
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
-      setImage(img);
-      initializeCanvas(img);
-      fitToScreen(img);
-    };
-    img.src = imageUrl;
-  }, [imageUrl, existingMask]);
+
 
   const initializeCanvas = async (img: HTMLImageElement) => {
     const canvas = canvasRef.current;
@@ -611,9 +603,19 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
     });
 
     const maskedImageFile = new File([imageWithAlphaBlob], 'masked_image.png', { type: 'image/png' });
-
     onSave(maskedImageFile);
   };
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setImage(img);
+      initializeCanvas(img);
+      fitToScreen(img);
+    };
+    img.src = imageUrl;
+  }, [imageUrl, existingMask]);
+
 
   return (
     <div className={cn("flex h-full w-full bg-background border rounded-lg", className)}>

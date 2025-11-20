@@ -1,28 +1,73 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle";
-import { useViewComfy } from "@/app/providers/view-comfy-provider";
+import { IViewComfyState, useViewComfy } from "@/app/providers/view-comfy-provider";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
 import { SignedIn, UserButton } from "@clerk/nextjs";
+import { useBoundStore } from "@/stores/bound-store";
+import { SettingsService } from "@/app/services/settings-service";
+import { usePathname } from "next/navigation";
+import { ITeam } from "@/app/interfaces/user";
+
+const settingsServer = new SettingsService();
+
+const getAppDetails = (params: {
+    viewComfyState: IViewComfyState,
+    currentTeam?: ITeam,
+    pathname: string,
+}): {
+    title: string;
+    img: string;
+
+} => {
+    const appDetails = {
+        title: "ViewComfy",
+        img: "",
+    };
+
+    if (params.pathname === "/apps") {
+        appDetails.title = params.currentTeam?.playgroundLandingName || "ViewComfy";
+        appDetails.img = params.currentTeam?.playgroundLandingLogoUrl || "";
+    } else {
+        appDetails.title = params.viewComfyState.appTitle || "ViewComfy";
+        appDetails.img = params.viewComfyState.appImg || "";
+    }
+
+    return appDetails;
+}
 
 export function TopNav() {
-    const userManagementEnabled = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
+    const userManagementEnabled = settingsServer.isUserManagementEnabled();
+    const pathname = usePathname();
     const { viewComfyState } = useViewComfy();
-    const [appTitle, setAppTitle] = useState(viewComfyState.appTitle || "ViewComfy");
+    const { currentTeam } = useBoundStore();
+    const appDetails = getAppDetails({
+        pathname,
+        viewComfyState,
+        currentTeam,
+    });
+    const [appTitle, setAppTitle] = useState(appDetails.title);
+    const [appImg, setAppImg] = useState(appDetails.img);
 
     useEffect(() => {
-        if (viewComfyState.appTitle) {
-            setAppTitle(viewComfyState.appTitle);
-        }
-    }, [viewComfyState.appTitle]);
+
+        const appDetails = getAppDetails({
+            pathname,
+            viewComfyState,
+            currentTeam,
+        });
+        setAppTitle(appDetails.title);
+        setAppImg(appDetails.img);
+
+    }, [viewComfyState, pathname, currentTeam]);
 
     return (
         <nav className="flex items-center justify-between px-4 py-2 bg-background border-b gap-2">
 
             {!false ? (<div className="flex items-center">
-                <ViewComfyIconButton appTitle={appTitle} appImg={viewComfyState.appImg} />
+                <ViewComfyIconButton appTitle={appTitle} appImg={appImg} />
                 <span className="ml-2 text-lg font-semibold">{appTitle}</span>
             </div>) : (
                 <div className="flex items-center gap-2">

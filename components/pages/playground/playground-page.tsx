@@ -1,4 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
+"use client"
+ 
 import {
     Settings,
     History,
@@ -50,9 +51,11 @@ import {
     TransformComponent,
 
 } from "react-zoom-pan-pinch";
-import { IWorkflowHistoryModel, IWorkflowResult } from "@/app/interfaces/workflow-history";
+import { IWorkflowHistoryFileModel, IWorkflowHistoryModel, IWorkflowResult } from "@/app/interfaces/workflow-history";
 import { useWorkflowData } from "@/app/providers/workflows-data-provider";
+import { SettingsService } from "@/app/services/settings-service";
 
+const settingsService = new SettingsService();
 
 export interface IOutput {
     file: File | S3FilesData,
@@ -112,7 +115,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
     const [showOutputFileName, setShowOutputFileName] = useState(false);
     const [permission, setPermission] = useState<"default" | "granted" | "denied">("default");
     const [isRequesting, setIsRequesting] = useState(false);
-    const isNotificationAvailable = 'Notification' in window
+    const isNotificationAvailable = window && 'Notification' in window;
 
     const requestPermission = useCallback(async () => {
         if (!isNotificationAvailable) {
@@ -148,6 +151,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
     }, [permission, requestPermission, isNotificationAvailable]);
 
     useEffect(() => {
+
         if (viewMode) {
             const fetchViewComfy = async () => {
                 try {
@@ -160,7 +164,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     }
                     const data = await response.json();
                     viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                 } catch (error: any) {
                     if (error.errorType) {
                         const responseError =
@@ -189,17 +193,30 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
         const { promptId, status, errorData } = params;
         const outputs = params.outputs || [];
         const resultOutputs: {
-            file: File | S3FilesData,
+            file: File | S3FilesData | IWorkflowHistoryFileModel,
             url: string
         }[] = [];
 
         for (const output of outputs) {
             let url;
-            if (output instanceof S3FilesData) {
-                url = output.filepath;
+            if (output instanceof File) {
+                try {
+                    url = URL.createObjectURL(output);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                } catch (error) {
+                    console.error("cannot parse output to URL")
+                    console.log({ output });
+                    url = "";
+                }
             } else {
-                url = URL.createObjectURL(output);
+                url = output.filepath;
             }
+            // if (output instanceof S3FilesData || output.hasOwnProperty("filepath")) {
+            //     url = output.filepath;
+            // } else {
+
+
+            // }
             resultOutputs.push({ file: output, url })
         }
 
@@ -275,7 +292,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (params: { promptId: string, outputs: File[] }) => {
                 onSetResults({ ...params });
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
             }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -365,7 +382,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     </Drawer>
                 </div>
                 <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden">
+                    <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden pb-12">
                         {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                             <div className="px-3 w-full">
                                 <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
@@ -436,7 +453,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
 }
 
 export default function PlaygroundPage() {
-    const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
+    const userManagement = settingsService.isUserManagementEnabled();
 
     const content = !userManagement ? <PlaygroundWithoutAuth /> : (
         <UserContentWrapper>
@@ -531,7 +548,9 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                         backgroundColor,
                         cursor: "zoom-in"
                     }}
-                    ref={(el: HTMLDivElement | null) => setContainer(el)}
+                    ref={(el: HTMLDivElement | null) => {
+                        setContainer(el);
+                    }}
                 >
                     <TransformWrapper
                         key={`${containerWidth}x${containerHeight}`}
@@ -566,7 +585,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
 
 export function VideoDialog({ output }: { output: IOutput }) {
@@ -624,7 +643,7 @@ export function TextOutput({ output }: { output: IOutput }) {
                     }
                     const textData = await response.text();
                     setText(textData);
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                     
                 } catch (e: any) {
                     setText("");
                 }

@@ -14,7 +14,7 @@ type ErrorDict = Record<string, WorkflowNodeError>;
 
 export class ComfyErrorHandler {
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     public tryToParseWorkflowError(error: any): ComfyWorkflowError | undefined {
         try {
             if (error.node_errors) {

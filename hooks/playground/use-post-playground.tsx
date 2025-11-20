@@ -44,12 +44,14 @@ function findSubarray(arr: Uint8Array, separator: Uint8Array): number {
 
 function buildFormData(data: {
     logs: boolean;
+     
     params: Record<string, any>;
+     
     override_workflow_api?: Record<string, any> | undefined;
 }): FormData {
     const { params, override_workflow_api, logs } = data;
     const formData = new FormData();
-    let params_str: Record<string, any> = {};
+    const paramsStr: Record<string, any> = {};
     for (const key in params) {
         const value = params[key];
         if (value instanceof File) {
@@ -58,7 +60,7 @@ function buildFormData(data: {
             formData.set(key, value.image);
             formData.set(`${key}-viewcomfymask`, value.mask);
         } else {
-            params_str[key] = value;
+            paramsStr[key] = value;
         }
     }
 
@@ -66,7 +68,7 @@ function buildFormData(data: {
         formData.set("workflow_api", JSON.stringify(override_workflow_api));
     }
 
-    formData.set("params", JSON.stringify(params_str));
+    formData.set("params", JSON.stringify(paramsStr));
 
     formData.set("logs", logs.toString());
 
@@ -77,7 +79,9 @@ function buildFormData(data: {
 
 interface Infer {
     apiUrl: string;
+     
     params: Record<string, any>;
+     
     override_workflow_api?: Record<string, any> | undefined;
     secret: Secret;
 }

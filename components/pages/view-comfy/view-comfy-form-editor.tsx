@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'react18-json-view/src/style.css'
 import { IViewComfyJSON, useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import { useForm, useFieldArray } from 'react-hook-form';
 import { ViewComfyForm } from '@/components/view-comfy/view-comfy-form';
-import { ToastAction } from "@/components/ui/toast"
-import { useToast } from '@/hooks/use-toast';
-import { CheckIcon } from 'lucide-react';
+import { toast } from "sonner";
 
 interface ViewComfyFormEditorProps {
     onSubmit: (data: IViewComfyBase) => void;
@@ -16,8 +14,6 @@ interface ViewComfyFormEditorProps {
 export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewComfyFormEditorProps) {
 
     const { viewComfyState } = useViewComfy();
-    const { toast } = useToast();
-
     const [downloadJson, setDownloadJson] = useState<boolean>(false);
 
     const defaultValues: IViewComfyBase = {
@@ -64,19 +60,14 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
     function submitOnCLick(data: IViewComfyBase) {
         onSubmit(data);
 
-        toast({
-            title: "Form Saved!",
+        toast.success(
+            "Form Saved!", {
             description: "Go to the Playground to run it",
             duration: 3000,
-            action: (
-                <ToastAction altText="Goto schedule to undo">
-                    <CheckIcon className="size-5 text-green-500" />
-                </ToastAction>
-            ),
-        });
+        })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     function downloadViewComfyJSON(data: any) {
         onSubmit(data);
         setDownloadJson(true);

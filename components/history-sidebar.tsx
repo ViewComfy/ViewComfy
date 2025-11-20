@@ -1,8 +1,6 @@
 "use client"
-
-import * as React from "react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { History, Filter, ChevronRight, Check, Copy, FileType, File } from "lucide-react"
+import { History, Filter, ChevronRight, Copy, FileType, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
@@ -23,8 +21,7 @@ import { default as NextImage } from "next/image"
 import { Play } from "lucide-react"
 import { ChevronLeft } from "lucide-react"
 import { IWorkflowHistoryModel, IWorkflowHistoryFileModel } from "@/app/interfaces/workflow-history"
-import { toast } from "@/hooks/use-toast"
-import { ToastAction } from "@/components/ui/toast";
+import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "./ui/skeleton"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
@@ -94,15 +91,11 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
 
     const copyPrompt = (prompt: string) => {
         navigator.clipboard.writeText(prompt);
-        toast({
-            duration: 2000,
-            description: "Prompt copied to clipboard",
-            action: (
-                <ToastAction altText="Try again" onClick={() => { }}>
-                    <Check className="text-green-500" />
-                </ToastAction>
-            ),
-        });
+        toast.success(
+            "Prompt copied to clipboard",
+            {
+                duration: 2000,
+            })
     };
 
     return (
@@ -415,7 +408,9 @@ function BlobPreview({
                                     backgroundColor,
                                     cursor: "zoom-in"
                                 }}
-                                ref={(el: HTMLDivElement | null) => setContainer(el)}
+                                ref={(el: HTMLDivElement | null) => {
+                                    setContainer(el);
+                                }}
                             >
                                 <TransformWrapper
                                     key={`${containerWidth}x${containerHeight}`}
