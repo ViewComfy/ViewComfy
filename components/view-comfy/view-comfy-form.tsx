@@ -214,7 +214,7 @@ export function ViewComfyForm(args: {
                                                                     />
                                                                 </div>
                                                             </FormControl>
-                                                            <FormDescription className="pb-2">
+                                                            <FormDescription className="pt-2 pb-2">
                                                                 Text output is in beta and can lead to unexpected text being rendered
                                                             </FormDescription>
                                                         </FormItem>
@@ -236,7 +236,7 @@ export function ViewComfyForm(args: {
                                                                     />
                                                                 </div>
                                                             </FormControl>
-                                                            <FormDescription className="pb-2">
+                                                            <FormDescription className="pt-2 pb-2">
                                                                 Show the filename below the file, you can parse the display by surrounding the filename with __
                                                                 <br />
                                                                 __example__123.png =&gt; example
