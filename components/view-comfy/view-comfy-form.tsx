@@ -1,4 +1,4 @@
- 
+
 import React from "react";
 import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
@@ -74,11 +74,11 @@ const validateViewComfyEndpoint = (endpoint: string | undefined) => {
 }
 
 export function ViewComfyForm(args: {
-     
+
     form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
-     
+
     onSubmit: (data: any) => void,
-     
+
     inputFieldArray: UseFieldArrayReturn<any>, advancedFieldArray: UseFieldArrayReturn<any>,
     editMode?: boolean,
     downloadViewComfyJSON?: (data: IViewComfyBase) => void,
@@ -260,7 +260,7 @@ export function ViewComfyForm(args: {
                                                 </legend>
                                             )}
                                             {inputFieldArray.fields.map((field, index) => {
-                                                 
+
                                                 // @ts-ignore
                                                 if (field.inputs.length > 0) {
                                                     if (editMode) {
@@ -268,7 +268,7 @@ export function ViewComfyForm(args: {
                                                             <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
-                                                                         
+
                                                                         // @ts-ignore
                                                                         field.title
                                                                     }
@@ -287,7 +287,7 @@ export function ViewComfyForm(args: {
                                                                                         const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                                                         if (!group) return;
                                                                                         // strip RHF internal id
-                                                                                         
+
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
                                                                                         inputFieldArray.remove(index);
@@ -410,7 +410,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
-             
+
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];
@@ -491,11 +491,11 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 }
 
 function AdvancedInputSection(args: {
-     
+
     inputFieldArray: UseFieldArrayReturn<any>,
-     
+
     advancedFieldArray: UseFieldArrayReturn<any>,
-     
+
     form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
     editMode: boolean,
     isLoading: boolean,
@@ -529,7 +529,7 @@ function AdvancedInputSection(args: {
                         <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
                             <legend className="-ml-1 px-1 text-sm font-medium">
                                 {
-                                     
+
                                     // @ts-ignore
                                     advancedField.title
                                 }
@@ -549,7 +549,7 @@ function AdvancedInputSection(args: {
                                                             const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                             if (!group) return;
                                                             // strip RHF internal id
-                                                             
+
                                                             const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                             inputFieldArray.append(rest as unknown as never);
                                                             advancedFieldArray.remove(index);
@@ -595,12 +595,12 @@ function AdvancedInputSection(args: {
     </>)
 }
 
- 
+
 function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
-         
+
         // @ts-ignore
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
@@ -626,7 +626,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
             applyUpdate: (patch: Partial<IInputField>) => {
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
-                 
+
                 // @ts-ignore
                 nestedFieldArray.update(idx, updated);
             }
@@ -641,17 +641,14 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                     <FormField
                         key={input.id}
                         control={form.control}
-                         
+
                         // @ts-ignore
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false
                         }}
-                        render={({ field, fieldState: { error } }) => (
-                            <>
-                                <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
-                                {error && <FormMessage>{error.message}</FormMessage>}
-                            </>
+                        render={({ field }) => (
+                            <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
                         )}
                     />
                 )
@@ -663,7 +660,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
 
 function InputFieldToUI(args: {
     input: IInputForm,
-     
+
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove, index: number,
@@ -724,7 +721,7 @@ function InputFieldToUI(args: {
     )
 }
 
- 
+
 function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     // The Number.MIN_VALUE is used to indicate that the input has been randomized
@@ -800,11 +797,12 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
                     {input.helpText}
                 </FormDescription>
             )}
+            <FormMessage />
         </FormItem>
     );
 }
 
- 
+
 function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
@@ -934,11 +932,12 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                     />
                 )}
             </FormControl>
+            <FormMessage />
         </FormItem>
     )
 }
 
- 
+
 function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
@@ -1119,6 +1118,7 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
                         />
                     )}
                 </FormControl>
+                <FormMessage />
             </FormItem>
             {!editMode && showMaskEditor &&
                 (
@@ -1142,7 +1142,7 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
 
 function FormTextAreaInput(args: {
     input: IInputForm,
-     
+
     field: any, editMode?: boolean,
     remove?: UseFieldArrayRemove,
     index: number,
@@ -1186,6 +1186,7 @@ function FormTextAreaInput(args: {
                     {input.helpText}
                 </FormDescription>
             )}
+            <FormMessage />
         </FormItem>
     )
 }
@@ -1193,7 +1194,7 @@ function FormTextAreaInput(args: {
 
 function FormCheckboxInput(args: {
     input: IInputForm,
-     
+
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove,
@@ -1234,13 +1235,14 @@ function FormCheckboxInput(args: {
             {editMode && (
                 <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} field={field} input={input} />
             )}
+            <FormMessage />
         </FormItem>
     )
 }
 
 function FormBasicInput(args: {
     input: IInputForm,
-     
+
     field: any,
     editMode?: boolean,
     remove?: UseFieldArrayRemove,
@@ -1278,11 +1280,12 @@ function FormBasicInput(args: {
                     {input.helpText}
                 </FormDescription>
             )}
+            <FormMessage />
         </FormItem>
     )
 }
 
- 
+
 function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
@@ -1324,11 +1327,12 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                     </SelectContent>
                 </Select>
             </FormControl>
+            <FormMessage />
         </FormItem>
     )
 }
 
- 
+
 function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [open, setOpen] = useState(false);
@@ -1428,12 +1432,13 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                     </PopoverContent>
                 </Popover>
             </FormControl>
+            <FormMessage />
         </FormItem>
     )
 }
 
 
- 
+
 function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
 
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
@@ -1474,6 +1479,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                 Value: {field.value} <br />
                 Min: {input.slider?.min} Max: {input.slider?.max} Step: {input.slider?.step}
             </FormDescription> */}
+            <FormMessage />
         </FormItem>
     )
 }
@@ -1482,7 +1488,7 @@ function FieldActionButtons(props: {
     remove?: UseFieldArrayRemove, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     input: IInputForm,
-     
+
     field: any
 }) {
 
@@ -1522,7 +1528,7 @@ function FieldActionButtons(props: {
 
 interface IEditFieldDialog {
     input: IInputForm,
-     
+
     field: any,
     index: number,
     formFieldName?: string,
@@ -1533,7 +1539,7 @@ interface IEditFieldDialog {
 function EditFieldDialog(props: {
     showEditDialog: IEditFieldDialog | undefined,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-     
+
     form?: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
 }) {
 
@@ -1545,7 +1551,7 @@ function EditFieldDialog(props: {
     const [sliderMin, setSliderMin] = useState<number>(0);
     const [sliderMax, setSliderMax] = useState<number>(100);
     const [sliderStep, setSliderStep] = useState<number>(1);
-     
+
     const [defaultValue, setDefaultValue] = useState<any>("");
     const [fieldTitle, setFieldTitle] = useState<string>("");
     const [helpText, setHelpText] = useState<string>("");
@@ -1796,10 +1802,10 @@ function EditFieldDialog(props: {
                 break;
             }
         }
-         
+
         patch.value = computedDefault as any;
         if (patch.value === undefined && showEditDialog.field && typeof showEditDialog.field.value !== 'undefined') {
-             
+
             patch.value = showEditDialog.field.value as any;
         }
 
@@ -1822,34 +1828,34 @@ function EditFieldDialog(props: {
         try {
             if (form && showEditDialog.formFieldName && typeof showEditDialog.nestedIndex === 'number') {
                 const base = `${showEditDialog.formFieldName}[${showEditDialog.nestedIndex}].inputs[${showEditDialog.index}]`;
-                 
+
                 (form as any).setValue(`${base}.valueType`, patch.valueType);
                 if (patch.value !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.value`, patch.value);
                 }
                 if (patch.title !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.title`, patch.title);
                 }
                 if (patch.options !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.options`, patch.options);
                 }
                 if (patch.slider !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.slider`, patch.slider);
                 }
                 if (patch.helpText !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.helpText`, patch.helpText);
                 }
                 if (patch.tooltip !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.tooltip`, patch.tooltip);
                 }
                 if (patch.validations !== undefined) {
-                     
+
                     (form as any).setValue(`${base}.validations`, patch.validations);
                 }
             }
