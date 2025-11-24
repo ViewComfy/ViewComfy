@@ -53,6 +53,11 @@ export function Dropzone({
         }
         const uploadedFile = files[0];
 
+        if (!uploadedFile) {
+            setError("Something went wrong uploading your file, please try again.");
+            return;
+        }
+
         // Check file extension
         if (fileExtensions && !fileExtensions.some(fileExtension => uploadedFile.name.endsWith(fileExtension))) {
             // if (fileExtensions && !uploadedFile.name.endsWith(`${fileExtension}`)) {
