@@ -261,7 +261,7 @@ export function ViewComfyForm(args: {
                                             )}
                                             {inputFieldArray.fields.map((field, index) => {
 
-                                                // @ts-expect-error this inputs are dynamically parsed
+                                                // @ts-ignore
                                                 if (field.inputs.length > 0) {
                                                     if (editMode) {
                                                         return (
@@ -269,7 +269,7 @@ export function ViewComfyForm(args: {
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
 
-                                                                        // @ts-expect-error this inputs are dynamically parsed
+                                                                        // @ts-ignore
                                                                         field.title
                                                                     }
 
@@ -530,7 +530,7 @@ function AdvancedInputSection(args: {
                             <legend className="-ml-1 px-1 text-sm font-medium">
                                 {
 
-                                    // @ts-expect-error this inputs are dynamically parsed
+                                    // @ts-ignore
                                     advancedField.title
                                 }
                                 {editMode && (
@@ -601,7 +601,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
     const nestedFieldArray = useFieldArray({
         control: form.control,
 
-        // @ts-expect-error this inputs are dynamically parsed
+        // @ts-ignore
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
 
@@ -627,7 +627,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
 
-                // @ts-expect-error this inputs are dynamically parsed
+                // @ts-ignore
                 nestedFieldArray.update(idx, updated);
             }
         });
@@ -642,7 +642,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                         key={input.id}
                         control={form.control}
 
-                        // @ts-expect-error this inputs are dynamically parsed
+                        // @ts-ignore
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false
