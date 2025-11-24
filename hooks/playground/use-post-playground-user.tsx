@@ -128,6 +128,7 @@ const inferApiComfy = async (params: IPlaygroundParams & {
                 "Authorization": `Bearer ${token}`,
             },
         });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         const args = {
             errorMsg: "Something went wrong",

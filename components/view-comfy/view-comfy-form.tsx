@@ -410,7 +410,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
-
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];
