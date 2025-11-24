@@ -1,5 +1,5 @@
 "use client"
- 
+
 import {
     Settings,
     History,
@@ -164,7 +164,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     }
                     const data = await response.json();
                     viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
-                     
+
                 } catch (error: any) {
                     if (error.errorType) {
                         const responseError =
@@ -202,7 +202,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             if (output instanceof File) {
                 try {
                     url = URL.createObjectURL(output);
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (error) {
                     console.error("cannot parse output to URL")
                     console.log({ output });
@@ -292,7 +292,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             viewcomfyEndpoint: viewComfyState.currentViewComfy?.viewComfyJSON.viewcomfyEndpoint ?? "",
             onSuccess: (params: { promptId: string, outputs: File[] }) => {
                 onSetResults({ ...params });
-                 
+
             }, onError: (error: any) => {
                 const errorDialog = apiErrorHandler.apiErrorToDialog(error);
                 setErrorAlertDialog({
@@ -643,7 +643,7 @@ export function TextOutput({ output }: { output: IOutput }) {
                     }
                     const textData = await response.text();
                     setText(textData);
-                     
+
                 } catch (e: any) {
                     setText("");
                 }
@@ -695,7 +695,12 @@ function OutputRenderer({
     }) {
 
     const getOutputComponent = () => {
-        const contentType = output.file instanceof S3FilesData ? output.file.contentType : output.file.type;
+        let contentType = "";
+        if ("contentType" in output.file) {
+            contentType = output.file.contentType;
+        } else {
+            contentType = output.file.type;
+        }
 
         if (contentType.startsWith('image/') && contentType !== "image/vnd.adobe.photoshop") {
             return (
