@@ -261,7 +261,7 @@ export function ViewComfyForm(args: {
                                             )}
                                             {inputFieldArray.fields.map((field, index) => {
 
-                                                // @ts-ignore
+                                                // @ts-expect-error this inputs are dynamically parsed
                                                 if (field.inputs.length > 0) {
                                                     if (editMode) {
                                                         return (
@@ -269,7 +269,7 @@ export function ViewComfyForm(args: {
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
 
-                                                                        // @ts-ignore
+                                                                        // @ts-expect-error this inputs are dynamically parsed
                                                                         field.title
                                                                     }
 
@@ -410,7 +410,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
-
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];
@@ -530,7 +530,7 @@ function AdvancedInputSection(args: {
                             <legend className="-ml-1 px-1 text-sm font-medium">
                                 {
 
-                                    // @ts-ignore
+                                    // @ts-expect-error this inputs are dynamically parsed
                                     advancedField.title
                                 }
                                 {editMode && (
@@ -601,7 +601,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
     const nestedFieldArray = useFieldArray({
         control: form.control,
 
-        // @ts-ignore
+        // @ts-expect-error this inputs are dynamically parsed
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
 
@@ -627,7 +627,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
 
-                // @ts-ignore
+                // @ts-expect-error this inputs are dynamically parsed
                 nestedFieldArray.update(idx, updated);
             }
         });
@@ -642,7 +642,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                         key={input.id}
                         control={form.control}
 
-                        // @ts-ignore
+                        // @ts-expect-error this inputs are dynamically parsed
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false

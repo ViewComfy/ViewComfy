@@ -103,6 +103,22 @@ interface IPlaygroundPageContent {
     workflowsCompleted: IWorkflowResult[];
 }
 
+const getOutputFileName = (output: { file: File | S3FilesData, url: string }): string => {
+    if ("filename" in output.file) {
+        return output.file.filename;
+    } else {
+        return output.file.name;
+    }
+}
+
+const getOutputContentType = (output: IOutput): string => {
+    if ("contentType" in output.file) {
+        return output.file.contentType;
+    } else {
+        return output.file.type;
+    }
+}
+
 function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted }: IPlaygroundPageContent) {
     const [results, setResults] = useState<IResults>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
@@ -539,7 +555,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                     className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                 />
             </DialogTrigger>
-            {showOutputFileName && parseFileName(output.file instanceof S3FilesData ? output.file.filename : output.file.name)}
+            {showOutputFileName && parseFileName(getOutputFileName(output))}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div
                     style={{
@@ -643,7 +659,7 @@ export function TextOutput({ output }: { output: IOutput }) {
                     }
                     const textData = await response.text();
                     setText(textData);
-
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (e: any) {
                     setText("");
                 }
@@ -653,7 +669,7 @@ export function TextOutput({ output }: { output: IOutput }) {
         }
     }, [output.file, output.url]);
 
-    const outputName = output.file instanceof S3FilesData ? output.file.filename : output.file.name;
+    const outputName = getOutputFileName(output);
 
     return (
         <div className="pt-4 w-full">
@@ -663,7 +679,7 @@ export function TextOutput({ output }: { output: IOutput }) {
 }
 
 export function FileOutput({ output }: { output: IOutput }) {
-    const outputName = output.file instanceof S3FilesData ? output.file.filename : output.file.name;
+    const outputName = getOutputFileName(output);
 
     return (
         <div
@@ -694,13 +710,9 @@ function OutputRenderer({
         showOutputFileName: boolean,
     }) {
 
+
     const getOutputComponent = () => {
-        let contentType = "";
-        if ("contentType" in output.file) {
-            contentType = output.file.contentType;
-        } else {
-            contentType = output.file.type;
-        }
+        const contentType = getOutputContentType(output);
 
         if (contentType.startsWith('image/') && contentType !== "image/vnd.adobe.photoshop") {
             return (
@@ -734,7 +746,7 @@ function OutputRenderer({
                 </div>
             )}
             {
-                ((output.file instanceof S3FilesData ? output.file.contentType : output.file.type).startsWith('text/') && textOutputEnabled) && (
+                ((getOutputContentType(output)).startsWith('text/') && textOutputEnabled) && (
                     <BlurFade key={`${output.url}-text`} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         <TextOutput output={output} />
                     </BlurFade>
