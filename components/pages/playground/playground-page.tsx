@@ -44,7 +44,6 @@ import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-us
 import { ComparisonButton } from "@/components/comparison/comparison-button";
 import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
 import { SelectableImage } from "@/components/comparison/selectable-image";
-import { ImgComparisonSlider } from "@img-comparison-slider/react";
 import { Header } from "@/components/header";
 import {
     TransformWrapper,
@@ -54,6 +53,12 @@ import {
 import { IWorkflowHistoryFileModel, IWorkflowHistoryModel, IWorkflowResult } from "@/app/interfaces/workflow-history";
 import { useWorkflowData } from "@/app/providers/workflows-data-provider";
 import { SettingsService } from "@/app/services/settings-service";
+
+// Dynamically import web component to avoid hydration issues
+const ImgComparisonSlider = dynamic(
+    () => import("@img-comparison-slider/react").then((mod) => mod.ImgComparisonSlider),
+    { ssr: false }
+);
 
 const settingsService = new SettingsService();
 

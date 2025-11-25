@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ImgComparisonSlider } from '@img-comparison-slider/react';
 import { useImageComparison } from "./image-comparison-provider";
+
+// Dynamically import web component to avoid hydration issues
+const ImgComparisonSlider = dynamic(
+    () => import("@img-comparison-slider/react").then((mod) => mod.ImgComparisonSlider),
+    { ssr: false }
+);
 
 export function ComparisonDialog() {
     const { selectedImages, handleComparisonDialogClose } = useImageComparison();
