@@ -57,6 +57,8 @@ import { Label } from "@/components/ui/label";
 import { ActionType, useViewComfy } from "@/app/providers/view-comfy-provider";
 import { MaskEditor } from "@/components/ui/mask-editor";
 import { ImageMasked } from "@/app/models/prompt-result";
+import { useBoundStore } from "@/stores/bound-store";
+import { IWorkflow } from "@/app/interfaces/workflow";
 
 
 interface IInputForm extends IInputField {
@@ -65,9 +67,14 @@ interface IInputForm extends IInputField {
 
 
 const settingsService = new SettingsService();
-const validateViewComfyEndpoint = (endpoint: string | undefined) => {
+const validateViewComfyEndpoint = (endpoint: string | undefined, workflows: IWorkflow[] | undefined) => {
     if (!settingsService.getIsRunningInViewComfy()) {
         return true;
+    }
+
+    if (workflows) {
+        const found = workflows.some(w => w.apiUrl === endpoint);
+        return found;
     }
 
     return endpoint && endpoint.startsWith("https://viewcomfy");
@@ -89,6 +96,7 @@ export function ViewComfyForm(args: {
     const { form, onSubmit, inputFieldArray, advancedFieldArray, editMode = false, isLoading = false, downloadViewComfyJSON } = args;
     const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
+    const { workflows } = useBoundStore();
 
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
@@ -146,7 +154,7 @@ export function ViewComfyForm(args: {
                                                     control={form.control}
                                                     name="description"
                                                     render={({ field }) => (
-                                                        <FormItem key="description" className="ml-0.5 mr-0.5">
+                                                        <FormItem key="description" className="m-1">
                                                             <FormLabel>Description</FormLabel>
                                                             <FormControl>
                                                                 <Textarea placeholder="The description of your workflow" {...field} />
@@ -159,9 +167,9 @@ export function ViewComfyForm(args: {
                                                     control={form.control}
                                                     name="viewcomfyEndpoint"
                                                     rules={{
-                                                        required: settingsService.getIsRunningInViewComfy() ? "Enter your API Endpoint, you can find it under 'Your Workflows' in the Dashboard" : false,
+                                                        required: settingsService.getIsRunningInViewComfy() ? "Please pick a workflow to connect to the App" : false,
                                                         validate: {
-                                                            endpoint: (value) => (validateViewComfyEndpoint(value)) || "The API endpoint URL looks wrong, you can find it under 'Your Workflows' in the Dashboard",
+                                                            endpoint: (value) => (validateViewComfyEndpoint(value, workflows)) || "The API endpoint URL belongs to another team, you can switch the team in the bottom left or pick a new endpoint",
                                                         }
                                                     }}
                                                     render={({ field }) => (
@@ -193,8 +201,24 @@ export function ViewComfyForm(args: {
                                                             </FormLabel>
                                                             <FormControl
                                                             >
-                                                                <Input
-                                                                    placeholder="ViewComfy endpoint" {...field} />
+                                                                {settingsService.getIsRunningInViewComfy() ? (
+                                                                    <Select
+                                                                        onValueChange={field.onChange}
+                                                                        defaultValue={field.value}
+                                                                    >
+                                                                        <SelectTrigger>
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent className={"max-h-[300px]"}>
+                                                                            {workflows?.map((workflow) => {
+                                                                                return <SelectItem key={workflow.id} value={workflow.apiUrl}>{workflow.name}</SelectItem>
+                                                                            })}
+                                                                        </SelectContent>
+                                                                    </Select>
+
+                                                                ) : (
+                                                                    <Input placeholder="ViewComfy endpoint" {...field} />
+                                                                )}
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>
@@ -410,7 +434,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
             const newErrors = [...urlErrors];
             newErrors[index] = "";
             setUrlErrors(newErrors);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             // Invalid URL, set error message but keep the input value
             const newErrors = [...urlErrors];

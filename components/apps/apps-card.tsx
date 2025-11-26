@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IViewComfyApp } from "@/app/models/viewcomfy-app";
+import { IViewComfyApp } from "@/app/interfaces/viewcomfy-app";
 import { useRouter } from "next/navigation";
 
 export function AppCard({

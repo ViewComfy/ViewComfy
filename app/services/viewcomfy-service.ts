@@ -1,4 +1,4 @@
-import { IViewComfyApp, IViewComfyAppSecrets } from "@/app/models/viewcomfy-app";
+import { IViewComfyApp, IViewComfyAppSecrets } from "@/app/interfaces/viewcomfy-app";
 import { SettingsService } from "@/app/services/settings-service";
 import { ErrorTypes, ErrorBase } from "@/app/models/errors";
 

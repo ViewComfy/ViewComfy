@@ -7,10 +7,11 @@ import { UTCDate } from "@date-fns/utc";
 
 import { IWorkflowHistoryModel } from "@/app/interfaces/workflow-history";
 import { SettingsService } from "@/app/services/settings-service";
-import { IViewComfyApp } from "@/app/models/viewcomfy-app";
+import { IViewComfyApp } from "@/app/interfaces/viewcomfy-app";
 import { useRouter } from "next/navigation";
 import { IUser } from "@/app/interfaces/user";
 import { ApiResponseError } from "@/app/models/errors";
+import { IWorkflow } from "@/app/interfaces/workflow";
 
 const settingsService = new SettingsService();
 
@@ -198,5 +199,60 @@ export function useUser() {
         user: data as IUser | null,
         isLoading,
         isError: error,
+    };
+}
+
+export function useWorkflows({
+    teamId
+}: { teamId: number | undefined; }) {
+    const fetchWithToken = useFetchWithToken();
+
+    const { data, error, isLoading, mutate } = useSWR(teamId ? `viewcomfy-app/playground/workflows?team_id=${teamId}` : undefined,
+        fetchWithToken,
+        {
+            refreshInterval: 15000,
+        },
+    );
+
+    let result: IWorkflow[] | null = null;
+
+    if (data && !error) {
+        result = data as IWorkflow[];
+    } else {
+        result = null;
+    }
+
+    return {
+        workflows: result,
+        isLoading,
+        isError: error,
+        mutateWorkflows: mutate,
+    };
+}
+
+export function useGetTeamByAppId({
+    appId
+}: { appId: string | null | undefined; }) {
+    const fetchWithToken = useFetchWithToken();
+    const { data, error, isLoading, mutate } = useSWR(appId ? `viewcomfy-app/app/team/${appId}` : undefined,
+        fetchWithToken,
+        {
+            refreshInterval: 0,
+        },
+    );
+
+    let result: { teamId: number } | null = null;
+
+    if (data && !error) {
+        result = data as { teamId: number };
+    } else {
+        result = null;
+    }
+
+    return {
+        teamId: result?.teamId,
+        isLoading,
+        isError: error,
+        mutateWorkflows: mutate,
     };
 }
