@@ -38,10 +38,16 @@ Inputs can be required or optional. It is also possible to add helper text to gu
 Easily add masks to image inputs. 
 ![ViewComfy mask editor](https://github.com/user-attachments/assets/f459b3da-9599-40c8-982f-4a6c3cd18c0c)
 
+### Enable complex workflow behaviours
+Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
+
 ### History
 Built-in user output history for apps deployed on ViewComfy Cloud. 
 ![ViewComfy app user history](https://github.com/user-attachments/assets/123d68d4-eaed-43c1-80fa-81684c125fb3)
 
+### App hub
+Built-in hub with all of your apps for apps deployed on ViewComfy Cloud. 
+![ViewComfy app hub](https://github.com/user-attachments/assets/4e1459b7-93b8-4966-a328-7a633db1f99b)
 
 ### User management and Analytics
 Built-in user management and analytics for apps deployed on ViewComfy Cloud. 
@@ -49,11 +55,6 @@ Built-in user management and analytics for apps deployed on ViewComfy Cloud.
 
 ### Serverless API connection
 Run workflows on serverless infrastructure and connect them via API to your apps. 
-
-### Enable complex workflow behaviours
-Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
-
-
 
 ## Installation
 
