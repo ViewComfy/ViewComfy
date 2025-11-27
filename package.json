@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_OPTIONS='--inspect' next dev",
-    "build": "next build --debug-prerender",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix"
