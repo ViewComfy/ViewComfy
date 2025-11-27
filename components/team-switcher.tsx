@@ -21,21 +21,24 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { useUser } from "@/hooks/use-data"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ITeam } from "@/app/interfaces/user"
 import { useBoundStore } from "@/stores/bound-store"
+import { useRouter } from "next/navigation";
+import { CheckIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export function TeamSwitch() {
     const [open, setOpen] = useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const { currentTeam, setCurrentTeam } = useBoundStore();
     const { user, isLoading } = useUser();
+    const router = useRouter();
 
-    useEffect(() => {
-        if (user && user?.teams.length > 0 && !currentTeam) {
-            setCurrentTeam(user.teams[0]);
-        }
-    }, [user, currentTeam, setCurrentTeam]);
+    const onSelectChanged = (team: ITeam) => {
+        setCurrentTeam(team);
+        router.push("/apps");
+    };
 
     if (isLoading || !user) {
         return <></>
@@ -50,11 +53,11 @@ export function TeamSwitch() {
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" className="w-[170px] justify-start">
-                        {currentTeam ? <>{currentTeam.name}</> : <>+ Set status</>}
+                        {currentTeam ? <>{currentTeam.slug}</> : <>Loading...</>}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0" align="start">
-                    <StatusList setOpen={setOpen} setCurrentTeam={setCurrentTeam} teams={user.teams} />
+                    <TeamList setOpen={setOpen} onSelectChanged={onSelectChanged} teams={user.teams} />
                 </PopoverContent>
             </Popover>
         )
@@ -69,44 +72,54 @@ export function TeamSwitch() {
             </DrawerTrigger>
             <DrawerContent>
                 <div className="mt-4 border-t">
-                    <StatusList setOpen={setOpen} setCurrentTeam={setCurrentTeam} teams={user.teams} />
+                    <TeamList setOpen={setOpen} onSelectChanged={onSelectChanged} teams={user.teams} />
                 </div>
             </DrawerContent>
         </Drawer>
     )
 }
 
-function StatusList({
+function TeamList({
     setOpen,
-    setCurrentTeam,
+    onSelectChanged,
     teams,
 }: {
     setOpen: (open: boolean) => void
-    setCurrentTeam: (value: ITeam) => void
+        onSelectChanged: (value: ITeam) => void
     teams: ITeam[]
 }) {
 
+    const { currentTeam } = useBoundStore();
     const onSelectFind = (value: string) => {
-        const found = teams.find((priority) => priority.name === value);
+        const found = teams.find((priority) => priority.slug === value);
         if (found) {
-            setCurrentTeam(found);
-            setOpen(false)
+            onSelectChanged(found);
+            setOpen(false);
         }
     }
 
     return (
         <Command>
-            <CommandInput placeholder="Filter status..." />
+            <CommandInput placeholder="Filter teams..." />
             <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                     {teams.map((team) => (
                         <CommandItem
                             key={team.id}
-                            value={team.name}
+                            value={team.slug}
                             onSelect={onSelectFind}
                         >
-                            {team.name}
+                            {team.slug}
+                            <CheckIcon
+                                className={cn(
+                                    "ml-auto h-4 w-4",
+                                        currentTeam?.id ===
+                                        team.id
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                )}
+                            />
                         </CommandItem>
                     ))}
                 </CommandGroup>

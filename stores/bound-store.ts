@@ -1,6 +1,8 @@
 import { create, StateCreator } from "zustand";
 import { ITeam } from "@/app/interfaces/user";
 import { createTeamSlice, ITeamSlice } from "@/stores/team-store-slice";
+import { IWorkflowSlice, createWorkflowSlice } from "@/stores/workflows-store-slice";
+
 interface ISharedStore {
     setSharedProps: (
         partial:
@@ -16,6 +18,7 @@ interface ISharedStore {
 
 const useSharedStore: StateCreator<
     ITeamSlice &
+    IWorkflowSlice &
     ISharedStore,
     [],
     [],
@@ -42,8 +45,10 @@ const useSharedStore: StateCreator<
 
 export const useBoundStore = create<
     ITeamSlice &
+    IWorkflowSlice &
     ISharedStore
 >()((...a) => ({
     ...createTeamSlice(...a),
+    ...createWorkflowSlice(...a),
     ...useSharedStore(...a),
 }));

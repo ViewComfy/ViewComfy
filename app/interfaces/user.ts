@@ -9,6 +9,7 @@ export interface IUser extends IBase {
 
 export interface ITeam extends IBase {
     name: string;
+    slug: string;
     playgroundLandingLogoUrl: string | undefined;
     playgroundLandingName: string | undefined;
 }
