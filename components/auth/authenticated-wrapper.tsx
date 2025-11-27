@@ -19,7 +19,7 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
     const { workflows } = useWorkflows({ teamId: currentTeam?.id });
 
     useEffect(() => {
-        if (user && user?.teams.length > 0 && !currentTeam) {
+        if (user && user?.teams.length > 0 && !currentTeam && !isLoading) {
             if (teamId) {
                 let idx = user.teams.findIndex(t => t.id === teamId);
                 if (idx === -1) {
@@ -30,7 +30,7 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
                 setCurrentTeam(user.teams[0]);
             }
         }
-    }, [user, setCurrentTeam, teamId, appId, currentTeam]);
+    }, [user, setCurrentTeam, teamId, appId, currentTeam, isLoading]);
 
     useEffect(() => {
         if (workflows) {
