@@ -39,7 +39,7 @@ Easily add masks to image inputs.
 ![ViewComfy mask editor](https://github.com/user-attachments/assets/f459b3da-9599-40c8-982f-4a6c3cd18c0c)
 
 ### Enable complex workflow behaviours
-Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack.  
+Create complex workflow behaviours in your apps, like workflow routing, optional images, and custom input validation with error message using the [ViewComfy utils](https://github.com/ViewComfy/ViewComfy-Utils) node pack. [This](https://youtu.be/kMSHMvVe-W8) video goes over some examples. 
 
 ### History
 Built-in user output history for apps deployed on ViewComfy Cloud. 
@@ -123,7 +123,7 @@ But ultimately, you can deploy your app on the hosting service of your choice. F
 
 You can drag and drop your ComfyUI workflow_api.json file into the form editor. It will then generate a new form that you can use to configure the inputs that will be displayed on the playground.
 
-For more details on how to use the editor with advanced Comfy workflows, you can refer to [this](https://youtu.be/70h0FUohMlE) guide. 
+For more details on how to use the editor with advanced Comfy workflows, you can refer to the [demo](https://youtu.be/Su_rbjodvEI) guide. 
 
 ### Playground
 
