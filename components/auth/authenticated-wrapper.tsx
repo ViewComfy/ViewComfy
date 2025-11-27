@@ -44,12 +44,9 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
         }
     }, [userId, isLoaded, router]);
 
-    if (!isLoaded || !userId || !user || (appId && isLoading)) {
+    // this should remain the only condition because people with glitchy connection face a flashing loading screen
+    if (!isLoaded) {
         return <div>Loading...</div>;
-    }
-
-    if (!userId) {
-        return null;
     }
 
     return (
