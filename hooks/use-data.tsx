@@ -234,11 +234,8 @@ export function useGetTeamByAppId({
     appId
 }: { appId: string | null | undefined; }) {
     const fetchWithToken = useFetchWithToken();
-    const { data, error, isLoading, mutate } = useSWR(appId ? `viewcomfy-app/app/team/${appId}` : undefined,
+    const { data, error, isLoading, mutate } = useSWRImmutable(appId ? `viewcomfy-app/app/team/${appId}` : undefined,
         fetchWithToken,
-        {
-            refreshInterval: 0,
-        },
     );
 
     let result: { teamId: number } | null = null;
