@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
+import { useFieldArray, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
     Form,
     FormControl,
@@ -123,6 +123,7 @@ export function ViewComfyForm(args: {
             console.error(e);
         }
     };
+
 
     return (
         <>
@@ -637,6 +638,18 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
         }
     }
 
+    // Custom remove handler that uses replace to avoid value sync issues
+    // When using remove(), indices shift and form field registrations can get out of sync
+    // Using replace() explicitly sets all remaining values correctly
+    const handleRemove = (indexToRemove: number) => {
+        const currentFields = nestedFieldArray.fields as IInputForm[];
+        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
+        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
+
+        // @ts-ignore
+        nestedFieldArray.replace(cleanedFields);
+    };
+
     const openEditDialogWithContext = (value: IEditFieldDialog | undefined) => {
         if (!value) {
             setShowEditDialog(undefined);
@@ -672,7 +685,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false
                         }}
                         render={({ field }) => (
-                            <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
+                            <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={handleRemove} index={k} setShowEditDialog={openEditDialogWithContext} />
                         )}
                     />
                 )
@@ -687,7 +700,7 @@ function InputFieldToUI(args: {
 
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove, index: number,
+    remove?: (index: number) => void, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
@@ -746,7 +759,7 @@ function InputFieldToUI(args: {
 }
 
 
-function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     // The Number.MIN_VALUE is used to indicate that the input has been randomized
     const [isRandomized, setIsRandomized] = useState(field.value === Number.MIN_VALUE);
@@ -827,7 +840,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 }
 
 
-function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
@@ -962,7 +975,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
 }
 
 
-function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
@@ -1168,7 +1181,7 @@ function FormTextAreaInput(args: {
     input: IInputForm,
 
     field: any, editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    remove?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
@@ -1221,7 +1234,7 @@ function FormCheckboxInput(args: {
 
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    remove?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
@@ -1269,7 +1282,7 @@ function FormBasicInput(args: {
 
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    remove?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
@@ -1310,7 +1323,7 @@ function FormBasicInput(args: {
 }
 
 
-function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     return (
         <FormItem key={input.id}>
@@ -1357,7 +1370,7 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
 }
 
 
-function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
     const [open, setOpen] = useState(false);
     const [buttonWidth, setButtonWidth] = useState<number>(0);
@@ -1463,7 +1476,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
 
 
 
-function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
+function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
 
     const { input, field, editMode, remove, index, setShowEditDialog } = args;
 
@@ -1509,7 +1522,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
 }
 
 function FieldActionButtons(props: {
-    remove?: UseFieldArrayRemove, index: number,
+    remove?: (index: number) => void, index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     input: IInputForm,
 
