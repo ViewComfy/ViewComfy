@@ -97,7 +97,14 @@ export function ViewComfyForm(args: {
     const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const { workflows } = useBoundStore();
+    const viewcomfyEndpointRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const error = form.formState.errors.viewcomfyEndpoint;
+        if (error && viewcomfyEndpointRef.current) {
+            viewcomfyEndpointRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [form.formState.errors.viewcomfyEndpoint]);
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
         try {
@@ -174,7 +181,7 @@ export function ViewComfyForm(args: {
                                                         }
                                                     }}
                                                     render={({ field }) => (
-                                                        <FormItem key="viewcomfyEndpoint" className="m-1">
+                                                        <FormItem key="viewcomfyEndpoint" className="m-1" ref={viewcomfyEndpointRef}>
                                                             <FormLabel>
                                                                 ViewComfy Endpoint {!settingsService.getIsRunningInViewComfy() && <span>(optional)</span>}
                                                                 <Tooltip>
