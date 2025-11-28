@@ -131,6 +131,21 @@ export function ViewComfyForm(args: {
         }
     };
 
+    // Custom remove handlers that use replace() to avoid value sync issues
+    // When using remove(), indices shift and form field registrations can get out of sync
+    const handleRemoveInput = (indexToRemove: number) => {
+        const currentFields = inputFieldArray.fields;
+        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
+        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
+        inputFieldArray.replace(cleanedFields as any);
+    };
+
+    const handleRemoveAdvanced = (indexToRemove: number) => {
+        const currentFields = advancedFieldArray.fields;
+        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
+        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
+        advancedFieldArray.replace(cleanedFields as any);
+    };
 
     return (
         <>
@@ -322,7 +337,7 @@ export function ViewComfyForm(args: {
 
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
-                                                                                        inputFieldArray.remove(index);
+                                                                                        handleRemoveInput(index);
                                                                                     } catch (err) {
                                                                                         console.error("Failed to move to advanced inputs", err);
                                                                                     }
@@ -343,7 +358,7 @@ export function ViewComfyForm(args: {
                                                                                 size="icon"
                                                                                 variant="ghost"
                                                                                 className="text-muted-foreground"
-                                                                                onClick={() => inputFieldArray.remove(index)}
+                                                                                onClick={() => handleRemoveInput(index)}
                                                                             >
                                                                                 <Trash2 className="size-5" />
                                                                             </Button>
@@ -370,7 +385,7 @@ export function ViewComfyForm(args: {
                                             })}
                                         </fieldset>
                                         {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
+                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveInput={handleRemoveInput} handleRemoveAdvanced={handleRemoveAdvanced} />
                                         )}
                                         {editMode && (args.children)}
                                     </div>
@@ -532,8 +547,10 @@ function AdvancedInputSection(args: {
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleRemoveInput: (index: number) => void,
+    handleRemoveAdvanced: (index: number) => void,
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveInput, handleRemoveAdvanced } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -584,7 +601,7 @@ function AdvancedInputSection(args: {
 
                                                             const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                             inputFieldArray.append(rest as unknown as never);
-                                                            advancedFieldArray.remove(index);
+                                                            handleRemoveAdvanced(index);
                                                         } catch (err) {
                                                             console.error("Failed to move to basic inputs", err);
                                                         }
@@ -604,7 +621,7 @@ function AdvancedInputSection(args: {
                                                     size="icon"
                                                     variant="ghost"
                                                     className="text-muted-foreground"
-                                                    onClick={() => advancedFieldArray.remove(index)}
+                                                    onClick={() => handleRemoveAdvanced(index)}
                                                 >
                                                     <Trash2 className="size-5" />
                                                 </Button>
