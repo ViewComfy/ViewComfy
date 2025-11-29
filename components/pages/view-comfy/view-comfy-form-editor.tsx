@@ -28,7 +28,9 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
     }
 
     const form = useForm<IViewComfyBase>({
-        defaultValues
+        defaultValues,
+        mode: "onChange",
+        reValidateMode: "onChange"
     });
 
     const inputFieldArray = useFieldArray({
@@ -52,7 +54,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
                 previewImages: viewComfyJSON.previewImages,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
-            });
+            }, { keepErrors: true });
         }
     }, [viewComfyJSON, form]);
 

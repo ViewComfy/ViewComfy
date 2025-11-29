@@ -98,13 +98,17 @@ export function ViewComfyForm(args: {
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const { workflows } = useBoundStore();
     const viewcomfyEndpointRef = useRef<HTMLDivElement>(null);
+    const hasInitializedEndpoint = useRef(false);
+    const { errors } = form.formState;
+    const viewcomfyEndpointError = errors.viewcomfyEndpoint;
 
     useEffect(() => {
-        const error = form.formState.errors.viewcomfyEndpoint;
-        if (error && viewcomfyEndpointRef.current) {
+        if (viewcomfyEndpointError && viewcomfyEndpointRef.current) {
             viewcomfyEndpointRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, [form.formState.errors.viewcomfyEndpoint]);
+    }, [viewcomfyEndpointError]);
+
+
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
         try {
@@ -131,22 +135,69 @@ export function ViewComfyForm(args: {
         }
     };
 
+    useEffect(() => {
+        if (hasInitializedEndpoint.current) {
+            return;
+        }
+        const value = form.getValues("viewcomfyEndpoint");
+        if (settingsService.getIsRunningInViewComfy() && workflows) {
+            hasInitializedEndpoint.current = true;
+            if (!value) {
+                const newEndpoint = workflows[0].apiUrl;
+                form.setValue("viewcomfyEndpoint", newEndpoint, {
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                handleSaveSubmit({
+                    ...form.getValues(),
+                    viewcomfyEndpoint: newEndpoint
+                });
+            } else {
+                const found = workflows.some(w => w.apiUrl === value);
+                if (!found) {
+                    form.setError("viewcomfyEndpoint", { type: "custom", message: "The API endpoint URL belongs to another team, you can switch the team in the bottom left or pick a new endpoint" }, { shouldFocus: true })
+                }
+            }
+        }
+    }, [workflows]);
+
+
     // Custom remove handlers that use replace() to avoid value sync issues
     // When using remove(), indices shift and form field registrations can get out of sync
-    const handleRemoveInput = (indexToRemove: number) => {
-        const currentFields = inputFieldArray.fields;
-        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
-        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
-        inputFieldArray.replace(cleanedFields as any);
+    // If inputIndex is provided, removes a specific input within the group; otherwise removes the entire group
+    const handleRemoveInput = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex?: number }) => {
+        if (inputIndex !== undefined) {
+            const currentInputs = form.getValues(`inputs.${groupIndex}.inputs`) as any[];
+            const remainingInputs = currentInputs.filter((_, idx) => idx !== inputIndex);
+            form.setValue(`inputs.${groupIndex}.inputs`, remainingInputs);
+        } else {
+            const currentFields = inputFieldArray.fields;
+            const remainingFields = currentFields.filter((_, idx) => idx !== groupIndex);
+            const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
+            inputFieldArray.replace(cleanedFields as any);
+        }
+        handleSaveSubmit(form.getValues());
     };
 
-    const handleRemoveAdvanced = (indexToRemove: number) => {
-        const currentFields = advancedFieldArray.fields;
-        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
-        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
-        advancedFieldArray.replace(cleanedFields as any);
+    const handleRemoveAdvanced = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex?: number }) => {
+        if (inputIndex !== undefined) {
+            const currentInputs = form.getValues(`advancedInputs.${groupIndex}.inputs`) as any[];
+            const remainingInputs = currentInputs.filter((_, idx) => idx !== inputIndex);
+            form.setValue(`advancedInputs.${groupIndex}.inputs`, remainingInputs);
+        } else {
+            const currentFields = advancedFieldArray.fields;
+            const remainingFields = currentFields.filter((_, idx) => idx !== groupIndex);
+            const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
+            advancedFieldArray.replace(cleanedFields as any);
+        }
+        handleSaveSubmit(form.getValues());
     };
 
+    const getDefaultValue = () => {
+        if (workflows) {
+            return workflows[0].apiUrl
+        }
+    }
     return (
         <>
             <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} form={form} />
@@ -227,7 +278,7 @@ export function ViewComfyForm(args: {
                                                                 {settingsService.getIsRunningInViewComfy() ? (
                                                                     <Select
                                                                         onValueChange={field.onChange}
-                                                                        defaultValue={field.value}
+                                                                        value={field.value || getDefaultValue()}
                                                                     >
                                                                         <SelectTrigger>
                                                                             <SelectValue />
@@ -337,7 +388,7 @@ export function ViewComfyForm(args: {
 
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
-                                                                                        handleRemoveInput(index);
+                                                                                        handleRemoveInput({ groupIndex: index });
                                                                                     } catch (err) {
                                                                                         console.error("Failed to move to advanced inputs", err);
                                                                                     }
@@ -358,7 +409,7 @@ export function ViewComfyForm(args: {
                                                                                 size="icon"
                                                                                 variant="ghost"
                                                                                 className="text-muted-foreground"
-                                                                                onClick={() => handleRemoveInput(index)}
+                                                                                onClick={() => handleRemoveInput({ groupIndex: index })}
                                                                             >
                                                                                 <Trash2 className="size-5" />
                                                                             </Button>
@@ -368,16 +419,15 @@ export function ViewComfyForm(args: {
                                                                         </TooltipContent>
                                                                     </Tooltip>
 
-
                                                                 </legend>
-                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleRemove={(inputIndex) => handleRemoveInput({ groupIndex: index, inputIndex })} />
                                                             </fieldset>
                                                         )
                                                     }
 
                                                     return (
                                                         <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleRemove={(inputIndex) => handleRemoveInput({ groupIndex: index, inputIndex })} />
                                                         </fieldset>
                                                     )
                                                 }
@@ -547,8 +597,8 @@ function AdvancedInputSection(args: {
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-    handleRemoveInput: (index: number) => void,
-    handleRemoveAdvanced: (index: number) => void,
+    handleRemoveInput: (params: { groupIndex: number, inputIndex?: number }) => void,
+    handleRemoveAdvanced: (params: { groupIndex: number, inputIndex?: number }) => void,
 }) {
     const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveInput, handleRemoveAdvanced } = args;
     const [isOpen, setIsOpen] = useState(editMode);
@@ -601,7 +651,7 @@ function AdvancedInputSection(args: {
 
                                                             const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                             inputFieldArray.append(rest as unknown as never);
-                                                            handleRemoveAdvanced(index);
+                                                            handleRemoveAdvanced({ groupIndex: index });
                                                         } catch (err) {
                                                             console.error("Failed to move to basic inputs", err);
                                                         }
@@ -621,7 +671,7 @@ function AdvancedInputSection(args: {
                                                     size="icon"
                                                     variant="ghost"
                                                     className="text-muted-foreground"
-                                                    onClick={() => handleRemoveAdvanced(index)}
+                                                    onClick={() => handleRemoveAdvanced({ groupIndex: index })}
                                                 >
                                                     <Trash2 className="size-5" />
                                                 </Button>
@@ -635,7 +685,7 @@ function AdvancedInputSection(args: {
 
                                 )}
                             </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
+                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} handleRemove={(inputIndex) => handleRemoveAdvanced({ groupIndex: index, inputIndex })} />
                         </fieldset>
                     ))}
                 </fieldset>
@@ -645,8 +695,15 @@ function AdvancedInputSection(args: {
 }
 
 
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
+function NestedInputField(args: {
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
+    nestedIndex: number,
+    editMode: boolean,
+    formFieldName: string,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleRemove: (inputIndex: number) => void,
+}) {
+    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog, handleRemove } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
 
@@ -661,18 +718,6 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
             return "This field is required"
         }
     }
-
-    // Custom remove handler that uses replace to avoid value sync issues
-    // When using remove(), indices shift and form field registrations can get out of sync
-    // Using replace() explicitly sets all remaining values correctly
-    const handleRemove = (indexToRemove: number) => {
-        const currentFields = nestedFieldArray.fields as IInputForm[];
-        const remainingFields = currentFields.filter((_, idx) => idx !== indexToRemove);
-        const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
-
-        // @ts-ignore
-        nestedFieldArray.replace(cleanedFields);
-    };
 
     const openEditDialogWithContext = (value: IEditFieldDialog | undefined) => {
         if (!value) {
