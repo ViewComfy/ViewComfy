@@ -173,6 +173,7 @@ export function ViewComfyForm(args: {
         } else {
             const currentFields = inputFieldArray.fields;
             const remainingFields = currentFields.filter((_, idx) => idx !== groupIndex);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
             inputFieldArray.replace(cleanedFields as any);
         }
@@ -187,6 +188,7 @@ export function ViewComfyForm(args: {
         } else {
             const currentFields = advancedFieldArray.fields;
             const remainingFields = currentFields.filter((_, idx) => idx !== groupIndex);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const cleanedFields = remainingFields.map(({ id, ...rest }) => rest);
             advancedFieldArray.replace(cleanedFields as any);
         }
@@ -385,7 +387,7 @@ export function ViewComfyForm(args: {
                                                                                         const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                                                         if (!group) return;
                                                                                         // strip RHF internal id
-
+                                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
                                                                                         handleRemoveInput({ groupIndex: index });
@@ -435,7 +437,7 @@ export function ViewComfyForm(args: {
                                             })}
                                         </fieldset>
                                         {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveInput={handleRemoveInput} handleRemoveAdvanced={handleRemoveAdvanced} />
+                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} />
                                         )}
                                         {editMode && (args.children)}
                                     </div>
@@ -597,10 +599,9 @@ function AdvancedInputSection(args: {
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
-    handleRemoveInput: (params: { groupIndex: number, inputIndex?: number }) => void,
     handleRemoveAdvanced: (params: { groupIndex: number, inputIndex?: number }) => void,
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveInput, handleRemoveAdvanced } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -648,7 +649,7 @@ function AdvancedInputSection(args: {
                                                             const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                             if (!group) return;
                                                             // strip RHF internal id
-
+                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                                             const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                             inputFieldArray.append(rest as unknown as never);
                                                             handleRemoveAdvanced({ groupIndex: index });
