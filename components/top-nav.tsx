@@ -27,9 +27,9 @@ const getAppDetails = (params: {
         img: "",
     };
 
-    if (params.pathname === "/apps") {
-        appDetails.title = params.currentTeam?.playgroundLandingName || "ViewComfy";
-        appDetails.img = params.currentTeam?.playgroundLandingLogoUrl || "";
+    if (params.currentTeam) {
+        appDetails.title = params.currentTeam.playgroundLandingName || "ViewComfy";
+        appDetails.img = params.currentTeam.playgroundLandingLogoUrl || "";
     } else {
         appDetails.title = params.viewComfyState.appTitle || "ViewComfy";
         appDetails.img = params.viewComfyState.appImg || "";

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import 'react18-json-view/src/style.css'
 import { IViewComfyJSON, useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import { useForm, useFieldArray } from 'react-hook-form';
 import { ViewComfyForm } from '@/components/view-comfy/view-comfy-form';
@@ -28,7 +27,9 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
     }
 
     const form = useForm<IViewComfyBase>({
-        defaultValues
+        defaultValues,
+        mode: "onChange",
+        reValidateMode: "onChange"
     });
 
     const inputFieldArray = useFieldArray({
@@ -52,7 +53,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
                 previewImages: viewComfyJSON.previewImages,
                 inputs: viewComfyJSON.inputs,
                 advancedInputs: viewComfyJSON.advancedInputs,
-            });
+            }, { keepErrors: true });
         }
     }, [viewComfyJSON, form]);
 

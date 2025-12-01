@@ -1,13 +1,9 @@
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/components/ui/dropzone';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ViewComfyFormEditor from '@/components/pages/view-comfy/view-comfy-form-editor';
 import { workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
-import { Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import JsonView from 'react18-json-view'
-import 'react18-json-view/src/style.css'
 import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
 import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
@@ -27,8 +23,6 @@ export default function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
-    const [viewJSON] = useState<boolean>(false);
-
     const [appTitle, setAppTitle] = useState<string>(viewComfyState.appTitle || "");
     const [appImg, setAppImg] = useState<string>(viewComfyState.appImg || "");
     const [appImgError, setAppImgError] = useState<string | undefined>(undefined);
@@ -241,11 +235,6 @@ export default function ViewComfyPage() {
                                 </div>
                             </div>
                         )}
-                        {(viewJSON) && (
-                            <div className="flex flex-col h-full overflow-hidden">
-                                <JSONPreview />
-                            </div>
-                        )}
                     </>
                 )}
             </main>
@@ -270,47 +259,4 @@ function getErrorText(error: Error | undefined) {
 
     return <> An error occurred while parsing the JSON, most commons cuase is the json is not valid or is empty. <br /> <b> error details: </b> <br /> {error.message} </>
 
-}
-
-
-function JSONPreview() {
-    const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
-    const getFileInfo = () => {
-        if (viewComfyState.viewComfyDraft?.file) {
-            const fileSizeInKB = Math.round(viewComfyState.viewComfyDraft.file.size / 1024);
-            return `Uploaded file: ${viewComfyState.viewComfyDraft.file.name} (${fileSizeInKB} KB)`;
-        }
-        return undefined;
-    }
-
-    const removeFileOnClick = () => {
-        viewComfyStateDispatcher({
-            type: ActionType.SET_VIEW_COMFY_DRAFT,
-            payload: undefined
-        });
-    }
-
-
-
-    return (
-        <>
-            {!viewComfyState.currentViewComfy && (
-                <Button
-                    variant="secondary"
-                    className="border-2 border-dashed text-muted-foreground mb-4"
-                    onClick={removeFileOnClick}
-                >
-                    <p className="text-muted-foreground mr-2">{getFileInfo()}</p>
-                    <Trash2 className="size-5" />
-                </Button>
-            )}
-            <div className="h-full hidden md:block">
-                <Label className="mb-2">Workflow API JSON</Label>
-                <ScrollArea className="flex-1 rounded-md border">
-                    <JsonView src={viewComfyState.viewComfyDraft?.workflowApiJSON} collapsed={3} displaySize={3} editable={false} />
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-            </div>
-        </>
-    )
 }

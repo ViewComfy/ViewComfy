@@ -282,13 +282,18 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
 
         for (const dataInputs of data.inputs) {
             for (const input of dataInputs.inputs) {
-                inputs.push({ key: input.key, value: input.value });
+                if (input.visibility === undefined || input.visibility !== "deleted") {
+                    inputs.push({ key: input.key, value: input.value });
+                }
+                
             }
         }
 
         for (const advancedInput of data.advancedInputs) {
             for (const input of advancedInput.inputs) {
-                inputs.push({ key: input.key, value: input.value });
+                if (input.visibility === undefined || input.visibility !== "deleted") {
+                    inputs.push({ key: input.key, value: input.value });
+                }
             }
         }
 

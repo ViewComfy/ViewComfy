@@ -4,6 +4,8 @@ import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
 const VC_BASIC_INPUT = "VC_BASIC";
 const VC_ADVANCED_INPUT = "VC_ADV";
 
+export type InputVisibility = 'active' | 'deleted' | 'hidden';
+
 export interface IInputField {
     title: string;
     placeholder: string;
@@ -17,12 +19,14 @@ export interface IInputField {
     options?: { label: string, value: string }[];
     slider?: { min: number, max: number, step: number };
     tooltip?: string;
+    visibility?: InputVisibility;
 }
 
 export interface IMultiValueInput {
     title: string;
     inputs: IInputField[];
     key: string;
+    visibility?: InputVisibility;
 }
 
 export interface WorkflowApiJSON {

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useFieldArray, type UseFieldArrayRemove, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
+import { useFieldArray, type UseFieldArrayReturn, type UseFormReturn } from "react-hook-form"
 import {
     Form,
     FormControl,
@@ -13,13 +13,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import type { IViewComfyBase } from "@/app/providers/view-comfy-provider";
-import type { IInputField } from "@/lib/workflow-api-parser";
+import type { IInputField, IMultiValueInput } from "@/lib/workflow-api-parser";
 import { parseWorkflowApiTypeToInputHtmlType } from "@/components/pages/view-comfy/view-comfy-form-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Brush } from "lucide-react";
+import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Brush, Undo2, Eye, EyeOff } from "lucide-react";
 import { Dropzone } from "../ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
 import { AutosizeTextarea } from "../ui/autosize-text-area"
@@ -59,12 +59,25 @@ import { MaskEditor } from "@/components/ui/mask-editor";
 import { ImageMasked } from "@/app/models/prompt-result";
 import { useBoundStore } from "@/stores/bound-store";
 import { IWorkflow } from "@/app/interfaces/workflow";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 
 interface IInputForm extends IInputField {
     id: string;
 }
 
+// Interface for displaying deleted inputs in the UI
+interface IDeletedInputDisplay {
+    type: 'group' | 'input';
+    section: 'inputs' | 'advancedInputs';
+    groupIndex: number;
+    inputIndex?: number;
+    groupTitle: string;
+    inputTitle?: string;
+    groupKey: string;
+    inputKey?: string;
+}
 
 const settingsService = new SettingsService();
 const validateViewComfyEndpoint = (endpoint: string | undefined, workflows: IWorkflow[] | undefined) => {
@@ -97,6 +110,17 @@ export function ViewComfyForm(args: {
     const [editDialogInput, setShowEditDialogInput] = useState<IEditFieldDialog | undefined>(undefined);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const { workflows } = useBoundStore();
+    const viewcomfyEndpointRef = useRef<HTMLDivElement>(null);
+    const hasInitializedEndpoint = useRef(false);
+    const { errors } = form.formState;
+    const viewcomfyEndpointError = errors.viewcomfyEndpoint;
+
+    useEffect(() => {
+        if (viewcomfyEndpointError && viewcomfyEndpointRef.current) {
+            viewcomfyEndpointRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [viewcomfyEndpointError]);
+
 
 
     const handleSaveSubmit = (data: IViewComfyBase) => {
@@ -124,6 +148,159 @@ export function ViewComfyForm(args: {
         }
     };
 
+    useEffect(() => {
+        if (hasInitializedEndpoint.current) {
+            return;
+        }
+        const value = form.getValues("viewcomfyEndpoint");
+        if (settingsService.getIsRunningInViewComfy() && workflows) {
+            hasInitializedEndpoint.current = true;
+            if (!value) {
+                const newEndpoint = workflows[0].apiUrl;
+                form.setValue("viewcomfyEndpoint", newEndpoint, {
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                handleSaveSubmit({
+                    ...form.getValues(),
+                    viewcomfyEndpoint: newEndpoint
+                });
+            } else {
+                const found = workflows.some(w => w.apiUrl === value);
+                if (!found) {
+                    form.setError("viewcomfyEndpoint", { type: "custom", message: "The API endpoint URL belongs to another team, you can switch the team in the bottom left or pick a new endpoint" }, { shouldFocus: true })
+                }
+            }
+        }
+    }, [workflows]);
+
+
+    // Compute deleted inputs from form data for display
+    const getDeletedInputs = (): IDeletedInputDisplay[] => {
+        const deleted: IDeletedInputDisplay[] = [];
+        const inputs = form.getValues('inputs') as IMultiValueInput[];
+        const advancedInputs = form.getValues('advancedInputs') as IMultiValueInput[];
+
+        // Check basic inputs
+        inputs?.forEach((group, groupIndex) => {
+            if (group.visibility === 'deleted') {
+                deleted.push({
+                    type: 'group',
+                    section: 'inputs',
+                    groupIndex,
+                    groupTitle: group.title,
+                    groupKey: group.key
+                });
+            } else {
+                group.inputs?.forEach((input, inputIndex) => {
+                    if (input.visibility === 'deleted') {
+                        deleted.push({
+                            type: 'input',
+                            section: 'inputs',
+                            groupIndex,
+                            inputIndex,
+                            groupTitle: group.title,
+                            inputTitle: input.title,
+                            groupKey: group.key,
+                            inputKey: input.key
+                        });
+                    }
+                });
+            }
+        });
+
+        // Check advanced inputs
+        advancedInputs?.forEach((group, groupIndex) => {
+            if (group.visibility === 'deleted') {
+                deleted.push({
+                    type: 'group',
+                    section: 'advancedInputs',
+                    groupIndex,
+                    groupTitle: group.title,
+                    groupKey: group.key
+                });
+            } else {
+                group.inputs?.forEach((input, inputIndex) => {
+                    if (input.visibility === 'deleted') {
+                        deleted.push({
+                            type: 'input',
+                            section: 'advancedInputs',
+                            groupIndex,
+                            inputIndex,
+                            groupTitle: group.title,
+                            inputTitle: input.title,
+                            groupKey: group.key,
+                            inputKey: input.key
+                        });
+                    }
+                });
+            }
+        });
+
+        return deleted;
+    };
+
+    // Custom remove handlers - now set visibility to 'deleted' instead of removing
+    // If inputIndex is provided, marks a specific input as deleted; otherwise marks the entire group
+    const handleRemoveInput = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex?: number }) => {
+        if (inputIndex !== undefined) {
+            // Mark individual input as deleted
+            form.setValue(`inputs.${groupIndex}.inputs.${inputIndex}.visibility`, 'deleted');
+        } else {
+            // Mark entire group as deleted
+            form.setValue(`inputs.${groupIndex}.visibility`, 'deleted');
+        }
+        handleSaveSubmit(form.getValues());
+    };
+
+    const handleRemoveAdvanced = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex?: number }) => {
+        if (inputIndex !== undefined) {
+            // Mark individual input as deleted
+            form.setValue(`advancedInputs.${groupIndex}.inputs.${inputIndex}.visibility`, 'deleted');
+        } else {
+            // Mark entire group as deleted
+            form.setValue(`advancedInputs.${groupIndex}.visibility`, 'deleted');
+        }
+        handleSaveSubmit(form.getValues());
+    };
+
+    // Handler to restore deleted inputs - sets visibility back to 'active'
+    const handleRestoreInput = (deletedInput: IDeletedInputDisplay) => {
+        if (deletedInput.type === 'group') {
+            // Restore entire group
+            form.setValue(`${deletedInput.section}.${deletedInput.groupIndex}.visibility`, 'active');
+            // Also restore all inputs within the group
+            const group = form.getValues(`${deletedInput.section}.${deletedInput.groupIndex}`) as IMultiValueInput;
+            group.inputs?.forEach((_, inputIdx) => {
+                form.setValue(`${deletedInput.section}.${deletedInput.groupIndex}.inputs.${inputIdx}.visibility`, 'active');
+            });
+        } else if (deletedInput.inputIndex !== undefined) {
+            // Restore individual input
+            form.setValue(`${deletedInput.section}.${deletedInput.groupIndex}.inputs.${deletedInput.inputIndex}.visibility`, 'active');
+        }
+        handleSaveSubmit(form.getValues());
+    };
+
+    // Toggle visibility between 'active' and 'hidden'
+    const handleToggleVisibilityInput = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex: number }) => {
+        const currentVisibility = form.getValues(`inputs.${groupIndex}.inputs.${inputIndex}.visibility`);
+        const newVisibility = currentVisibility === 'hidden' ? 'active' : 'hidden';
+        form.setValue(`inputs.${groupIndex}.inputs.${inputIndex}.visibility`, newVisibility);
+        handleSaveSubmit(form.getValues());
+    };
+
+    const handleToggleVisibilityAdvanced = ({ groupIndex, inputIndex }: { groupIndex: number, inputIndex: number }) => {
+        const currentVisibility = form.getValues(`advancedInputs.${groupIndex}.inputs.${inputIndex}.visibility`);
+        const newVisibility = currentVisibility === 'hidden' ? 'active' : 'hidden';
+        form.setValue(`advancedInputs.${groupIndex}.inputs.${inputIndex}.visibility`, newVisibility);
+        handleSaveSubmit(form.getValues());
+    };
+
+    const getDefaultValue = () => {
+        if (workflows) {
+            return workflows[0].apiUrl
+        }
+    }
     return (
         <>
             <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} form={form} />
@@ -173,7 +350,7 @@ export function ViewComfyForm(args: {
                                                         }
                                                     }}
                                                     render={({ field }) => (
-                                                        <FormItem key="viewcomfyEndpoint" className="m-1">
+                                                        <FormItem key="viewcomfyEndpoint" className="m-1" ref={viewcomfyEndpointRef}>
                                                             <FormLabel>
                                                                 ViewComfy Endpoint {!settingsService.getIsRunningInViewComfy() && <span>(optional)</span>}
                                                                 <Tooltip>
@@ -204,7 +381,7 @@ export function ViewComfyForm(args: {
                                                                 {settingsService.getIsRunningInViewComfy() ? (
                                                                     <Select
                                                                         onValueChange={field.onChange}
-                                                                        defaultValue={field.value}
+                                                                        value={field.value || getDefaultValue()}
                                                                     >
                                                                         <SelectTrigger>
                                                                             <SelectValue />
@@ -284,9 +461,24 @@ export function ViewComfyForm(args: {
                                                 </legend>
                                             )}
                                             {inputFieldArray.fields.map((field, index) => {
-
+                                                // @ts-ignore - Skip deleted groups, and in non-edit mode only show active groups
+                                                if (field.visibility === 'deleted') {
+                                                    return null;
+                                                }
                                                 // @ts-ignore
-                                                if (field.inputs.length > 0) {
+                                                const isGroupActive = field.visibility === 'active' || field.visibility === undefined;
+                                                if (!editMode && !isGroupActive) {
+                                                    return null;
+                                                }
+
+                                                // @ts-ignore - Filter to only active inputs when not in edit mode
+                                                const activeInputs = field.inputs?.filter((input: IInputField) => {
+                                                    if (!editMode) {
+                                                        return input.visibility === 'active' || input.visibility === undefined;
+                                                    }
+                                                    return input.visibility !== 'deleted';
+                                                }) ?? [];
+                                                if (activeInputs.length > 0) {
                                                     if (editMode) {
                                                         return (
                                                             <fieldset disabled={isLoading} key={field.id} className="grid gap-4 rounded-lg border p-4">
@@ -311,10 +503,10 @@ export function ViewComfyForm(args: {
                                                                                         const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
                                                                                         if (!group) return;
                                                                                         // strip RHF internal id
-
+                                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
-                                                                                        inputFieldArray.remove(index);
+                                                                                        handleRemoveInput({ groupIndex: index });
                                                                                     } catch (err) {
                                                                                         console.error("Failed to move to advanced inputs", err);
                                                                                     }
@@ -335,7 +527,7 @@ export function ViewComfyForm(args: {
                                                                                 size="icon"
                                                                                 variant="ghost"
                                                                                 className="text-muted-foreground"
-                                                                                onClick={() => inputFieldArray.remove(index)}
+                                                                                onClick={() => handleRemoveInput({ groupIndex: index })}
                                                                             >
                                                                                 <Trash2 className="size-5" />
                                                                             </Button>
@@ -345,25 +537,35 @@ export function ViewComfyForm(args: {
                                                                         </TooltipContent>
                                                                     </Tooltip>
 
-
                                                                 </legend>
-                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleRemove={(inputIndex) => handleRemoveInput({ groupIndex: index, inputIndex })} handleToggleVisibility={(inputIndex) => handleToggleVisibilityInput({ groupIndex: index, inputIndex })} />
                                                             </fieldset>
                                                         )
                                                     }
 
                                                     return (
                                                         <fieldset disabled={isLoading} key={field.id} className="grid gap-4">
-                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} />
+                                                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="inputs" setShowEditDialog={setShowEditDialogInput} handleRemove={(inputIndex) => handleRemoveInput({ groupIndex: index, inputIndex })} handleToggleVisibility={(inputIndex) => handleToggleVisibilityInput({ groupIndex: index, inputIndex })} />
                                                         </fieldset>
                                                     )
                                                 }
                                                 return undefined;
                                             })}
                                         </fieldset>
-                                        {advancedFieldArray.fields.length > 0 && (
-                                            <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} />
-                                        )}
+                                        {advancedFieldArray.fields.some((field: any) => {
+                                            if (field.visibility === 'deleted') return false;
+                                            const isGroupActive = field.visibility === 'active' || field.visibility === undefined;
+                                            if (!editMode && !isGroupActive) return false;
+                                            const activeInputs = field.inputs?.filter((input: IInputField) => {
+                                                if (!editMode) {
+                                                    return input.visibility === 'active' || input.visibility === undefined;
+                                                }
+                                                return input.visibility !== 'deleted';
+                                            }) ?? [];
+                                            return activeInputs.length > 0;
+                                        }) && (
+                                                <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} handleToggleVisibilityAdvanced={handleToggleVisibilityAdvanced} />
+                                            )}
                                         {editMode && (args.children)}
                                     </div>
                                 </ScrollArea>
@@ -377,7 +579,12 @@ export function ViewComfyForm(args: {
                         {editMode && (
                             <ScrollArea className="h-full flex-1 rounded-md px-[5px] pr-4">
                                 <div className="">
-                                    <PreviewImagesInput form={form} />
+                                    <ViewComfyFormEditorRighSide
+                                        deletedInputs={getDeletedInputs()}
+                                        onRestore={handleRestoreInput}
+                                        form={form}
+                                    />
+                                    {/* <PreviewImagesInput form={form} /> */}
                                 </div>
                             </ScrollArea>
                         )}
@@ -515,17 +722,16 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 }
 
 function AdvancedInputSection(args: {
-
     inputFieldArray: UseFieldArrayReturn<any>,
-
     advancedFieldArray: UseFieldArrayReturn<any>,
-
     form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
     editMode: boolean,
     isLoading: boolean,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleRemoveAdvanced: (params: { groupIndex: number, inputIndex?: number }) => void,
+    handleToggleVisibilityAdvanced: (params: { groupIndex: number, inputIndex: number }) => void,
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced, handleToggleVisibilityAdvanced } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -549,70 +755,91 @@ function AdvancedInputSection(args: {
                             Advanced Inputs
                         </legend>
                     )}
-                    {advancedFieldArray.fields.map((advancedField, index) => (
-                        <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
-                            <legend className="-ml-1 px-1 text-sm font-medium">
-                                {
+                    {advancedFieldArray.fields.map((advancedField, index) => {
+                        // @ts-ignore - Skip deleted groups, and in non-edit mode only show active groups
+                        if (advancedField.visibility === 'deleted') {
+                            return null;
+                        }
+                        // @ts-ignore
+                        const isGroupActive = advancedField.visibility === 'active' || advancedField.visibility === undefined;
+                        if (!editMode && !isGroupActive) {
+                            return null;
+                        }
+                        // @ts-ignore - Filter to only active inputs when not in edit mode
+                        const activeInputs = advancedField.inputs?.filter((input: IInputField) => {
+                            if (!editMode) {
+                                return input.visibility === 'active' || input.visibility === undefined;
+                            }
+                            return input.visibility !== 'deleted';
+                        }) ?? [];
+                        if (activeInputs.length === 0) {
+                            return null;
+                        }
+                        return (
+                            <fieldset disabled={isLoading} key={advancedField.id} className="grid gap-4 rounded-lg border p-4">
+                                <legend className="-ml-1 px-1 text-sm font-medium">
+                                    {
 
-                                    // @ts-ignore
-                                    advancedField.title
-                                }
-                                {editMode && (
-                                    <>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    type="button"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="text-muted-foreground"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        try {
-                                                            const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
-                                                            if (!group) return;
-                                                            // strip RHF internal id
+                                        // @ts-ignore
+                                        advancedField.title
+                                    }
+                                    {editMode && (
+                                        <>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="text-muted-foreground"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            try {
+                                                                const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
+                                                                if (!group) return;
+                                                                // strip RHF internal id
+                                                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
+                                                                inputFieldArray.append(rest as unknown as never);
+                                                                handleRemoveAdvanced({ groupIndex: index });
+                                                            } catch (err) {
+                                                                console.error("Failed to move to basic inputs", err);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <MoveUp />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Move to Basic Inputs</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="text-muted-foreground"
+                                                        onClick={() => handleRemoveAdvanced({ groupIndex: index })}
+                                                    >
+                                                        <Trash2 className="size-5" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Delete Input</p>
+                                                </TooltipContent>
+                                            </Tooltip>
 
-                                                            const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
-                                                            inputFieldArray.append(rest as unknown as never);
-                                                            advancedFieldArray.remove(index);
-                                                        } catch (err) {
-                                                            console.error("Failed to move to basic inputs", err);
-                                                        }
-                                                    }}
-                                                >
-                                                    <MoveUp />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Move to Basic Inputs</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    type="button"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="text-muted-foreground"
-                                                    onClick={() => advancedFieldArray.remove(index)}
-                                                >
-                                                    <Trash2 className="size-5" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Delete Input</p>
-                                            </TooltipContent>
-                                        </Tooltip>
+                                        </>
 
-                                    </>
-
-                                )}
-                            </legend>
-                            <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} />
-                        </fieldset>
-                    ))}
+                                    )}
+                                </legend>
+                                <NestedInputField form={form} nestedIndex={index} editMode={editMode} formFieldName="advancedInputs" setShowEditDialog={setShowEditDialog} handleRemove={(inputIndex) => handleRemoveAdvanced({ groupIndex: index, inputIndex })} handleToggleVisibility={(inputIndex) => handleToggleVisibilityAdvanced({ groupIndex: index, inputIndex })} />
+                            </fieldset>
+                        );
+                    })}
                 </fieldset>
             </CollapsibleContent>
         </Collapsible>
@@ -620,8 +847,16 @@ function AdvancedInputSection(args: {
 }
 
 
-function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>, nestedIndex: number, editMode: boolean, formFieldName: string, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog } = args;
+function NestedInputField(args: {
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
+    nestedIndex: number,
+    editMode: boolean,
+    formFieldName: string,
+    setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
+    handleRemove: (inputIndex: number) => void,
+    handleToggleVisibility: (inputIndex: number) => void,
+}) {
+    const { form, nestedIndex, editMode, formFieldName, setShowEditDialog, handleRemove, handleToggleVisibility } = args;
     const nestedFieldArray = useFieldArray({
         control: form.control,
 
@@ -661,6 +896,15 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
         <>
             {nestedFieldArray.fields.map((item, k) => {
                 const input = item as IInputForm;
+                // Only show active inputs when not in edit mode (or undefined for backwards compatibility)
+                const isActive = input.visibility === 'active' || input.visibility === undefined;
+                if (!editMode && !isActive) {
+                    return null;
+                }
+                // In edit mode, skip deleted inputs
+                if (editMode && input.visibility === 'deleted') {
+                    return null;
+                }
                 return (
                     <FormField
                         key={input.id}
@@ -672,7 +916,7 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false
                         }}
                         render={({ field }) => (
-                            <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={nestedFieldArray.remove} index={k} setShowEditDialog={openEditDialogWithContext} />
+                            <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={handleRemove} toggleVisibility={handleToggleVisibility} index={k} setShowEditDialog={openEditDialogWithContext} />
                         )}
                     />
                 )
@@ -684,70 +928,71 @@ function NestedInputField(args: { form: UseFormReturn<IViewComfyBase, any, IView
 
 function InputFieldToUI(args: {
     input: IInputForm,
-
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove, index: number,
+    remove?: (index: number) => void,
+    toggleVisibility?: (index: number) => void,
+    index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
 
     if (input.valueType === "long-text") {
         return (
-            <FormTextAreaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormTextAreaInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "boolean") {
         return (
-            <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormCheckboxInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "video" || input.valueType === "image" || input.valueType === "audio") {
         return (
-            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormMediaInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "image-mask") {
         return (
-            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormMaskInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "seed" || input.valueType === "noise_seed" || input.valueType === "rand_seed") {
         return (
-            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormSeedInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     if (input.valueType === "select") {
         if (input.options && input.options.length < 6) {
             return (
-                <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+                <FormSelectInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
             )
         } else {
             return (
-                <FormComboboxInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+                <FormComboboxInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
             )
         }
     }
 
     if (input.valueType === "slider") {
         return (
-            <FormSliderInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+            <FormSliderInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
         )
     }
 
     return (
-        <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} index={index} setShowEditDialog={setShowEditDialog} />
+        <FormBasicInput input={input} field={field} editMode={editMode} remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} />
     )
 }
 
 
-function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     // The Number.MIN_VALUE is used to indicate that the input has been randomized
     const [isRandomized, setIsRandomized] = useState(field.value === Number.MIN_VALUE);
     const [storedValue] = useState(field.value);
@@ -786,7 +1031,7 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -827,8 +1072,8 @@ function FormSeedInput(args: { input: IInputForm, field: any, editMode?: boolean
 }
 
 
-function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
@@ -892,7 +1137,7 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -962,8 +1207,8 @@ function FormMediaInput(args: { input: IInputForm, field: any, editMode?: boolea
 }
 
 
-function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     const [media, setMedia] = useState({
         src: "",
         name: "",
@@ -1100,7 +1345,7 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
                             </TooltipContent>
                         </Tooltip>)}
                     {editMode && (
-                        <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                        <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                     )}
                 </FormLabel>
                 <FormControl>
@@ -1166,13 +1411,14 @@ function FormMaskInput(args: { input: IInputForm, field: any, editMode?: boolean
 
 function FormTextAreaInput(args: {
     input: IInputForm,
-
-    field: any, editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    field: any,
+    editMode?: boolean,
+    remove?: (index: number) => void,
+    toggleVisibility?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
 
     return (
         <FormItem key={input.id}>
@@ -1194,7 +1440,7 @@ function FormTextAreaInput(args: {
                     </Tooltip>)
                 }
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
 
                 )}
             </FormLabel>
@@ -1218,14 +1464,14 @@ function FormTextAreaInput(args: {
 
 function FormCheckboxInput(args: {
     input: IInputForm,
-
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    remove?: (index: number) => void,
+    toggleVisibility?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     return (
         <FormItem className="flex flex-row items-center space-x-3 space-y-0" key={input.id}>
             <FormControl>
@@ -1257,7 +1503,7 @@ function FormCheckboxInput(args: {
                 </FormDescription> */}
             </div>
             {editMode && (
-                <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} field={field} input={input} />
+                <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} field={field} input={input} />
             )}
             <FormMessage />
         </FormItem>
@@ -1266,14 +1512,14 @@ function FormCheckboxInput(args: {
 
 function FormBasicInput(args: {
     input: IInputForm,
-
     field: any,
     editMode?: boolean,
-    remove?: UseFieldArrayRemove,
+    remove?: (index: number) => void,
+    toggleVisibility?: (index: number) => void,
     index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
 }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -1293,7 +1539,7 @@ function FormBasicInput(args: {
                     </Tooltip>)
                 }
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1310,8 +1556,8 @@ function FormBasicInput(args: {
 }
 
 
-function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     return (
         <FormItem key={input.id}>
             <FormLabel className={FORM_STYLE.label}>{input.title}
@@ -1330,7 +1576,7 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1357,8 +1603,8 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
 }
 
 
-function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
     const [open, setOpen] = useState(false);
     const [buttonWidth, setButtonWidth] = useState<number>(0);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -1402,7 +1648,7 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1463,9 +1709,8 @@ function FormComboboxInput(args: { input: IInputForm, field: any, editMode?: boo
 
 
 
-function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: UseFieldArrayRemove, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void, }) {
-
-    const { input, field, editMode, remove, index, setShowEditDialog } = args;
+function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boolean, remove?: (index: number) => void, toggleVisibility?: (index: number) => void, index: number, setShowEditDialog: (value: IEditFieldDialog | undefined) => void }) {
+    const { input, field, editMode, remove, toggleVisibility, index, setShowEditDialog } = args;
 
     const onSliderChange = (value: number[]) => {
         field.onChange(value[0]);
@@ -1493,7 +1738,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                         </TooltipContent>
                     </Tooltip>)}
                 {editMode && (
-                    <FieldActionButtons remove={remove} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
+                    <FieldActionButtons remove={remove} toggleVisibility={toggleVisibility} index={index} setShowEditDialog={setShowEditDialog} input={input} field={field} />
                 )}
             </FormLabel>
             <FormControl>
@@ -1509,14 +1754,16 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
 }
 
 function FieldActionButtons(props: {
-    remove?: UseFieldArrayRemove, index: number,
+    remove?: (index: number) => void,
+    toggleVisibility?: (index: number) => void,
+    index: number,
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     input: IInputForm,
-
     field: any
 }) {
 
-    const { remove, index, setShowEditDialog, input, field } = props;
+    const { remove, toggleVisibility, index, setShowEditDialog, input, field } = props;
+    const isHidden = input.visibility === 'hidden';
 
     return (
         <div className="flex items-center gap-1 ml-auto">
@@ -1537,6 +1784,23 @@ function FieldActionButtons(props: {
             >
                 <SquarePen className="size-5" />
             </Button>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={toggleVisibility ? () => toggleVisibility(index) : undefined}
+                    >
+                        {isHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                {isHidden ? <p>Show Input in Playground </p> : <p>Hide input from the Playground</p>}
+                </TooltipContent>
+            </Tooltip>
+
             <Button
                 type="button"
                 size="icon"
@@ -2078,5 +2342,118 @@ function EditFieldDialog(props: {
                 </form>
             </DialogContent>
         </Dialog>
+    )
+}
+
+interface ViewComfyFormEditorRighSideProps {
+    deletedInputs: IDeletedInputDisplay[];
+    onRestore: (deletedInput: IDeletedInputDisplay) => void;
+    form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>;
+}
+
+function ViewComfyFormEditorRighSide({ deletedInputs, onRestore, form }: ViewComfyFormEditorRighSideProps) {
+    // Helper to get the number of inputs in a deleted group
+    const getGroupInputCount = (deletedInput: IDeletedInputDisplay): number => {
+        const group = form.getValues(`${deletedInput.section}.${deletedInput.groupIndex}`) as IMultiValueInput;
+        return group?.inputs?.length ?? 0;
+    };
+
+    // Generate a unique key for each deleted input
+    const getDeletedInputKey = (deletedInput: IDeletedInputDisplay): string => {
+        return deletedInput.type === 'group'
+            ? `group-${deletedInput.groupKey}`
+            : `input-${deletedInput.groupKey}-${deletedInput.inputKey}`;
+    };
+
+    return (
+        <div className="flex w-full max-w-sm flex-col gap-6">
+            <Tabs defaultValue="deleted-inputs">
+                <TabsList>
+                    <TabsTrigger value="deleted-inputs">
+                        Deleted Inputs
+                        {deletedInputs.length > 0 && (
+                            <span className="ml-2 inline-flex items-center justify-center rounded-full bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
+                                {deletedInputs.length}
+                            </span>
+                        )}
+                    </TabsTrigger>
+                    <TabsTrigger value="preview-images">
+                        Preview Images
+                    </TabsTrigger>
+                </TabsList>
+                <TabsContent value="deleted-inputs" className="mt-4">
+                    {deletedInputs.length === 0 ? (
+                        <Card>
+                            <CardContent className="pt-6">
+                                <p className="text-sm text-muted-foreground text-center">
+                                    No deleted inputs. Deleted inputs will appear here and can be restored.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            {deletedInputs.map((deletedInput) => (
+                                <Card key={getDeletedInputKey(deletedInput)} className="overflow-hidden">
+                                    <CardHeader className="py-3 px-4">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <CardTitle className="text-sm font-medium truncate">
+                                                    {deletedInput.type === 'group'
+                                                        ? deletedInput.groupTitle
+                                                        : deletedInput.inputTitle}
+                                                </CardTitle>
+                                                <CardDescription className="text-xs mt-1">
+                                                    {deletedInput.type === 'group' ? (
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
+                                                                Group
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>
+                                                                {getGroupInputCount(deletedInput)} input(s)
+                                                            </span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
+                                                                Input
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>from {deletedInput.groupTitle}</span>
+                                                        </span>
+                                                    )}
+                                                    <span className="ml-1">
+                                                        • {deletedInput.section === 'inputs' ? 'Basic' : 'Advanced'}
+                                                    </span>
+                                                </CardDescription>
+                                            </div>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="text-muted-foreground hover:text-primary shrink-0"
+                                                        onClick={() => onRestore(deletedInput)}
+                                                    >
+                                                        <Undo2 className="size-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Restore Input</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
+                                    </CardHeader>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+                <TabsContent value="preview-images">
+                    <PreviewImagesInput form={form} />
+                </TabsContent>
+            </Tabs>
+        </div>
     )
 }
