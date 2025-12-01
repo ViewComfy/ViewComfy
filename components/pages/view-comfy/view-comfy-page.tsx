@@ -27,8 +27,6 @@ export default function ViewComfyPage() {
     const [file, setFile] = useState<File | null>(null);
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const [errorDialog, setErrorDialog] = useState<{ open: boolean, error: Error | undefined }>({ open: false, error: undefined });
-    const [viewJSON] = useState<boolean>(false);
-
     const [appTitle, setAppTitle] = useState<string>(viewComfyState.appTitle || "");
     const [appImg, setAppImg] = useState<string>(viewComfyState.appImg || "");
     const [appImgError, setAppImgError] = useState<string | undefined>(undefined);
@@ -239,11 +237,6 @@ export default function ViewComfyPage() {
                                 <div className="flex-1 overflow-hidden">
                                     <ViewComfyFormEditor onSubmit={getOnSubmit} viewComfyJSON={viewComfyState.viewComfyDraft?.viewComfyJSON} />
                                 </div>
-                            </div>
-                        )}
-                        {(viewJSON) && (
-                            <div className="flex flex-col h-full overflow-hidden">
-                                <JSONPreview />
                             </div>
                         )}
                     </>
