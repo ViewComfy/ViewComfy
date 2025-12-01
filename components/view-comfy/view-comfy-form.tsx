@@ -60,7 +60,7 @@ import { ImageMasked } from "@/app/models/prompt-result";
 import { useBoundStore } from "@/stores/bound-store";
 import { IWorkflow } from "@/app/interfaces/workflow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 
 interface IInputForm extends IInputField {
