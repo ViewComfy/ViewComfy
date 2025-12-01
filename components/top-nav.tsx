@@ -28,7 +28,11 @@ const getAppDetails = (params: {
     };
 
     if (params.currentTeam) {
-        appDetails.title = params.currentTeam.playgroundLandingName || "ViewComfy";
+        let title = params.currentTeam.playgroundLandingName || "";
+        if (!params.currentTeam.playgroundLandingName && !params.currentTeam.playgroundLandingLogoUrl) {
+            title = "ViewComfy";
+        }
+        appDetails.title = title;
         appDetails.img = params.currentTeam.playgroundLandingLogoUrl || "";
     } else {
         appDetails.title = params.viewComfyState.appTitle || "ViewComfy";
