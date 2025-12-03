@@ -59,7 +59,7 @@
     "react": "19.2.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.2.0",
-    "react-hook-form": "^7.66.0",
+    "react-hook-form": "^7.67.0",
     "react-resizable-panels": "^3.0.6",
     "react-zoom-pan-pinch": "^3.7.0",
     "recharts": "2.15.4",
@@ -72,7 +72,7 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "13.0.0",
     "vaul": "^1.1.2",
-    "zod": "^4.1.12",
+    "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
