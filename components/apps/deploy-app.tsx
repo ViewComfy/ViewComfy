@@ -112,7 +112,7 @@ export function DeployAppDialog(props: IDeployAppDialogProps) {
     }
 
     return (
-        <Dialog>
+        <Dialog onOpenChange={onCloseDialog}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="form-deplopy-app">
                 <DialogTrigger asChild>
                     <Button type="button" className="w-full">Deploy App</Button>
@@ -169,37 +169,6 @@ export function DeployAppDialog(props: IDeployAppDialogProps) {
                                 <div className="flex gap-x-6">
                                     <div className="flex-1 space-y-2">
                                         <Controller
-                                            name="projectId"
-                                            control={form.control}
-                                            render={({ field, fieldState }) => (
-                                                <Field data-invalid={fieldState.invalid}>
-                                                    <FieldLabel htmlFor="form-deplopy-app">
-                                                        Project
-                                                    </FieldLabel>
-                                                    <Select
-                                                        name={field.name}
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
-                                                    >
-                                                        <SelectTrigger
-                                                            id="form-deplopy-app"
-                                                            aria-invalid={fieldState.invalid}
-                                                        >
-                                                            <SelectValue placeholder="Select" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {currentTeam.projects.map((p) => (
-                                                                <SelectItem key={p.id.toString()} value={p.id.toString()}>{p.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    {fieldState.invalid && (
-                                                        <FieldError errors={[fieldState.error]} />
-                                                    )}
-                                                </Field>
-                                            )}
-                                        />
-                                        <Controller
                                             control={form.control}
                                             name="name"
                                             render={({ field, fieldState }) => {
@@ -248,6 +217,37 @@ export function DeployAppDialog(props: IDeployAppDialogProps) {
                                         />
                                     </div>
                                     <div className="flex-1 space-y-2">
+                                    <Controller
+                                            name="projectId"
+                                            control={form.control}
+                                            render={({ field, fieldState }) => (
+                                                <Field data-invalid={fieldState.invalid}>
+                                                    <FieldLabel htmlFor="form-deplopy-app">
+                                                        Project
+                                                    </FieldLabel>
+                                                    <Select
+                                                        name={field.name}
+                                                        value={field.value}
+                                                        onValueChange={field.onChange}
+                                                    >
+                                                        <SelectTrigger
+                                                            id="form-deplopy-app"
+                                                            aria-invalid={fieldState.invalid}
+                                                        >
+                                                            <SelectValue placeholder="Select" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {currentTeam.projects.map((p) => (
+                                                                <SelectItem key={p.id.toString()} value={p.id.toString()}>{p.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {fieldState.invalid && (
+                                                        <FieldError errors={[fieldState.error]} />
+                                                    )}
+                                                </Field>
+                                            )}
+                                        />
                                         <Controller
                                             control={form.control}
                                             name="appHub"
