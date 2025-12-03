@@ -20,9 +20,9 @@ import { CHECKBOX_STYLE, FORM_STYLE, TEXT_AREA_STYLE } from "@/components/styles
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Brush, Undo2, Eye, EyeOff } from "lucide-react";
-import { Dropzone } from "../ui/dropzone";
+import { Dropzone } from "@/components/ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
-import { AutosizeTextarea } from "../ui/autosize-text-area"
+import { AutosizeTextarea } from "@/components/ui/autosize-text-area"
 import {
     Collapsible,
     CollapsibleContent,
@@ -61,6 +61,7 @@ import { useBoundStore } from "@/stores/bound-store";
 import { IWorkflow } from "@/app/interfaces/workflow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { DeployAppDialog } from "@/components/apps/deploy-app";
 
 
 interface IInputForm extends IInputField {
@@ -172,7 +173,7 @@ export function ViewComfyForm(args: {
                 }
             }
         }
-    }, [workflows]);
+    }, [workflows, form]);
 
 
     // Compute deleted inputs from form data for display
@@ -306,7 +307,6 @@ export function ViewComfyForm(args: {
             <EditFieldDialog showEditDialog={editDialogInput} setShowEditDialog={setShowEditDialogInput} form={form} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
-
                     <div className="flex flex-row gap-x-2 flex-1 min-h-0">
                         <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
                             <div id="inputs-form" className="flex flex-col w-full h-full">
@@ -584,21 +584,25 @@ export function ViewComfyForm(args: {
                                         onRestore={handleRestoreInput}
                                         form={form}
                                     />
-                                    {/* <PreviewImagesInput form={form} /> */}
                                 </div>
                             </ScrollArea>
                         )}
                     </div>
                     {editMode && (
-                        <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 rounded-md")}>
-                            <Button type="submit" className="w-full mb-2" onClick={form.handleSubmit(handleSaveSubmit)}>
+                        <div className={cn("sticky bottom-0 p-4 bg-background w-full flex flex-row gap-x-4 items-end rounded-md")}>
+                            <Button type="submit" className="w-full" onClick={form.handleSubmit(handleSaveSubmit)}>
                                 Save Changes
                             </Button>
-                            {downloadViewComfyJSON && (
-                                <Button type="button" variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
-                                    Download as ViewComfy JSON
-                                </Button>
-                            )}
+                            <div className="flex flex-col gap-y-2 w-full">
+                                {settingsService.getIsRunningInViewComfy() && (
+                                    <DeployAppDialog viewComfyState={viewComfyState}/>
+                                )}
+                                {downloadViewComfyJSON && (
+                                    <Button type="button" variant="secondary" className="w-full" onClick={form.handleSubmit(downloadViewComfyJSON)}>
+                                        Download as ViewComfy JSON
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </form>
@@ -676,7 +680,7 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
                                                         return newValues;
                                                     });
                                                 }}
-                                                onLoad={() => handleImageLoad(index, field.value)}
+                                                onLoad={() => handleImageLoad(index, field.value || "")}
                                             />
                                             <Button
                                                 type="button"

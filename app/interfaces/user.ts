@@ -12,4 +12,9 @@ export interface ITeam extends IBase {
     slug: string;
     playgroundLandingLogoUrl: string | undefined;
     playgroundLandingName: string | undefined;
+    projects: IProject[];
+}
+
+export interface IProject extends IBase {
+    name: string;
 }

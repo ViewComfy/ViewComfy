@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { IViewComfyJSON, useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
+import { useViewComfy, type IViewComfyBase } from "@/app/providers/view-comfy-provider";
 import { useForm, useFieldArray } from 'react-hook-form';
 import { ViewComfyForm } from '@/components/view-comfy/view-comfy-form';
 import { toast } from "sonner";
+import { buildViewComfyJSON } from '@/lib/utils';
 
 interface ViewComfyFormEditorProps {
     onSubmit: (data: IViewComfyBase) => void;
@@ -68,7 +69,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
         })
     }
 
-     
+
     function downloadViewComfyJSON(data: any) {
         onSubmit(data);
         setDownloadJson(true);
@@ -76,22 +77,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
 
     useEffect(() => {
         if (downloadJson) {
-            const workflows = viewComfyState.viewComfys.map((item) => {
-                return {
-                    viewComfyJSON: { ...item.viewComfyJSON },
-                    workflowApiJSON: { ...item.workflowApiJSON }
-                }
-            });
-
-            const viewComfyJSON: IViewComfyJSON = {
-                "file_type": "view_comfy",
-                "file_version": "1.0.0",
-                "version": "0.0.1",
-                "appTitle": viewComfyState.appTitle || "",
-                "appImg": viewComfyState.appImg || "",
-                workflows
-            };
-
+            const viewComfyJSON = buildViewComfyJSON({ viewComfyState });
             const jsonString = JSON.stringify(viewComfyJSON, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
@@ -105,7 +91,7 @@ export default function ViewComfyFormEditor({ onSubmit, viewComfyJSON }: ViewCom
             document.body.removeChild(a);
             setDownloadJson(false);
         }
-    }, [downloadJson, viewComfyState.viewComfys, viewComfyState.appTitle, viewComfyState.appImg]);
+    }, [downloadJson, viewComfyState]);
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
