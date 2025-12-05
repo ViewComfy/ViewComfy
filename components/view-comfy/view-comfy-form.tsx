@@ -500,14 +500,25 @@ export function ViewComfyForm(args: {
                                                                                     e.preventDefault();
                                                                                     e.stopPropagation();
                                                                                     try {
-                                                                                        const group = inputFieldArray.fields[index] as unknown as Record<string, unknown>;
-                                                                                        if (!group) return;
-                                                                                        // strip RHF internal id
-                                                                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                                        const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
-                                                                                        advancedFieldArray.append(rest as unknown as never);
-                                                                                        inputFieldArray.remove(index);
-                                                                                        handleSaveSubmit(form.getValues());
+                                                                                        // Get current form values before making changes
+                                                                                        const currentValues = form.getValues();
+                                                                                        const groupToMove = currentValues.inputs[index];
+                                                                                        if (!groupToMove) return;
+                                                                                        
+                                                                                        // Construct new state manually
+                                                                                        const newInputs = currentValues.inputs.filter((_, i) => i !== index);
+                                                                                        const newAdvancedInputs = [...(currentValues.advancedInputs || []), groupToMove];
+                                                                                        
+                                                                                        // Update form with new arrays
+                                                                                        form.setValue('inputs', newInputs);
+                                                                                        form.setValue('advancedInputs', newAdvancedInputs);
+                                                                                        
+                                                                                        // Save with constructed state
+                                                                                        handleSaveSubmit({
+                                                                                            ...currentValues,
+                                                                                            inputs: newInputs,
+                                                                                            advancedInputs: newAdvancedInputs
+                                                                                        });
                                                                                     } catch (err) {
                                                                                         console.error("Failed to move to advanced inputs", err);
                                                                                     }
@@ -802,14 +813,25 @@ function AdvancedInputSection(args: {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         try {
-                                                            const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
-                                                            if (!group) return;
-                                                            // strip RHF internal id
-                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                            const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
-                                                            inputFieldArray.append(rest as unknown as never);
-                                                            advancedFieldArray.remove(index);
-                                                            handleSaveSubmit(form.getValues());
+                                                            // Get current form values before making changes
+                                                            const currentValues = form.getValues();
+                                                            const groupToMove = currentValues.advancedInputs?.[index];
+                                                            if (!groupToMove) return;
+                                                            
+                                                            // Construct new state manually
+                                                            const newAdvancedInputs = (currentValues.advancedInputs || []).filter((_, i) => i !== index);
+                                                            const newInputs = [...currentValues.inputs, groupToMove];
+                                                            
+                                                            // Update form with new arrays
+                                                            form.setValue('inputs', newInputs);
+                                                            form.setValue('advancedInputs', newAdvancedInputs);
+                                                            
+                                                            // Save with constructed state
+                                                            handleSaveSubmit({
+                                                                ...currentValues,
+                                                                inputs: newInputs,
+                                                                advancedInputs: newAdvancedInputs
+                                                            });
                                                         } catch (err) {
                                                             console.error("Failed to move to basic inputs", err);
                                                         }
