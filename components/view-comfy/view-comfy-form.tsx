@@ -506,7 +506,8 @@ export function ViewComfyForm(args: {
                                                                                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                                                                         const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
                                                                                         advancedFieldArray.append(rest as unknown as never);
-                                                                                        handleRemoveInput({ groupIndex: index });
+                                                                                        inputFieldArray.remove(index);
+                                                                                        handleSaveSubmit(form.getValues());
                                                                                     } catch (err) {
                                                                                         console.error("Failed to move to advanced inputs", err);
                                                                                     }
@@ -564,7 +565,7 @@ export function ViewComfyForm(args: {
                                             }) ?? [];
                                             return activeInputs.length > 0;
                                         }) && (
-                                                <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} handleToggleVisibilityAdvanced={handleToggleVisibilityAdvanced} />
+                                                <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} handleToggleVisibilityAdvanced={handleToggleVisibilityAdvanced} handleSaveSubmit={handleSaveSubmit} />
                                             )}
                                         {editMode && (args.children)}
                                     </div>
@@ -734,8 +735,9 @@ function AdvancedInputSection(args: {
     setShowEditDialog: (value: IEditFieldDialog | undefined) => void,
     handleRemoveAdvanced: (params: { groupIndex: number, inputIndex?: number }) => void,
     handleToggleVisibilityAdvanced: (params: { groupIndex: number, inputIndex: number }) => void,
+    handleSaveSubmit: (data: IViewComfyBase) => void,
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced, handleToggleVisibilityAdvanced } = args;
+    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced, handleToggleVisibilityAdvanced, handleSaveSubmit } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
@@ -796,21 +798,22 @@ function AdvancedInputSection(args: {
                                                         size="icon"
                                                         variant="ghost"
                                                         className="text-muted-foreground"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            try {
-                                                                const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
-                                                                if (!group) return;
-                                                                // strip RHF internal id
-                                                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
-                                                                inputFieldArray.append(rest as unknown as never);
-                                                                handleRemoveAdvanced({ groupIndex: index });
-                                                            } catch (err) {
-                                                                console.error("Failed to move to basic inputs", err);
-                                                            }
-                                                        }}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        try {
+                                                            const group = advancedFieldArray.fields[index] as unknown as Record<string, unknown>;
+                                                            if (!group) return;
+                                                            // strip RHF internal id
+                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                            const { id, ...rest } = group as { id?: string } & Record<string, unknown>;
+                                                            inputFieldArray.append(rest as unknown as never);
+                                                            advancedFieldArray.remove(index);
+                                                            handleSaveSubmit(form.getValues());
+                                                        } catch (err) {
+                                                            console.error("Failed to move to basic inputs", err);
+                                                        }
+                                                    }}
                                                     >
                                                         <MoveUp />
                                                     </Button>
