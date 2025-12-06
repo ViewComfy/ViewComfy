@@ -5,9 +5,10 @@ import type { IInput } from "@/app/interfaces/input";
 import * as constants from "@/app/constants";
 import { getComfyUIRandomSeed } from "@/lib/utils";
 import { ComfyUIAPIService } from "../services/comfyui-api-service";
+import { SettingsService } from "../services/settings-service";
+import { waitForDebugger } from "node:inspector/promises";
 
-const COMFY_INPUTS_DIR = path.join(process.cwd(), "comfy", "inputs");
-const COMFY_WORKFLOWS_DIR = path.join(process.cwd(), "comfy", "workflows");
+const settingsService = new SettingsService();
 
 export class ComfyWorkflow {
    
@@ -15,12 +16,16 @@ export class ComfyWorkflow {
   private workflowFileName: string;
   private workflowFilePath: string;
   private id: string;
+  private comfyInputsDir: string;
+  private comfyWorkflowsDir: string;
 
   constructor(workflow: object) {
     this.workflow = workflow;
     this.id = crypto.randomUUID();
     this.workflowFileName = `workflow_${this.id}.json`;
-    this.workflowFilePath = path.join(COMFY_WORKFLOWS_DIR, this.workflowFileName);
+    this.comfyWorkflowsDir = settingsService.getComfyWorkflowsDirectory();
+    this.workflowFilePath = path.join(this.comfyWorkflowsDir, this.workflowFileName);
+    this.comfyInputsDir = settingsService.getComfyInputDirectory();
   }
 
   public async setViewComfy(viewComfy: IInput[], comfyUIService: ComfyUIAPIService) {
@@ -99,7 +104,7 @@ export class ComfyWorkflow {
 
   private async createFileFromInput(file: File) {
     const fileName = `${this.getFileNamePrefix()}${file.name}`;
-    const filePath = path.join(COMFY_INPUTS_DIR, fileName);
+    const filePath = path.join(this.comfyInputsDir, fileName);
     const fileBuffer = await file.arrayBuffer();
     await fs.writeFile(filePath, Buffer.from(fileBuffer));
     return filePath;
@@ -112,7 +117,9 @@ export class ComfyWorkflow {
     comfyUIService: ComfyUIAPIService
   }) {
     const { maskKeyParam, maskFile, viewComfy, comfyUIService } = params;
-    const originalFilePath = maskKeyParam.slice(0, "-viewcomfymask".length)
+    const originalFilePath = maskKeyParam.endsWith("-viewcomfymask") 
+      ? maskKeyParam.slice(0, maskKeyParam.length - "-viewcomfymask".length)
+      : maskKeyParam;
     const originalFilePathKeys = originalFilePath.split("-");
      
     let obj: any = this.workflow;
@@ -123,7 +130,22 @@ export class ComfyWorkflow {
       obj = obj[originalFilePathKeys[i]];
     }
     const unmaskedPath = obj[originalFilePathKeys[originalFilePathKeys.length - 1]];
-    const unmaskedFilename = unmaskedPath.slice(COMFY_INPUTS_DIR.length + 1);
+    
+    if (!unmaskedPath) {
+      throw new Error(`Cannot find unmasked path at key: ${originalFilePathKeys[originalFilePathKeys.length - 1]}. Available keys: ${Object.keys(obj).join(', ')}`);
+    }
+    
+    // Extract filename from path - handle both full paths and relative paths
+    let unmaskedFilename: string;
+    if (path.isAbsolute(unmaskedPath) && unmaskedPath.startsWith(this.comfyInputsDir)) {
+      unmaskedFilename = path.relative(this.comfyInputsDir, unmaskedPath);
+    } else if (path.isAbsolute(unmaskedPath)) {
+      // If it's an absolute path but doesn't start with comfyInputsDir, just get the basename
+      unmaskedFilename = path.basename(unmaskedPath);
+    } else {
+      // If it's already a relative path, use it as-is
+      unmaskedFilename = unmaskedPath;
+    }
     let viewComfyInput = undefined;
     for (const input of viewComfy) {
       if (input.key === originalFilePath) {
