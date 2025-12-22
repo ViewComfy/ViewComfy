@@ -562,7 +562,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                     key={output.url}
                     src={output.url}
                     alt={`${output.url}`}
-                    className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                    className={cn("max-w-64 max-h-64 w-fit h-fit object-contain rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                 />
             </DialogTrigger>
             {showOutputFileName && parseFileName(getOutputFileName(output))}
@@ -748,7 +748,7 @@ function OutputRenderer({
             {outputComponent && (
                 <div
                     key={output.url}
-                    className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]"
+                    className="flex pt-1 w-64 h-64 items-center justify-center"
                 >
                     <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         {outputComponent}
