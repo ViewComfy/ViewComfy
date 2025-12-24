@@ -75,3 +75,79 @@ export const buildViewComfyJSON = ({ viewComfyState }: { viewComfyState: IViewCo
     workflows
   };
 }
+
+// LocalStorage key for saving editor workflows
+const EDITOR_WORKFLOWS_STORAGE_KEY = "viewcomfy_editor_workflows";
+
+/**
+ * Save workflows to localStorage in view_comfy.json format
+ * This ensures workflows persist across page refreshes and browser sessions
+ */
+export const saveWorkflowsToLocalStorage = (viewComfyState: IViewComfyState): void => {
+  try {
+    // Only save if there are workflows to save
+    if (viewComfyState.viewComfys.length === 0 && !viewComfyState.viewComfyDraft) {
+      // Clear storage if no workflows exist
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(EDITOR_WORKFLOWS_STORAGE_KEY);
+      }
+      return;
+    }
+
+    // Build the view_comfy.json format
+    const viewComfyJSON = buildViewComfyJSON({ viewComfyState });
+    
+    // Save to localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem(EDITOR_WORKFLOWS_STORAGE_KEY, JSON.stringify(viewComfyJSON));
+    }
+  } catch (error) {
+    // Silently fail if localStorage is unavailable or quota exceeded
+    console.error("Failed to save workflows to localStorage:", error);
+  }
+};
+
+/**
+ * Load workflows from localStorage in view_comfy.json format
+ * Returns null if no saved workflows exist or if there's an error
+ */
+export const loadWorkflowsFromLocalStorage = (): IViewComfyJSON | null => {
+  try {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const savedData = localStorage.getItem(EDITOR_WORKFLOWS_STORAGE_KEY);
+    if (!savedData) {
+      return null;
+    }
+
+    const parsed = JSON.parse(savedData) as IViewComfyJSON;
+    
+    // Validate the structure
+    if (parsed.file_type === "view_comfy" && Array.isArray(parsed.workflows)) {
+      return parsed;
+    }
+
+    return null;
+  } catch (error) {
+    // Silently fail if localStorage is unavailable or data is corrupted
+    console.error("Failed to load workflows from localStorage:", error);
+    return null;
+  }
+};
+
+/**
+ * Clear workflows from localStorage
+ * This removes all saved workflow data from the browser's local storage
+ */
+export const clearWorkflowsFromLocalStorage = (): void => {
+  try {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(EDITOR_WORKFLOWS_STORAGE_KEY);
+    }
+  } catch (error) {
+    // Silently fail if localStorage is unavailable
+    console.error("Failed to clear workflows from localStorage:", error);
+  }
+};
