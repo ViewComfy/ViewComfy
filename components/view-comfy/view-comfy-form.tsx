@@ -465,7 +465,7 @@ export function ViewComfyForm(args: {
                                                 if (field.visibility === 'deleted') {
                                                     return null;
                                                 }
-                                                // @ts-ignore
+                                                // @ts-ignore - Skip deleted groups, and in non-edit mode only show active groups
                                                 const isGroupActive = field.visibility === 'active' || field.visibility === undefined;
                                                 if (!editMode && !isGroupActive) {
                                                     return null;
@@ -777,7 +777,7 @@ function AdvancedInputSection(args: {
                         if (advancedField.visibility === 'deleted') {
                             return null;
                         }
-                        // @ts-ignore
+                        // @ts-ignore - Skip deleted groups, and in non-edit mode only show active groups
                         const isGroupActive = advancedField.visibility === 'active' || advancedField.visibility === undefined;
                         if (!editMode && !isGroupActive) {
                             return null;
@@ -797,7 +797,7 @@ function AdvancedInputSection(args: {
                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                     {
 
-                                        // @ts-ignore
+                                         // @ts-ignore - form dynamic proeprtie
                                         advancedField.title
                                     }
                                     {editMode && (
@@ -889,7 +889,7 @@ function NestedInputField(args: {
     const nestedFieldArray = useFieldArray({
         control: form.control,
 
-        // @ts-ignore
+        // @ts-ignore - form dynamic proeprties
         name: `${formFieldName}[${nestedIndex}].inputs`
     });
 
@@ -939,7 +939,7 @@ function NestedInputField(args: {
                         key={input.id}
                         control={form.control}
 
-                        // @ts-ignore
+                         // @ts-ignore - form dynamic proeprtie
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
                             required: !editMode && input.validations.required ? getErrorMsg(input) : false
