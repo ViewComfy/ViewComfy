@@ -25,6 +25,15 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "./ui/skeleton"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+type PageSize = 5 | 10 | 20;
 
 interface HistorySidebarProps {
     open: boolean
@@ -53,6 +62,8 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
         from: subDays(today, 1),
         to: today,
     });
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState<PageSize>(5);
 
     const {
         workflowHistory,
@@ -62,7 +73,30 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
         apiEndpoint: currentViewComfySwitcher.viewComfyJSON.viewcomfyEndpoint || "",
         startDate: date?.from,
         endDate: date?.to,
+        page,
+        pageSize,
     });
+
+    // Reset page when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [currentViewComfySwitcher, date, pageSize]);
+
+    const handlePreviousPage = () => {
+        setPage((prev) => Math.max(1, prev - 1));
+    };
+
+    const handleNextPage = () => {
+        setPage((prev) => prev + 1);
+    };
+
+    const handlePageSizeChange = (value: string) => {
+        setPageSize(Number(value) as PageSize);
+    };
+
+    // Determine if we can navigate to next page (if we got a full page of results)
+    const hasNextPage = successWorkflows.length === pageSize;
+    const hasPreviousPage = page > 1;
 
     useEffect(() => {
         if (!workflowHistory) {
@@ -140,6 +174,22 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                 setDate={setDate}
                                 disabled={false}
                             />
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">Images per page</span>
+                                <Select
+                                    value={pageSize.toString()}
+                                    onValueChange={handlePageSizeChange}
+                                >
+                                    <SelectTrigger className="w-[80px]">
+                                        <SelectValue placeholder="10" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="5">5</SelectItem>
+                                        <SelectItem value="10">10</SelectItem>
+                                        <SelectItem value="20">20</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </CollapsibleContent>
                 </Collapsible>
@@ -168,13 +218,30 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                 </div>
                             </div>
                         </div>
-                    ) : successWorkflows && successWorkflows.length === 0 ? (
+                    ) : successWorkflows && successWorkflows.length === 0 && page === 1 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <History className="h-12 w-12 text-muted-foreground mb-4" />
                             <h3 className="text-lg font-medium">No history found</h3>
                             <p className="text-sm text-muted-foreground">
                                 Your generation history will appear here
                             </p>
+                        </div>
+                    ) : successWorkflows && successWorkflows.length === 0 && page > 1 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <History className="h-12 w-12 text-muted-foreground mb-4" />
+                            <h3 className="text-lg font-medium">No more results</h3>
+                            <p className="text-sm text-muted-foreground">
+                                You&apos;ve reached the end of the history
+                            </p>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-4"
+                                onClick={handlePreviousPage}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Go back
+                            </Button>
                         </div>
                     ) : isError ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -243,6 +310,33 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
 
                                     </div>
                                 ))}
+                            
+                            {/* Pagination Controls */}
+                            <div className="flex items-center justify-center gap-4 pt-4 pb-2 w-full">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handlePreviousPage}
+                                    disabled={!hasPreviousPage}
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft className="h-4 w-4 mr-1" />
+                                    Previous
+                                </Button>
+                                <span className="text-sm text-muted-foreground">
+                                    Page {page}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleNextPage}
+                                    disabled={!hasNextPage}
+                                    aria-label="Next page"
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </ScrollArea>

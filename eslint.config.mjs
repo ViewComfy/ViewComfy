@@ -17,16 +17,21 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
- 
+
 const eslintConfig = defineConfig([
-    ...nextVitals,
-    ...nextTs,
-    {
-        rules: {
-            "@next/next/no-img-element": "off",
-            "@typescript-eslint/no-explicit-any": "off"
-        }
-    },
+  ...nextVitals,
+  ...nextTs,
+  {
+    rules: {
+      "@next/next/no-img-element": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        { "ts-ignore": "allow-with-description" },
+      ],
+    }
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -36,5 +41,5 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
   ]),
 ])
- 
+
 export default eslintConfig

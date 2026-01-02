@@ -58,6 +58,8 @@ export function useWorkflowHistory(params: {
     apiEndpoint: string;
     startDate?: Date;
     endDate?: Date;
+    page?: number;
+    pageSize?: number;
 }) {
     const fetchWithToken = useFetchWithToken();
 
@@ -69,6 +71,14 @@ export function useWorkflowHistory(params: {
         const utcEndDate = new UTCDate(params.endDate);
         utcEndDate.setHours(23, 59, 59, 999);
         urlParams += `&start_date=${utcStartDate.toISOString()}&end_date=${utcEndDate.toISOString()}`;
+    }
+
+    if (params.page) {
+        urlParams += `&page=${params.page}`;
+    }
+
+    if (params.pageSize) {
+        urlParams += `&page_size=${params.pageSize}`;
     }
 
     const { data, error, isLoading } = useSWR(
