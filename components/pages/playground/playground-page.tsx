@@ -38,7 +38,6 @@ import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import * as constants from "@/app/constants";
-import { useSocket } from "@/app/providers/socket-provider";
 import { ISetResults, S3FilesData } from "@/app/models/prompt-result";
 import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-user";
 import { ComparisonButton } from "@/components/comparison/comparison-button";
@@ -798,61 +797,102 @@ function parseFileName(filename: string): string {
     }
 }
 
+const IndeterminateLoadingBar = () => {
+    return (
+        <div
+            role="progressbar"
+            aria-label="Generating"
+            className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted-foreground/10"
+        >
+            <div className="vc-indeterminate absolute inset-y-0 w-1/3 rounded-full bg-muted-foreground/40" />
+        </div>
+    );
+};
+
+const IndeterminateLoadingBarStyles = () => {
+    return (
+        <style jsx global>{`
+            @keyframes vc-indeterminate {
+                0% {
+                    transform: translateX(-120%);
+                }
+
+                100% {
+                    transform: translateX(320%);
+                }
+            }
+
+            .vc-indeterminate {
+                animation: vc-indeterminate 1.2s ease-in-out infinite;
+            }
+        `}</style>
+    );
+};
+
 const Generating = (props: {
     runningWorkflows: IWorkflowHistoryModel[],
     loading: boolean,
 }) => {
-    const { currentLog } = useSocket();
     const { runningWorkflows, loading } = props;
 
+    const generatingDetails = (
+        <div className="flex flex-col gap-2">
+            <IndeterminateLoadingBar />
+        </div>
+    );
+
     if (runningWorkflows.length > 0) {
-        return runningWorkflows.map((w) => (
-            (<div key={w.promptId} className="flex flex-col gap-4 w-full">
-                <div className="flex flex-wrap w-full gap-4 pt-4">
-                    <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
-                        <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                            <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
-                                    <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
-                                </div>
-                            </div>
-                        </BlurFade>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <div className="text-xs text-muted-foreground">
-                        {currentLog && currentLog[w.promptId] && (
-                            currentLog[w.promptId]
-                        )}
-                        {(!currentLog || !currentLog[w.promptId]) && (
-                            "Prompt Scheduled"
-                        )}
-                    </div>
-                </div>
-                <hr className="w-full py-4 border-gray-300" />
-            </div>)
-        ))
-    } else if (loading) {
-        return (<div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-wrap w-full gap-4 pt-4">
-                <div key={`loading-placeholder`} className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
-                    <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                        <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
-                                <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+        return (
+            <>
+                <IndeterminateLoadingBarStyles />
+                {runningWorkflows.map((w) => (
+                    <div key={w.promptId} className="flex flex-col gap-4 w-full">
+                        <div className="flex flex-wrap w-full gap-4 pt-4">
+                            <div key={`loading-placeholder`} className="flex flex-col gap-2 sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                                <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                    <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
+                                            <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+                                        </div>
+                                    </div>
+                                </BlurFade>
+                                {generatingDetails}
                             </div>
                         </div>
-                    </BlurFade>
-                </div>
-            </div>
-            <hr className="w-full py-4 border-gray-300" />
-        </div>)
-    } else {
-        return null
+                        <hr className="w-full py-4 border-gray-300" />
+                    </div>
+                ))}
+            </>
+        );
     }
-}
+
+    if (loading) {
+        return (
+            <>
+                <IndeterminateLoadingBarStyles />
+                <div className="flex flex-col gap-4 w-full">
+                    <div className="flex flex-wrap w-full gap-4 pt-4">
+                        <div key={`loading-placeholder`} className="flex flex-col gap-2 sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                            <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
+                                        <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
+                                    </div>
+                                </div>
+                            </BlurFade>
+                            {generatingDetails}
+                        </div>
+                    </div>
+                    <hr className="w-full py-4 border-gray-300" />
+                </div>
+            </>
+        );
+    }
+
+    return null;
+};
 
 const GenerationError = (params: {
     generation: IGeneration,
