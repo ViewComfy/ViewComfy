@@ -10,7 +10,7 @@
     "lint-fix": "eslint . --fix"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.35.0",
+    "@clerk/nextjs": "6.36.5",
     "@clerk/themes": "^2.4.35",
     "@date-fns/utc": "^2.1.1",
     "@hookform/resolvers": "^5.2.2",
@@ -56,9 +56,9 @@
     "mime-types": "^3.0.1",
     "next": ">=16.0.7",
     "next-themes": "^0.4.6",
-    "react": "19.2.1",
+    "react": "19.2.3",
     "react-day-picker": "^9.13.0",
-    "react-dom": "19.2.0",
+    "react-dom": "19.2.3",
     "react-hook-form": "^7.67.0",
     "react-resizable-panels": "^3.0.6",
     "react-zoom-pan-pinch": "^3.7.0",
