@@ -9,23 +9,18 @@ import { useWorkflowData } from "@/app/providers/workflows-data-provider";
 import { IWorkflowResult } from "@/app/interfaces/workflow-history";
 
 enum InferEmitEventEnum {
-  LogMessage = "infer_log_message",
   ErrorMessage = "infer_error_message",
-  ExecutedMessage = "infer_executed_message",
-  JoinRoom = "infer_join_room",
   ResultMessage = "infer_result_message",
 }
 
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
-  currentLog: ICurrentLog | null;
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket,
   isConnected: false,
-  currentLog: null,
 });
 
 export const useSocket = () => {
@@ -33,29 +28,15 @@ export const useSocket = () => {
 };
 
 export interface IWSMessage {
-   
   data: any;
   prompt_id: string;
-}
-
-export interface ICurrentLog {
-   
-  [prompt_id: string]: any;
 }
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { getToken, isSignedIn } = useAuth();
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [currentLog, setCurrentLog] = useState<ICurrentLog | null>(null);
   const { addCompletedWorkflow } = useWorkflowData();
 
-  const updateCurrentLog = (message: IWSMessage) => {
-    const updatedLog = { ...currentLog };
-    if (message.prompt_id) {
-      updatedLog[message.prompt_id] = message.data;
-    }
-    setCurrentLog(updatedLog);
-  };
 
   useEffect(() => {
     const onConnect = () => {
@@ -67,18 +48,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const onDisconnect = (reason: string, details: any) => {
       console.log("Socket disconnected", reason, details);
       setIsConnected(false);
-      if (reason !== "io client disconnect") {
-        const msg = {
-          prompt_id: "",
-          data: `Socket disconnected: ${reason}`
-        }
-        updateCurrentLog(msg);
-      }
     };
 
-    const onLogMessage = (data: IWSMessage) => {
-      updateCurrentLog(data);
-    };
 
     const onErrorMessage = (wsMsg: IWSMessage) => {
       console.error(`error: ${JSON.stringify(wsMsg)}`);
@@ -89,14 +60,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       // updateCurrentLog(msg);
     };
 
-    const onExecuteMessage = (data: IWSMessage) => {
-      // console.log(`prompt executed: ${JSON.stringify(data)}`);
-      const msg = {
-        prompt_id: data.prompt_id,
-        data: `Prompt executed, downloading the results...`
-      }
-      updateCurrentLog(msg);
-    };
+
 
      
     const onResultMessage = async (data: {
@@ -112,11 +76,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
        
       [key: string]: any
     }) => {
-      const msg = {
-        prompt_id: data.prompt_id,
-        data: `Prompt executed, downloading the results...`
-      };
-      updateCurrentLog(msg);
       if (data) {
         const fileOutputs: S3FilesData[] = [];
         if (data.outputs) {
@@ -146,11 +105,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     socket.on('connect_error', (err) => {
       console.error('Socket connection error:', err);
-      const msg = {
-        prompt_id: "",
-        data: `Connection error: ${err.message}`
-      }
-      updateCurrentLog(msg);
       setIsConnected(false);
     });
 
@@ -158,9 +112,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Socket error:', error);
     });
 
-    socket.on(InferEmitEventEnum.LogMessage, onLogMessage);
     socket.on(InferEmitEventEnum.ErrorMessage, onErrorMessage);
-    socket.on(InferEmitEventEnum.ExecutedMessage, onExecuteMessage);
     socket.on(InferEmitEventEnum.ResultMessage, onResultMessage);
 
     socket.io.on("reconnect_attempt", async () => {
@@ -175,9 +127,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off(InferEmitEventEnum.LogMessage, onLogMessage);
       socket.off(InferEmitEventEnum.ErrorMessage, onErrorMessage);
-      socket.off(InferEmitEventEnum.ExecutedMessage, onExecuteMessage);
       socket.off(InferEmitEventEnum.ResultMessage, onResultMessage);
       socket.off('error');
       socket.io.off("reconnect_attempt");
@@ -210,7 +160,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   }, [isSignedIn, getToken, isConnected]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected, currentLog }}>
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );
