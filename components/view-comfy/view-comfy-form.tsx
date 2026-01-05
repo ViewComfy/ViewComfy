@@ -485,7 +485,7 @@ export function ViewComfyForm(args: {
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
 
-                                                                        // @ts-ignore
+                                                                        // @ts-ignore dynamic field of the form
                                                                         field.title
                                                                     }
 
@@ -915,7 +915,7 @@ function NestedInputField(args: {
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
 
-                // @ts-ignore
+                // @ts-ignore dynamic field of the form
                 nestedFieldArray.update(idx, updated);
             }
         });
@@ -942,7 +942,13 @@ function NestedInputField(args: {
                          // @ts-ignore - form dynamic proeprtie
                         name={`${formFieldName}[${nestedIndex}].inputs[${k}].value`}
                         rules={{
-                            required: !editMode && input.validations.required ? getErrorMsg(input) : false
+                            required: !editMode && input.validations.required ? getErrorMsg(input) : false,
+                            min: (!editMode && input.range?.min !== undefined)
+                                ? { value: input.range.min, message: `Value must be at least ${input.range.min}` }
+                                : undefined,
+                            max: (!editMode && input.range?.max !== undefined)
+                                ? { value: input.range.max, message: `Value must be at most ${input.range.max}` }
+                                : undefined,
                         }}
                         render={({ field }) => (
                             <InputFieldToUI key={input.id} input={input} field={field} editMode={editMode} remove={handleRemove} toggleVisibility={handleToggleVisibility} index={k} setShowEditDialog={openEditDialogWithContext} />
@@ -1474,7 +1480,7 @@ function FormTextAreaInput(args: {
                 )}
             </FormLabel>
             <FormControl>
-                <AutosizeTextarea
+                <Textarea
                     placeholder={input.placeholder}
                     className={TEXT_AREA_STYLE}
                     {...field}
@@ -1572,11 +1578,26 @@ function FormBasicInput(args: {
                 )}
             </FormLabel>
             <FormControl>
-                <Input placeholder={input.placeholder} {...field} type={parseWorkflowApiTypeToInputHtmlType(input.valueType)} />
+                <Input
+                    placeholder={input.placeholder}
+                    {...field}
+                    type={parseWorkflowApiTypeToInputHtmlType(input.valueType)}
+                    min={input.range?.min}
+                    max={input.range?.max}
+                />
             </FormControl>
             {(input.helpText !== "Helper Text") && (
                 <FormDescription className="whitespace-pre-wrap">
                     {input.helpText}
+                </FormDescription>
+            )}
+            {!editMode && (input.range?.min !== undefined || input.range?.max !== undefined) && (
+                <FormDescription className="text-xs">
+                    {[
+                        input.range?.min !== undefined && `Min: ${input.range.min}`,
+                        input.range?.max !== undefined && `Max: ${input.range.max}`,
+                        `Default: ${input.value}`,
+                    ].filter(Boolean).join(' • ')}
                 </FormDescription>
             )}
             <FormMessage />
@@ -1773,10 +1794,15 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
             <FormControl>
                 <Slider onValueChange={onSliderChange} defaultValue={[field.value]} min={input.slider?.min} max={input.slider?.max} step={input.slider?.step} />
             </FormControl>
-            {/* <FormDescription className="whitespace-pre-wrap">
-                Value: {field.value} <br />
-                Min: {input.slider?.min} Max: {input.slider?.max} Step: {input.slider?.step}
-            </FormDescription> */}
+            {!editMode && (
+                <FormDescription className="text-xs">
+                    {[
+                        input.slider?.min !== undefined && `Min: ${input.slider.min}`,
+                        input.slider?.max !== undefined && `Max: ${input.slider.max}`,
+                        `Default: ${input.value}`,
+                    ].filter(Boolean).join(' • ')}
+                </FormDescription>
+            )}
             <FormMessage />
         </FormItem>
     )
@@ -1868,6 +1894,8 @@ function EditFieldDialog(props: {
     const [sliderMin, setSliderMin] = useState<number>(0);
     const [sliderMax, setSliderMax] = useState<number>(100);
     const [sliderStep, setSliderStep] = useState<number>(1);
+    const [numberMin, setNumberMin] = useState<number | undefined>(undefined);
+    const [numberMax, setNumberMax] = useState<number | undefined>(undefined);
 
     const [defaultValue, setDefaultValue] = useState<any>("");
     const [fieldTitle, setFieldTitle] = useState<string>("");
@@ -1913,7 +1941,13 @@ function EditFieldDialog(props: {
                 setErrorMsg("");
                 break;
             case "number":
-            case "float":
+            case "float": {
+                const num = Number(current.value);
+                setDefaultValue(Number.isFinite(num) ? num : 0);
+                setNumberMin(current.range?.min);
+                setNumberMax(current.range?.max);
+                break;
+            }
             case "seed":
             case "noise_seed":
             case "rand_seed": {
@@ -2011,6 +2045,7 @@ function EditFieldDialog(props: {
         // clear conflicting configs by default
         patch.options = undefined;
         patch.slider = undefined;
+        patch.range = undefined;
 
         let localOptions: { label: string, value: string }[] | undefined = undefined;
         let localRange: { min: number, max: number } | undefined = undefined;
@@ -2054,6 +2089,15 @@ function EditFieldDialog(props: {
             }
             case "number":
             case "float": {
+                // Build range if min or max is defined
+                if (numberMin !== undefined || numberMax !== undefined) {
+                    patch.range = {
+                        ...(numberMin !== undefined && { min: numberMin }),
+                        ...(numberMax !== undefined && { max: numberMax }),
+                    };
+                } else {
+                    patch.range = undefined;
+                }
                 break;
             }
             case "seed":
@@ -2175,6 +2219,10 @@ function EditFieldDialog(props: {
 
                     (form as any).setValue(`${base}.validations`, patch.validations);
                 }
+                if (patch.range !== undefined) {
+
+                    (form as any).setValue(`${base}.range`, patch.range);
+                }
             }
         } catch (err) {
             console.error('Failed to set RHF values:', err);
@@ -2280,6 +2328,31 @@ function EditFieldDialog(props: {
                                 <div className="grid gap-1">
                                     <Label htmlFor="step">Step</Label>
                                     <Input id="step" type="number" value={sliderStep} onChange={(e) => setSliderStep(parseFloat(e.target.value))} />
+                                </div>
+                            </div>
+                        )}
+
+                        {(selectedType === "number" || selectedType === "float") && (
+                            <div className="grid gap-3">
+                                <div className="grid gap-1">
+                                    <Label htmlFor="numberMin">Min (optional)</Label>
+                                    <Input
+                                        id="numberMin"
+                                        type="number"
+                                        value={numberMin ?? ""}
+                                        onChange={(e) => setNumberMin(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+                                        placeholder="No minimum"
+                                    />
+                                </div>
+                                <div className="grid gap-1">
+                                    <Label htmlFor="numberMax">Max (optional)</Label>
+                                    <Input
+                                        id="numberMax"
+                                        type="number"
+                                        value={numberMax ?? ""}
+                                        onChange={(e) => setNumberMax(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+                                        placeholder="No maximum"
+                                    />
                                 </div>
                             </div>
                         )}
