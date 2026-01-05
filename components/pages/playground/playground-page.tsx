@@ -774,7 +774,7 @@ function OutputRenderer({
             {outputComponent && (
                 <div
                     key={output.url}
-                    className="flex items-center justify-center sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]"
+                    className="flex pt-1 w-64 h-64 items-center justify-center"
                 >
                     <BlurFade key={output.url} delay={0.25} inView className="flex items-center justify-center w-full h-full">
                         {outputComponent}
