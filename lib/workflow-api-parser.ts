@@ -18,6 +18,7 @@ export interface IInputField {
     key: string;
     options?: { label: string, value: string }[];
     slider?: { min: number, max: number, step: number };
+    range?: { min?: number, max?: number };
     tooltip?: string;
     visibility?: InputVisibility;
 }
