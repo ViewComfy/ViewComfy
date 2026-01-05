@@ -150,3 +150,7 @@ Run the closest available checks:
 ```bash
 npm run lint && npx tsc -p tsconfig.json --noEmit && npm run build
 ```
+
+## Design Philosophy
+
+This project targets designers and creatives - prioritize beautiful, tasteful UI.

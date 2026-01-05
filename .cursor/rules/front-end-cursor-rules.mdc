@@ -88,3 +88,7 @@ Follow these rules when you write code:
 
 ## Knowledge Updates
 When working with shadcn/ui, Radix UI, or component design patterns, search for the latest documentation and community best practices to ensure components follow current standards and accessibility guidelines.
+
+## Design Philosophy
+
+This project targets designers and creatives - prioritize beautiful, tasteful UI.
