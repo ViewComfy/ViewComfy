@@ -485,7 +485,7 @@ export function ViewComfyForm(args: {
                                                                 <legend className="-ml-1 px-1 text-sm font-medium">
                                                                     {
 
-                                                                        // @ts-ignore
+                                                                        // @ts-ignore dynamic field of the form
                                                                         field.title
                                                                     }
 
@@ -915,7 +915,7 @@ function NestedInputField(args: {
                 const current = nestedFieldArray.fields[idx] as IInputForm;
                 const updated = { ...current, ...patch } as unknown as IInputForm;
 
-                // @ts-ignore
+                // @ts-ignore dynamic field of the form
                 nestedFieldArray.update(idx, updated);
             }
         });
@@ -1480,7 +1480,7 @@ function FormTextAreaInput(args: {
                 )}
             </FormLabel>
             <FormControl>
-                <AutosizeTextarea
+                <Textarea
                     placeholder={input.placeholder}
                     className={TEXT_AREA_STYLE}
                     {...field}
