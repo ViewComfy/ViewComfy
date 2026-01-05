@@ -123,6 +123,20 @@ const getOutputContentType = (output: IOutput): string => {
     }
 }
 
+/**
+ * Creates a drag start handler for media outputs.
+ * Sets up the data transfer with media information for drag-and-drop.
+ */
+const createMediaDragHandler = (output: IOutput) => (e: React.DragEvent<HTMLElement>) => {
+    const mediaData = {
+        url: output.url,
+        filename: getOutputFileName(output),
+        contentType: getOutputContentType(output)
+    };
+    e.dataTransfer.setData('application/x-viewcomfy-media', JSON.stringify(mediaData));
+    e.dataTransfer.effectAllowed = 'copy';
+};
+
 function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted }: IPlaygroundPageContent) {
     const [results, setResults] = useState<IResults>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
@@ -562,6 +576,8 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                     src={output.url}
                     alt={`${output.url}`}
                     className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                    draggable="true"
+                    onDragStart={createMediaDragHandler(output)}
                 />
             </DialogTrigger>
             {showOutputFileName && parseFileName(getOutputFileName(output))}
@@ -617,14 +633,20 @@ export function VideoDialog({ output }: { output: IOutput }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <video
-                    key={output.url}
-                    className="w-full h-64 object-cover rounded-md hover:cursor-pointer"
-                    controls
+                <div
+                    draggable="true"
+                    onDragStart={createMediaDragHandler(output)}
+                    className="w-full"
                 >
-                    <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
-                    <source src={output.url} />
-                </video>
+                    <video
+                        key={output.url}
+                        className="w-full h-64 object-cover rounded-md hover:cursor-pointer"
+                        controls
+                    >
+                        <track default kind="captions" srcLang="en" src="SUBTITLE_PATH" />
+                        <source src={output.url} />
+                    </video>
+                </div>
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <video
@@ -644,7 +666,12 @@ export function AudioDialog({ output }: { output: IOutput }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <audio src={output.url} controls />
+                <div
+                    draggable="true"
+                    onDragStart={createMediaDragHandler(output)}
+                >
+                    <audio src={output.url} controls />
+                </div>
             </DialogTrigger>
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <audio src={output.url} controls />
