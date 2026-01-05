@@ -22,7 +22,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Info, Check, SquarePen, MoveUp, MoveDown, Brush, Undo2, Eye, EyeOff } from "lucide-react";
 import { Dropzone } from "@/components/ui/dropzone";
 import { ChevronsUpDown } from "lucide-react"
-import { AutosizeTextarea } from "@/components/ui/autosize-text-area"
 import {
     Collapsible,
     CollapsibleContent,
@@ -576,7 +575,7 @@ export function ViewComfyForm(args: {
                                             }) ?? [];
                                             return activeInputs.length > 0;
                                         }) && (
-                                                <AdvancedInputSection inputFieldArray={inputFieldArray} advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} handleToggleVisibilityAdvanced={handleToggleVisibilityAdvanced} handleSaveSubmit={handleSaveSubmit} />
+                                                <AdvancedInputSection advancedFieldArray={advancedFieldArray} form={form} editMode={editMode} isLoading={isLoading} setShowEditDialog={setShowEditDialogInput} handleRemoveAdvanced={handleRemoveAdvanced} handleToggleVisibilityAdvanced={handleToggleVisibilityAdvanced} handleSaveSubmit={handleSaveSubmit} />
                                             )}
                                         {editMode && (args.children)}
                                     </div>
@@ -738,7 +737,6 @@ function PreviewImagesInput({ form }: { form: UseFormReturn<IViewComfyBase> }) {
 }
 
 function AdvancedInputSection(args: {
-    inputFieldArray: UseFieldArrayReturn<any>,
     advancedFieldArray: UseFieldArrayReturn<any>,
     form: UseFormReturn<IViewComfyBase, any, IViewComfyBase>,
     editMode: boolean,
@@ -748,7 +746,7 @@ function AdvancedInputSection(args: {
     handleToggleVisibilityAdvanced: (params: { groupIndex: number, inputIndex: number }) => void,
     handleSaveSubmit: (data: IViewComfyBase) => void,
 }) {
-    const { inputFieldArray, advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced, handleToggleVisibilityAdvanced, handleSaveSubmit } = args;
+    const { advancedFieldArray, form, editMode, isLoading, setShowEditDialog, handleRemoveAdvanced, handleToggleVisibilityAdvanced, handleSaveSubmit } = args;
     const [isOpen, setIsOpen] = useState(editMode);
     return (<>
         <Collapsible
