@@ -6,7 +6,7 @@ import { TopNav } from '@/components/top-nav';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from '@/components/ui/sidebar';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
-import { SquarePlay, FileJson, SquareTerminal } from 'lucide-react';
+import { FileJson, SquarePlay, SquareTerminal } from 'lucide-react';
 import Link from 'next/link';
 import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
 import dynamic from "next/dynamic";
@@ -17,6 +17,8 @@ import { Suspense } from "react";
 const settingsService = new SettingsService();
 
 const validUrls = ["/playground", "/apps"];
+
+const showSidebar = !(settingsService.getIsRunningInViewComfy() && settingsService.getIsViewMode());
 
 export default function ClientRootLayout({ children }: { children: React.ReactNode }) {
   const [deployWindow, setDeployWindow] = useState<boolean>(false);
@@ -47,6 +49,8 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
     }
   }, [pathname, router, userManagement, appId]);
 
+
+
   const content = (
     <Suspense>
       <ImageComparisonProvider>
@@ -55,7 +59,7 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
           <SidebarProvider>
             <div className="flex flex-1 overflow-hidden">
               <AppSidebar />
-              <main className="flex-1 overflow-x-auto overflow-y-hidden ml-[var(--sidebar-width)]">
+              <main className={`flex-1 overflow-x-auto overflow-y-hidden ${showSidebar ? 'ml-[var(--sidebar-width)]' : ''}`}>
                 <PageWrapper>
                   {children}
                 </PageWrapper>
@@ -76,6 +80,9 @@ export function AppSidebar() {
   const items = [];
   const pathname = usePathname();
   const isPlaygroundRouteEnabled = settingsService.getIsRunningInViewComfy() && settingsService.getIsViewMode();
+  if (!showSidebar) {
+    return <></>
+  }
   if (settingsService.getIsRunningInViewComfy()) {
     if (settingsService.getIsViewMode()) {
       items.push({
