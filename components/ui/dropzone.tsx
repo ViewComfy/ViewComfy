@@ -3,13 +3,7 @@ import { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Interface for drag data from output media
-interface DragMediaData {
-    url: string;
-    filename: string;
-    contentType: string;
-}
+import { DRAG_MEDIA_MIME_TYPE, type DraggableMediaData } from '@/lib/drag-utils';
 
 // Define the props expected by the Dropzone component
 interface DropzoneProps {
@@ -102,10 +96,10 @@ export function Dropzone({
         setIsDragOver(false); // Reset drag over state
 
         // Check for custom ViewComfy media data first (internal drag from output)
-        const mediaDataStr = e.dataTransfer.getData('application/x-viewcomfy-media');
+        const mediaDataStr = e.dataTransfer.getData(DRAG_MEDIA_MIME_TYPE);
         if (mediaDataStr) {
             try {
-                const mediaData: DragMediaData = JSON.parse(mediaDataStr);
+                const mediaData: DraggableMediaData = JSON.parse(mediaDataStr);
                 await handleMediaUrl(mediaData);
                 return;
             } catch (err) {
@@ -121,7 +115,7 @@ export function Dropzone({
     };
 
     // Function to handle media URL drop (from output panel)
-    const handleMediaUrl = async (mediaData: DragMediaData) => {
+    const handleMediaUrl = async (mediaData: DraggableMediaData) => {
         const { url, filename, contentType } = mediaData;
 
         // Validate content type against allowed extensions
@@ -159,6 +153,7 @@ export function Dropzone({
             setError("You can only upload one file at a time");
             return;
         }
+
         const uploadedFile = files[0];
 
         if (!uploadedFile) {

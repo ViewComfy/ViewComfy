@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/collapsible"
 import BlurFade from "@/components/ui/blur-fade"
 import { cn, fromSecondsToTime } from "@/lib/utils"
+import { createMediaDragHandler } from "@/lib/drag-utils"
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { type IViewComfy, useViewComfy } from "@/app/providers/view-comfy-provider";
 import DatePickerWithRange from "./ui/date-picker-with-range"
@@ -17,7 +18,6 @@ import { DateRange } from "react-day-picker"
 import { subDays, format } from "date-fns"
 import { useWorkflowHistory } from "@/hooks/use-data"
 import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
-import { default as NextImage } from "next/image"
 import { Play } from "lucide-react"
 import { ChevronLeft } from "lucide-react"
 import { IWorkflowHistoryModel, IWorkflowHistoryFileModel } from "@/app/interfaces/workflow-history"
@@ -450,35 +450,58 @@ function BlobPreview({
                 <DialogTrigger asChild>
                     <div key={previewBlob.id + "blob-preview-trigger"}>
                         {previewBlob.contentType.startsWith("image/") && previewBlob.contentType !== "image/vnd.adobe.photoshop" && (
-                            <NextImage
+                            <img
                                 src={previewBlob.filepath}
                                 alt={"Output image"}
-                                unoptimized
                                 width={140}
                                 height={140}
                                 className="rounded-md transition-all hover:scale-105 hover:cursor-pointer"
+                                draggable="true"
+                                onDragStart={createMediaDragHandler({
+                                    url: previewBlob.filepath,
+                                    filename: previewBlob.filename,
+                                    contentType: previewBlob.contentType
+                                })}
                             />
                         )}
                         {previewBlob.contentType.startsWith("video/") && (
-                            <video
-                                key={previewBlob.id}
-                                className="object-contain rounded-md hover:cursor-pointer transition-all hover:scale-105"
-                                width={100}
-                                height={100}
+                            <div
+                                draggable="true"
+                                onDragStart={createMediaDragHandler({
+                                    url: previewBlob.filepath,
+                                    filename: previewBlob.filename,
+                                    contentType: previewBlob.contentType
+                                })}
                             >
-                                <track
-                                    default
-                                    kind="captions"
-                                    srcLang="en"
-                                    src="SUBTITLE_PATH"
-                                />
-                                <source src={previewBlob.filepath} />
-                            </video>
+                                <video
+                                    key={previewBlob.id}
+                                    className="object-contain rounded-md hover:cursor-pointer transition-all hover:scale-105"
+                                    width={100}
+                                    height={100}
+                                >
+                                    <track
+                                        default
+                                        kind="captions"
+                                        srcLang="en"
+                                        src="SUBTITLE_PATH"
+                                    />
+                                    <source src={previewBlob.filepath} />
+                                </video>
+                            </div>
                         )}
                         {previewBlob.contentType.startsWith("audio/") && (
-                            <Button variant="outline">
-                                <Play className="h-4 w-4" />
-                            </Button>
+                            <div
+                                draggable="true"
+                                onDragStart={createMediaDragHandler({
+                                    url: previewBlob.filepath,
+                                    filename: previewBlob.filename,
+                                    contentType: previewBlob.contentType
+                                })}
+                            >
+                                <Button variant="outline">
+                                    <Play className="h-4 w-4" />
+                                </Button>
+                            </div>
                         )}
                         {(previewBlob.contentType === "image/vnd.adobe.photoshop") && (
                             <Button variant="outline">
@@ -617,80 +640,4 @@ function BlobPreview({
     );
 }
 
-export function ImageDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <NextImage
-                    src={blob.filepath}
-                    alt={"Output image"}
-                    unoptimized
-                    width={100}
-                    height={100}
-                    className="rounded-md transition-all hover:scale-105 hover:cursor-pointer"
-                />
-            </DialogTrigger>
-            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
-                <div className="inline-block">
-                    <img
-                        key={blob.id}
-                        src={blob.filepath}
-                        alt={`${blob.filepath}`}
-                        className="max-h-[85vh] w-auto object-contain rounded-md"
-                    />
-                </div>
-                <DialogFooter className="bg-transparent">
-                    <Button
-                        className="w-full"
-                        onClick={() => {
-                            const link = document.createElement("a");
-                            link.href = blob.filepath;
-                            link.download = `${blob.filepath.split("/").pop()}`;
-                            link.click();
-                        }}
-                    >
-                        Download
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
 
-export function VideoDialog({ blob }: { blob: IWorkflowHistoryFileModel }) {
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <video
-                    key={blob.id}
-                    className="object-contain rounded-md hover:cursor-pointer transition-all hover:scale-105"
-                    width={100}
-                    height={100}
-                >
-                    <track
-                        default
-                        kind="captions"
-                        srcLang="en"
-                        src="SUBTITLE_PATH"
-                    />
-                    <source src={blob.filepath} />
-                </video>
-            </DialogTrigger>
-            <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-white [&>button]:border [&>button]:border-gray-300 [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
-                <video
-                    key={blob.id}
-                    className="max-h-[85vh] w-auto object-contain rounded-md"
-                    controls
-                >
-                    <track
-                        default
-                        kind="captions"
-                        srcLang="en"
-                        src="SUBTITLE_PATH"
-                    />
-                    <source src={blob.filepath} />
-                </video>
-            </DialogContent>
-        </Dialog>
-    );
-}

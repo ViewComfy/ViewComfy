@@ -23,6 +23,7 @@ import { ApiErrorHandler } from "@/lib/api-error-handler";
 import type { ResponseError } from "@/app/models/errors";
 import BlurFade from "@/components/ui/blur-fade";
 import { cn, getComfyUIRandomSeed } from "@/lib/utils";
+import { createMediaDragHandler } from "@/lib/drag-utils";
 import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
@@ -122,20 +123,6 @@ const getOutputContentType = (output: IOutput): string => {
         return output.file.type;
     }
 }
-
-/**
- * Creates a drag start handler for media outputs.
- * Sets up the data transfer with media information for drag-and-drop.
- */
-const createMediaDragHandler = (output: IOutput) => (e: React.DragEvent<HTMLElement>) => {
-    const mediaData = {
-        url: output.url,
-        filename: getOutputFileName(output),
-        contentType: getOutputContentType(output)
-    };
-    e.dataTransfer.setData('application/x-viewcomfy-media', JSON.stringify(mediaData));
-    e.dataTransfer.effectAllowed = 'copy';
-};
 
 function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted }: IPlaygroundPageContent) {
     const [results, setResults] = useState<IResults>({});
@@ -577,7 +564,11 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                     alt={`${output.url}`}
                     className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                     draggable="true"
-                    onDragStart={createMediaDragHandler(output)}
+                    onDragStart={createMediaDragHandler({
+                        url: output.url,
+                        filename: getOutputFileName(output),
+                        contentType: getOutputContentType(output)
+                    })}
                 />
             </DialogTrigger>
             {showOutputFileName && parseFileName(getOutputFileName(output))}
@@ -635,7 +626,11 @@ export function VideoDialog({ output }: { output: IOutput }) {
             <DialogTrigger asChild>
                 <div
                     draggable="true"
-                    onDragStart={createMediaDragHandler(output)}
+                    onDragStart={createMediaDragHandler({
+                        url: output.url,
+                        filename: getOutputFileName(output),
+                        contentType: getOutputContentType(output)
+                    })}
                     className="w-full"
                 >
                     <video
@@ -668,7 +663,11 @@ export function AudioDialog({ output }: { output: IOutput }) {
             <DialogTrigger asChild>
                 <div
                     draggable="true"
-                    onDragStart={createMediaDragHandler(output)}
+                    onDragStart={createMediaDragHandler({
+                        url: output.url,
+                        filename: getOutputFileName(output),
+                        contentType: getOutputContentType(output)
+                    })}
                 >
                     <audio src={output.url} controls />
                 </div>
