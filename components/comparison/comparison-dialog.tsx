@@ -65,6 +65,7 @@ export function ComparisonDialog() {
             const maxY = 0;
             return Math.min(maxY, prev + 10);
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageSize]);
     
     const handleMoveLeft = useCallback(() => {
@@ -79,6 +80,7 @@ export function ComparisonDialog() {
             const maxX = 0;
             return Math.min(maxX, prev + 10);
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageSize]);
 
 
