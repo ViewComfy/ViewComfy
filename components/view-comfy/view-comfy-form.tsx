@@ -307,7 +307,7 @@ export function ViewComfyForm(args: {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
                     <div className="flex flex-row gap-x-2 flex-1 min-h-0">
-                        <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0'>
+                        <div className='flex-col flex-1 items-start gap-4 flex mr-1 min-h-0 min-w-0'>
                             <div id="inputs-form" className="flex flex-col w-full h-full">
                                 <ScrollArea className={"flex-1 px-[5px] pr-4"}>
                                     <div className={cn("grid w-full items-start gap-4", !editMode && "pb-24")}>
@@ -448,9 +448,9 @@ export function ViewComfyForm(args: {
                                         )}
 
                                         {!editMode && (
-                                            <div id="workflow-title-description">
-                                                <h1 className="text-xl font-semibold">{form.getValues("title")}</h1>
-                                                <p className="text-md text-muted-foreground whitespace-pre-wrap">{form.getValues("description")}</p>
+                                            <div id="workflow-title-description" className="ml-1 mt-2">
+                                                {/* <h1 className="text-xl font-semibold">{form.getValues("title")}</h1> */}
+                                                <p className="text-md text-muted-foreground whitespace-pre-wrap break-all">{form.getValues("description")}</p>
                                             </div>
                                         )}
                                         <fieldset disabled={isLoading} className="grid gap-4 rounded-lg p-1">
