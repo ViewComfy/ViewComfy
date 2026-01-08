@@ -134,7 +134,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-r bg-background">
-        <TeamSwitcherWrapper />
+        {/* <TeamSwitcherWrapper /> */}
       </ SidebarFooter>
     </Sidebar>
   )
