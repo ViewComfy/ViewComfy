@@ -1645,6 +1645,9 @@ function FormSelectInput(args: { input: IInputForm, field: any, editMode?: boole
                     </SelectContent>
                 </Select>
             </FormControl>
+            <FormDescription className="text-sm text-muted-foreground">
+                {input.helpText}
+            </FormDescription>
             <FormMessage />
         </FormItem>
     )
