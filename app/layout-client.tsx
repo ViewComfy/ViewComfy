@@ -134,7 +134,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-r bg-background">
-        {/* <TeamSwitcherWrapper /> */}
       </ SidebarFooter>
     </Sidebar>
   )
@@ -158,13 +157,4 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 
   // Otherwise render the app content directly
   return children
-}
-
-function TeamSwitcherWrapper() {
-  const userManagement = settingsService.isUserManagementEnabled();
-  if (userManagement) {
-    return <TeamSwitch />
-  } else {
-    return <> </>
-  }
 }
