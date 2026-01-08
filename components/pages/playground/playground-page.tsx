@@ -44,7 +44,7 @@ import { usePostPlaygroundUser } from "@/hooks/playground/use-post-playground-us
 import { ComparisonButton } from "@/components/comparison/comparison-button";
 import { ComparisonDialog } from "@/components/comparison/comparison-dialog";
 import { SelectableImage } from "@/components/comparison/selectable-image";
-import { Header } from "@/components/header";
+
 import {
     TransformWrapper,
     TransformComponent,
@@ -375,24 +375,6 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
     return (
         <>
             <div className="flex flex-col h-full">
-                <div className="md:grid md:grid-cols-2">
-                    <div>
-                        <Header title={""} />
-                    </div>
-                    <div className="hidden pr-4 md:flex md:items-center md:justify-end gap-2">
-                        <ComparisonButton />
-                        <ComparisonDialog />
-
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setHistorySidebarOpen(value => !value)}
-                        >
-                            <History className="h-4 w-4" />
-                            History
-                        </Button>
-                    </div>
-                </div>
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                     <Drawer>
@@ -407,28 +389,42 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                         </DrawerContent>
                     </Drawer>
                 </div>
-                <main className="grid overflow-hidden flex-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="relative hidden flex-col items-start gap-8 md:flex overflow-hidden pb-12">
-                        {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
-                            <div className="px-3 w-full">
-                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
-                            </div>
-                        )}
-                        {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
+                <main className="grid overflow-hidden flex-1 gap-0 p-2 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-xl bg-muted/50 p-4 mb-12">
+                        <div className="flex flex-col w-full h-full min-h-0 bg-background rounded-xl overflow-hidden">
+                            {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
+                                <div className="px-4 pt-4 w-full">
+                                    <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
+                                </div>
+                            )}
+                            {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
+                        </div>
                     </div>
                     <div className="relative flex h-full min-h-[50vh] rounded-xl bg-muted/50 p-1 lg:col-span-2">
+                        <div className="absolute right-3 top-3 z-20 hidden md:flex items-center gap-2">
+                            <ComparisonButton />
+                            <ComparisonDialog />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setHistorySidebarOpen(value => !value)}
+                            >
+                                <History className="h-4 w-4" />
+                                History
+                            </Button>
+                        </div>
                         <ScrollArea className="relative flex h-full w-full flex-1 flex-col">
                             {(Object.keys(results).length === 0) && runningWorkflows.length === 0 && !loading && (
                                 <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
                                     <PreviewOutputsImageGallery viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} />
                                 </div>
-                                    <Badge variant="outline" className="absolute right-3 top-3">
+                                    <Badge variant="outline" className="absolute right-3 top-14">
                                         Output preview
                                     </Badge>
                                 </>
                             )}
                             {(Object.keys(results).length > 0) && (
-                                <div className="absolute right-3 top-3 flex gap-2">
+                                <div className="absolute right-3 top-14 flex gap-2">
                                     <Badge variant="outline">
                                         Output
                                     </Badge>
