@@ -6,16 +6,24 @@ import { useRunningWorkflow, useWorkflowByPromptIds } from "@/hooks/use-data";
 
 interface WorkflowDataContextType {
     runningWorkflows: IWorkflowHistoryModel[];
+    cancellingWorkflows: string[];
     workflowsCompleted: IWorkflowResult[];
     addRunningWorkflow: (w: IWorkflowHistoryModel) => void;
     addCompletedWorkflow: (w: IWorkflowResult) => void;
+    setCancellingWorkflow: (promptId: string) => void;
+    removeRunningWorkflow: (promptId: string) => void;
+    removeCancellingWorkflow: (promptId: string) => void;
 }
 
 const WorkflowDataContext = createContext<WorkflowDataContextType>({
     runningWorkflows: [],
+    cancellingWorkflows: [],
     workflowsCompleted: [],
     addRunningWorkflow: () => { },
     addCompletedWorkflow: () => { },
+    setCancellingWorkflow: () => { },
+    removeRunningWorkflow: () => { },
+    removeCancellingWorkflow: () => { },
 });
 
 export const useWorkflowData = () => {
@@ -26,6 +34,7 @@ export const WorkflowDataProvider = ({ children }: { children: React.ReactNode }
     const [promptIds, setPromptIds] = useState<string[]>([]);
     const [runningWorkflowsState, setRunningWorkflows] = useState<IWorkflowHistoryModel[]>([]);
     const [workflowsCompleted, setWorkflowsCompleted] = useState<IWorkflowResult[]>([]);
+    const [cancellingWorkflows, setCancellingWorkflowsState] = useState<string[]>([]);
     const {
         runningWorkflows
     } = useRunningWorkflow();
@@ -92,11 +101,32 @@ export const WorkflowDataProvider = ({ children }: { children: React.ReactNode }
         if (runningWorkflows.every(r => r.promptId !== w.promptId)) {
             setWorkflowsCompleted((prevState) => ([...prevState, { ...w }]));
         }
-
     }
 
+    const setCancellingWorkflow = (promptId: string) => {
+        setCancellingWorkflowsState(prev => [...prev, promptId]);
+    };
+
+    const removeCancellingWorkflow = (promptId: string) => {
+        setCancellingWorkflowsState(prev => prev.filter(id => id !== promptId));
+    };
+
+    const removeRunningWorkflow = (promptId: string) => {
+        setRunningWorkflows(prev => prev.filter(w => w.promptId !== promptId));
+        removeCancellingWorkflow(promptId);
+    };
+
     return (
-        <WorkflowDataContext.Provider value={{ runningWorkflows: runningWorkflowsState, workflowsCompleted, addRunningWorkflow, addCompletedWorkflow }}>
+        <WorkflowDataContext.Provider value={{
+            runningWorkflows: runningWorkflowsState,
+            cancellingWorkflows,
+            workflowsCompleted,
+            addRunningWorkflow,
+            addCompletedWorkflow,
+            setCancellingWorkflow,
+            removeRunningWorkflow,
+            removeCancellingWorkflow,
+        }}>
             {children}
         </WorkflowDataContext.Provider>
     );

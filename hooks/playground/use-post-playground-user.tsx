@@ -30,6 +30,30 @@ export const usePostPlaygroundUser = () => {
         }
     }, [socket, getToken, addRunningWorkflow]);
 
+    const cancelJob = useCallback(async (promptId: string) => {
+        const token = await getToken();
+
+        if (!token) {
+            throw new Error("User token is missing");
+        }
+
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/viewcomfy-app/playground/infer/cancel/${promptId}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            const responseError = await response.json();
+            throw responseError;
+        }
+
+        return await response.json();
+    }, [getToken]);
+
     useEffect(() => {
         if (runningWorkflows.length > 0 && isConnected) {
             const doSubscribe = async () => {
@@ -42,7 +66,7 @@ export const usePostPlaygroundUser = () => {
         }
     }, [runningWorkflows, isConnected, socket, getToken]);
 
-    return { doPost, loading, setLoading };
+    return { doPost, loading, setLoading, cancelJob };
 }
 
 function buildFormDataWS(data: {

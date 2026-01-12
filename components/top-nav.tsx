@@ -2,18 +2,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle";
 import { IViewComfyState, useViewComfy } from "@/app/providers/view-comfy-provider";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { useBoundStore } from "@/stores/bound-store";
 import { SettingsService } from "@/app/services/settings-service";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ITeam } from "@/app/interfaces/user";
-import { AppSwitcherDialog } from "@/components/apps/app-switcher-dialog";
-import { useViewComfyApps, useGetTeamByAppId } from "@/hooks/use-data";
-import type { IViewComfyApp } from "@/app/interfaces/viewcomfy-app";
 import { TeamSwitch } from "@/components/team-switcher";
+import dynamic from "next/dynamic";
+
+const TopNavAppSwitcher = dynamic(
+    () => import("@/components/top-nav-app-switcher"),
+    { ssr: false }
+);
 
 const settingsServer = new SettingsService();
 
@@ -49,7 +52,6 @@ const getAppDetails = (params: {
 export function TopNav() {
     const userManagementEnabled = settingsServer.isUserManagementEnabled();
     const pathname = usePathname();
-    const router = useRouter();
     const searchParams = useSearchParams();
     const appId = searchParams?.get("appId");
     const { viewComfyState } = useViewComfy();
@@ -62,19 +64,8 @@ export function TopNav() {
     const [appTitle, setAppTitle] = useState(appDetails.title);
     const [appImg, setAppImg] = useState(appDetails.img);
 
-    // App switching - fetch apps when in view mode
+    // App switching - only enabled in view mode
     const viewMode = settingsServer.getIsViewMode();
-    const { teamId: appTeamId } = useGetTeamByAppId({ appId });
-    const effectiveTeamId = currentTeam?.id ?? appTeamId;
-    const { viewComfyApps, isLoading: isLoadingApps } = useViewComfyApps({ teamId: effectiveTeamId });
-
-    // Handle app selection - updates URL without full navigation to preserve state
-    const handleSelectApp = useCallback((app: IViewComfyApp) => {
-        router.push(`/playground?appId=${app.appId}`, { scroll: false });
-    }, [router]);
-
-    // Determine if app switcher should be shown
-    const showAppSwitcher = viewMode && appId && viewComfyApps && viewComfyApps.length > 1;
 
     useEffect(() => {
 
@@ -90,7 +81,6 @@ export function TopNav() {
 
     return (
         <nav className="flex items-center justify-between px-4 py-2 bg-background border-b gap-2">
-            {/* LEFT: Logo + Title */}
             {!false ? (<div className="flex items-center">
                 <ViewComfyIconButton appTitle={appTitle} appImg={appImg} />
                 <span className="ml-2 text-lg font-semibold">{appTitle}</span>
@@ -101,20 +91,12 @@ export function TopNav() {
                 </div>
             )}
 
-            {/* CENTER: App Switcher (only when app is selected and multiple apps exist) */}
-            {showAppSwitcher && (
-                <div className="flex-1 flex justify-center">
-                    <AppSwitcherDialog
-                        apps={viewComfyApps}
-                        currentAppId={appId}
-                        isLoading={isLoadingApps}
-                        onSelectApp={handleSelectApp}
-                    />
-                </div>
+            {/* CENTER: App Switcher (only when user management is enabled and ClerkProvider is present) */}
+            {userManagementEnabled ? (
+                <TopNavAppSwitcher appId={appId} viewMode={viewMode} />
+            ) : (
+                <div className="flex-1" />
             )}
-
-            {/* Spacer when no app switcher (to maintain layout) */}
-            {!showAppSwitcher && <div className="flex-1" />}
 
 
             <div className="flex items-center gap-2">

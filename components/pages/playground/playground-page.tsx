@@ -35,6 +35,18 @@ import {
     DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from "sonner"
 import { IUsePostPlayground } from "@/hooks/playground/interfaces";
 import { HistorySidebar } from "@/components/history-sidebar";
 import { Textarea } from "@/components/ui/textarea";
@@ -89,15 +101,15 @@ const UserContentWrapper = dynamic(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaygroundWithAuth({ userId }: { userId: string | null }) {
-    const { setLoading, ...params } = usePostPlaygroundUser();
-    const { runningWorkflows, workflowsCompleted } = useWorkflowData();
+    const { setLoading, cancelJob, ...params } = usePostPlaygroundUser();
+    const { runningWorkflows, workflowsCompleted, cancellingWorkflows, setCancellingWorkflow, removeRunningWorkflow, removeCancellingWorkflow } = useWorkflowData();
 
-    return <PlaygroundPageContent {...{ ...params, runningWorkflows, setLoading, workflowsCompleted }} />;
+    return <PlaygroundPageContent {...{ ...params, runningWorkflows, setLoading, workflowsCompleted, cancellingWorkflows, setCancellingWorkflow, removeRunningWorkflow, removeCancellingWorkflow, cancelJob }} />;
 }
 
 function PlaygroundWithoutAuth() {
     const params = usePostPlayground();
-    return <PlaygroundPageContent {...{ ...params, runningWorkflows: [], workflowsCompleted: [] }} />;
+    return <PlaygroundPageContent {...{ ...params, runningWorkflows: [], workflowsCompleted: [], cancellingWorkflows: [], setCancellingWorkflow: () => {}, removeRunningWorkflow: () => {}, removeCancellingWorkflow: () => {}, cancelJob: undefined }} />;
 }
 
 interface IPlaygroundPageContent {
@@ -106,6 +118,11 @@ interface IPlaygroundPageContent {
     setLoading: (loading: boolean) => void;
     runningWorkflows: IWorkflowHistoryModel[];
     workflowsCompleted: IWorkflowResult[];
+    cancellingWorkflows: string[];
+    setCancellingWorkflow: (promptId: string) => void;
+    removeRunningWorkflow: (promptId: string) => void;
+    removeCancellingWorkflow: (promptId: string) => void;
+    cancelJob?: (promptId: string) => Promise<unknown>;
 }
 
 const getOutputFileName = (output: { file: File | S3FilesData, url: string }): string => {
@@ -124,7 +141,7 @@ const getOutputContentType = (output: IOutput): string => {
     }
 }
 
-function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted }: IPlaygroundPageContent) {
+function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, workflowsCompleted, cancellingWorkflows, setCancellingWorkflow, removeRunningWorkflow, removeCancellingWorkflow, cancelJob }: IPlaygroundPageContent) {
     const [results, setResults] = useState<IResults>({});
     const { viewComfyState, viewComfyStateDispatcher } = useViewComfy();
     const viewMode = process.env.NEXT_PUBLIC_VIEW_MODE === "true";
@@ -170,6 +187,23 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             await requestPermission();
         }
     }, [permission, requestPermission, isNotificationAvailable]);
+
+    const handleCancelWorkflow = useCallback(async (promptId: string) => {
+        if (!cancelJob) {
+            return;
+        }
+        setCancellingWorkflow(promptId);
+        try {
+            await cancelJob(promptId);
+            removeRunningWorkflow(promptId);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            removeCancellingWorkflow(promptId);
+            toast.error("Failed to cancel generation", {
+                description: "Please try again or wait for the generation to complete."
+            });
+        }
+    }, [cancelJob, setCancellingWorkflow, removeRunningWorkflow, removeCancellingWorkflow]);
 
     useEffect(() => {
 
@@ -432,7 +466,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                             )}
                             <div className="flex-1 h-full p-4 flex overflow-y-auto">
                                 <div className="flex flex-col w-full h-full">
-                                    <Generating loading={loading} runningWorkflows={runningWorkflows} />
+                                    <Generating loading={loading} runningWorkflows={runningWorkflows} cancellingWorkflows={cancellingWorkflows} onCancelWorkflow={handleCancelWorkflow} />
                                     {Object.entries(results).map(([promptId, generation], index, array) => (
                                         <div className="flex flex-col gap-4 w-full h-full" key={promptId}>
                                             <div className="flex flex-wrap w-full h-full gap-4 pt-4" key={promptId}>
@@ -853,9 +887,11 @@ const IndeterminateLoadingBarStyles = () => {
 
 const Generating = (props: {
     runningWorkflows: IWorkflowHistoryModel[],
+    cancellingWorkflows: string[],
     loading: boolean,
+    onCancelWorkflow: (promptId: string) => void,
 }) => {
-    const { runningWorkflows, loading } = props;
+    const { runningWorkflows, cancellingWorkflows, loading, onCancelWorkflow } = props;
 
     const generatingDetails = (
         <div className="flex flex-col gap-2">
@@ -867,24 +903,68 @@ const Generating = (props: {
         return (
             <>
                 <IndeterminateLoadingBarStyles />
-                {runningWorkflows.map((w) => (
-                    <div key={w.promptId} className="flex flex-col gap-4 w-full">
-                        <div className="flex flex-wrap w-full gap-4 pt-4">
-                            <div key={`loading-placeholder`} className="flex flex-col gap-2 sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
-                                <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
-                                    <div className="w-full h-64 rounded-md bg-muted animate-pulse flex items-center justify-center">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-muted-foreground/20 animate-pulse"></div>
-                                            <span className="text-sm text-muted-foreground animate-pulse">Generating...</span>
-                                        </div>
-                                    </div>
-                                </BlurFade>
-                                {generatingDetails}
+                {runningWorkflows.map((w) => {
+                    const isCancelling = cancellingWorkflows.includes(w.promptId);
+                    
+                    return (
+                        <div key={w.promptId} className="flex flex-col gap-4 w-full">
+                            <div className="flex flex-wrap w-full gap-4 pt-4">
+                                <div key={`loading-placeholder-${w.promptId}`} className="flex flex-col gap-2 sm:w-[calc(50%-2rem)] lg:w-[calc(33.333%-2rem)]">
+                                    <AlertDialog>
+                                        <BlurFade delay={0.25} inView className="flex items-center justify-center w-full h-full">
+                                            <AlertDialogTrigger asChild disabled={isCancelling}>
+                                                <button 
+                                                    type="button"
+                                                    disabled={isCancelling}
+                                                    className={cn(
+                                                        "w-full h-64 rounded-md flex items-center justify-center transition-all",
+                                                        isCancelling 
+                                                            ? "bg-muted/50" 
+                                                            : "bg-muted animate-pulse cursor-pointer hover:ring-2 hover:ring-primary/50"
+                                                    )}
+                                                >
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <div className={cn(
+                                                            "w-8 h-8 rounded-full",
+                                                            isCancelling 
+                                                                ? "bg-muted-foreground/10" 
+                                                                : "bg-muted-foreground/20 animate-pulse"
+                                                        )}></div>
+                                                        <span className={cn(
+                                                            "text-sm text-muted-foreground",
+                                                            !isCancelling && "animate-pulse"
+                                                        )}>
+                                                            {isCancelling ? "Cancelling..." : "Generating..."}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            </AlertDialogTrigger>
+                                        </BlurFade>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Cancel generation?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to cancel this generation? This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Continue generating</AlertDialogCancel>
+                                                <AlertDialogAction 
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                    onClick={() => onCancelWorkflow(w.promptId)}
+                                                >
+                                                    Cancel generation
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                    {generatingDetails}
+                                </div>
                             </div>
+                            <hr className="w-full py-4 border-gray-300" />
                         </div>
-                        <hr className="w-full py-4 border-gray-300" />
-                    </div>
-                ))}
+                    );
+                })}
             </>
         );
     }

@@ -10,7 +10,6 @@ import { FileJson, SquarePlay, SquareTerminal } from 'lucide-react';
 import Link from 'next/link';
 import { ImageComparisonProvider } from "@/components/comparison/image-comparison-provider";
 import dynamic from "next/dynamic";
-import { TeamSwitch } from "@/components/team-switcher";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
