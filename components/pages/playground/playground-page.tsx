@@ -424,7 +424,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     </Drawer>
                 </div>
                 <main className="grid overflow-hidden flex-1 gap-0 p-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-xl bg-muted/50 p-4 mb-12">
+                    <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-l-xl bg-muted/50 p-4 mb-12">
                         <div className="flex flex-col w-full h-full min-h-0 bg-background rounded-xl overflow-hidden">
                             {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                                 <div className="px-4 pt-4 w-full">
@@ -434,7 +434,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                             {viewComfyState.currentViewComfy && <PlaygroundForm viewComfyJSON={viewComfyState.currentViewComfy?.viewComfyJSON} onSubmit={onSubmit} loading={loading} />}
                         </div>
                     </div>
-                    <div className="relative flex h-full min-h-[50vh] rounded-xl bg-muted/50 p-1 lg:col-span-2">
+                    <div className="relative flex h-full min-h-[50vh] rounded-r-xl bg-muted/50 p-1 lg:col-span-2">
                         <div className="absolute right-3 top-3 z-20 hidden md:flex items-center gap-2">
                             <ComparisonButton />
                             <ComparisonDialog />
