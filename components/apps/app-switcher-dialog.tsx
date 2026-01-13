@@ -43,26 +43,18 @@ export function AppSwitcherDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <div className="flex items-center gap-2 cursor-pointer">
-                    {/* "Current App:" label - hidden on mobile */}
-                    <span className="hidden sm:inline text-sm font-medium text-foreground/70">
-                        Current App:
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    aria-label="Switch app"
+                >
+                    <AppWindow className="h-4 w-4" />
+                    <span className="truncate max-w-[150px]">
+                        {currentApp?.name || "Select App"}
                     </span>
-
-                    {/* Clickable button with app icon, name, and chevron */}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        aria-label="Switch app"
-                    >
-                        <AppWindow className="h-4 w-4" />
-                        <span className="truncate max-w-[150px]">
-                            {currentApp?.name || "Select App"}
-                        </span>
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                    </Button>
-                </div>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
             </DialogTrigger>
             <DialogContent className="max-w-5xl max-h-[85vh]">
                 <DialogHeader>

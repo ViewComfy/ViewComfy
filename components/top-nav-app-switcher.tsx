@@ -27,17 +27,15 @@ export default function TopNavAppSwitcher({ appId, viewMode }: TopNavAppSwitcher
     const showAppSwitcher = viewMode && appId && viewComfyApps && viewComfyApps.length > 1;
 
     if (!showAppSwitcher) {
-        return <div className="flex-1" />;
+        return null;
     }
 
     return (
-        <div className="flex-1 flex justify-center">
-            <AppSwitcherDialog
-                apps={viewComfyApps}
-                currentAppId={appId}
-                isLoading={isLoadingApps}
-                onSelectApp={handleSelectApp}
-            />
-        </div>
+        <AppSwitcherDialog
+            apps={viewComfyApps}
+            currentAppId={appId}
+            isLoading={isLoadingApps}
+            onSelectApp={handleSelectApp}
+        />
     );
 }

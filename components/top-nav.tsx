@@ -84,6 +84,13 @@ export function TopNav() {
             {!false ? (<div className="flex items-center">
                 <ViewComfyIconButton appTitle={appTitle} appImg={appImg} />
                 <span className="ml-2 text-lg font-semibold">{appTitle}</span>
+                {/* App Switcher with divider */}
+                {userManagementEnabled && (
+                    <>
+                        <div className="mx-3 h-6 w-px bg-border" />
+                        <TopNavAppSwitcher appId={appId} viewMode={viewMode} />
+                    </>
+                )}
             </div>) : (
                 <div className="flex items-center gap-2">
                     <Skeleton className="w-[34px] h-[34px]" />
@@ -91,12 +98,8 @@ export function TopNav() {
                 </div>
             )}
 
-            {/* CENTER: App Switcher (only when user management is enabled and ClerkProvider is present) */}
-            {userManagementEnabled ? (
-                <TopNavAppSwitcher appId={appId} viewMode={viewMode} />
-            ) : (
-                <div className="flex-1" />
-            )}
+            {/* Spacer */}
+            <div className="flex-1" />
 
 
             <div className="flex items-center gap-2">
