@@ -3,12 +3,23 @@ import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/components/ui/dropzone';
 import ViewComfyFormEditor from '@/components/pages/view-comfy/view-comfy-form-editor';
 import { workflowAPItoViewComfy } from '@/lib/workflow-api-parser';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ActionType, type IViewComfy, type IViewComfyBase, type IViewComfyJSON, useViewComfy } from '@/app/providers/view-comfy-provider';
 import { Label } from '@/components/ui/label';
 import { ErrorAlertDialog } from '@/components/ui/error-alert-dialog';
 import WorkflowSwitcher from '@/components/workflow-switchter';
 import { Input } from '@/components/ui/input';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { saveWorkflowsToLocalStorage, loadWorkflowsFromLocalStorage, clearWorkflowsFromLocalStorage } from '@/lib/utils';
 
 class WorkflowJSONError extends Error {
     constructor() {
@@ -26,10 +37,13 @@ export default function ViewComfyPage() {
     const [appTitle, setAppTitle] = useState<string>(viewComfyState.appTitle || "");
     const [appImg, setAppImg] = useState<string>(viewComfyState.appImg || "");
     const [appImgError, setAppImgError] = useState<string | undefined>(undefined);
+    const [clearCacheDialogOpen, setClearCacheDialogOpen] = useState(false);
+    const hasLoadedFromStorage = useRef(false);
 
     const handleOnBlur = (inputBlur: "appTitle" | "appImg") => {
         if (inputBlur === "appTitle") {
             viewComfyStateDispatcher({ type: ActionType.SET_APP_TITLE, payload: appTitle });
+            // Save is handled by the useEffect watching viewComfyState
         } else if (inputBlur === "appImg") {
             setAppImgError(undefined);
             if (!appImg) {
@@ -43,6 +57,7 @@ export default function ViewComfyPage() {
                     setAppImgError("Invalid image URL");
                 }
             }
+            // Save is handled by the useEffect watching viewComfyState
         }
     }
 
@@ -54,6 +69,38 @@ export default function ViewComfyPage() {
         setAppImg(viewComfyState.appImg || "");
     }, [viewComfyState.appImg]);
 
+    // Load workflows from localStorage on component mount
+    useEffect(() => {
+        if (hasLoadedFromStorage.current) {
+            return;
+        }
+
+        // Only load if there are no workflows currently loaded
+        if (viewComfyState.viewComfys.length === 0 && !viewComfyState.viewComfyDraft) {
+            const savedWorkflows = loadWorkflowsFromLocalStorage();
+            if (savedWorkflows) {
+                try {
+                    viewComfyStateDispatcher({
+                        type: ActionType.INIT_VIEW_COMFY,
+                        payload: savedWorkflows
+                    });
+                } catch (error) {
+                    console.error('Error loading workflows from localStorage:', error);
+                }
+            }
+        }
+        // Mark as loaded after initial check, allowing future saves
+        hasLoadedFromStorage.current = true;
+    }, [viewComfyState.viewComfys.length, viewComfyState.viewComfyDraft, viewComfyStateDispatcher]);
+
+    // Save workflows to localStorage whenever state changes
+    useEffect(() => {
+        // Skip saving on initial load to avoid overwriting with empty state
+        if (!hasLoadedFromStorage.current) {
+            return;
+        }
+        saveWorkflowsToLocalStorage(viewComfyState);
+    }, [viewComfyState]);
 
     useEffect(() => {
         if (file) {
@@ -113,6 +160,7 @@ export default function ViewComfyPage() {
                 type: ActionType.REMOVE_VIEW_COMFY,
                 payload: viewComfyState.currentViewComfy,
             });
+            // Save is handled by the useEffect watching viewComfyState
         }
     }
 
@@ -140,6 +188,7 @@ export default function ViewComfyPage() {
                     },
                 },
             });
+            // Save is handled by the useEffect watching viewComfyState
         } else {
             if (data.title === "") {
                 data.title = `My Awesome Workflow ${viewComfyState.viewComfys.length + 1}`;
@@ -149,6 +198,7 @@ export default function ViewComfyPage() {
                 type: ActionType.ADD_VIEW_COMFY,
                 payload: { viewComfyJSON: { ...data, id: Math.random().toString(16).slice(2) }, file: viewComfyState.viewComfyDraft?.file, workflowApiJSON: viewComfyState.viewComfyDraft?.workflowApiJSON }
             });
+            // Save is handled by the useEffect watching viewComfyState
         }
     }
 
@@ -164,6 +214,28 @@ export default function ViewComfyPage() {
             type: ActionType.RESET_CURRENT_AND_DRAFT_VIEW_COMFY,
             payload: undefined
         });
+    }
+
+    const handleClearCache = () => {
+        clearWorkflowsFromLocalStorage();
+        // Create a copy of workflows array to avoid mutation during iteration
+        const workflowsToRemove = [...viewComfyState.viewComfys];
+        // Remove all workflows from state
+        workflowsToRemove.forEach((workflow) => {
+            viewComfyStateDispatcher({
+                type: ActionType.REMOVE_VIEW_COMFY,
+                payload: workflow,
+            });
+        });
+        // Reset current and draft workflows
+        viewComfyStateDispatcher({
+            type: ActionType.RESET_CURRENT_AND_DRAFT_VIEW_COMFY,
+            payload: undefined
+        });
+        // Reset app title and image
+        viewComfyStateDispatcher({ type: ActionType.SET_APP_TITLE, payload: "" });
+        viewComfyStateDispatcher({ type: ActionType.SET_APP_IMG, payload: "" });
+        setClearCacheDialogOpen(false);
     }
 
     return (
@@ -227,6 +299,12 @@ export default function ViewComfyPage() {
                                             <Button onClick={addWorkflowOnClick}>
                                                 Add Workflow
                                             </Button>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setClearCacheDialogOpen(true)}
+                                            >
+                                                Clear Cache
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
@@ -242,6 +320,22 @@ export default function ViewComfyPage() {
                 open={errorDialog.open}
                 errorDescription={getErrorText(errorDialog.error)}
                 onClose={() => setErrorDialog({ open: false, error: undefined })} />
+            <AlertDialog open={clearCacheDialogOpen} onOpenChange={setClearCacheDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Clear Cache</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to clear all cached workflows? This will remove all saved workflows from localStorage and reset the editor. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleClearCache} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Clear Cache
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
