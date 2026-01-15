@@ -581,7 +581,7 @@ export function ViewComfyForm(args: {
                                     </div>
                                 </ScrollArea>
                                 {!editMode && (
-                                    <div className="sticky bottom-0 mt-auto p-4 bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t z-10">
+                                    <div className="sticky bottom-1 mt-auto p-3 ml-1 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t z-10">
                                         {args.children}
                                     </div>
                                 )}
