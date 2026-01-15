@@ -425,7 +425,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                 </div>
                 <main className="grid overflow-hidden flex-1 gap-0 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-l-xl bg-muted/50 p-4 mb-12">
-                        <div className="flex flex-col w-full h-full min-h-0 bg-background rounded-xl overflow-hidden">
+                        <div className="flex flex-col w-full h-full min-h-0 bg-background rounded-xl overflow-hidden border shadow-md">
                             {viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                                 <div className="px-4 pt-4 w-full">
                                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
