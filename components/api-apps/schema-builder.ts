@@ -47,7 +47,9 @@ function buildFieldSchema(field: AppInputFieldOutputDTO): z.ZodTypeAny {
   // Base schema based on dataType
   switch (dataType) {
     case "string":
-      schema = z.string();
+      schema = field.required
+        ? z.string().min(3, "This field is required")
+        : z.string();
       break;
     case "integer":
       schema = z.coerce.number().int();
@@ -74,8 +76,8 @@ function buildFieldSchema(field: AppInputFieldOutputDTO): z.ZodTypeAny {
       schema = z.any();
   }
 
-  // Handle required/optional
-  if (!field.required) {
+  // Handle required/optional (string already handled above)
+  if (!field.required && dataType !== "string") {
     schema = schema.optional();
   }
 

@@ -9,7 +9,7 @@ import type {
   AppInputDataTypeEnum,
 } from "@/src/generated";
 import { AppsService } from "@/src/generated";
-import { Trash2, Loader2, X } from "lucide-react";
+import { Trash2, Loader2, X, Info } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,11 +19,15 @@ import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
 import {
   FormControl,
-  FormDescription,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -44,6 +48,54 @@ interface AppFormFieldProps {
   inputDef: AppInputFieldOutputDTO;
   appId: number;
   className?: string;
+}
+
+/**
+ * Builds tooltip text from description and field constraints (min, max, default).
+ */
+function buildTooltipText(inputDef: AppInputFieldOutputDTO): string | null {
+  if (!inputDef.description) return null;
+
+  const parts: string[] = [inputDef.description];
+  const constraints: string[] = [];
+
+  if (inputDef.minValue !== null && inputDef.minValue !== undefined) {
+    constraints.push(`Min: ${inputDef.minValue}`);
+  }
+  if (inputDef.maxValue !== null && inputDef.maxValue !== undefined) {
+    constraints.push(`Max: ${inputDef.maxValue}`);
+  }
+  if (inputDef.default !== null && inputDef.default !== undefined) {
+    constraints.push(`Default: ${inputDef.default}`);
+  }
+
+  if (constraints.length > 0) {
+    parts.push(constraints.join(" | "));
+  }
+
+  return parts.join("\n");
+}
+
+/**
+ * Help tooltip icon that displays field description and constraints.
+ */
+function HelpTooltip({ text }: { text: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info
+          className="h-4 w-4 text-muted-foreground ml-1 inline cursor-help"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
+      </TooltipTrigger>
+      <TooltipContent className="text-center whitespace-pre-wrap max-w-[300px]">
+        <p>{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 /**
@@ -591,7 +643,8 @@ function FieldControl({
 }
 
 /**
- * Full form field component including label, control, description, and error message.
+ * Full form field component including label, control, and error message.
+ * Description is shown as a help tooltip next to the label.
  */
 export function AppFormField({
   field,
@@ -601,10 +654,8 @@ export function AppFormField({
 }: AppFormFieldProps) {
   const isCheckbox = inputDef.inputType === "checkbox";
   const dataType = inputDef.dataType as AppInputDataTypeEnum;
-  const isFile =
-    inputDef.inputType === "file" ||
-    isMediaDataType(dataType) ||
-    isMediaArrayDataType(dataType);
+  const isFileArray = isMediaArrayDataType(dataType);
+  const tooltipText = buildTooltipText(inputDef);
 
   if (isCheckbox) {
     // Checkbox has a different layout - label to the right
@@ -624,32 +675,24 @@ export function AppFormField({
             {inputDef.required && (
               <span className="text-destructive ml-1">*</span>
             )}
+            {tooltipText && <HelpTooltip text={tooltipText} />}
           </FormLabel>
-          {inputDef.description && (
-            <FormDescription>{inputDef.description}</FormDescription>
-          )}
         </div>
         <FormMessage />
       </FormItem>
     );
   }
 
-  // File fields don't show description under control (it's in the dropzone)
-  const showDescription = inputDef.description && !isFile;
-  const isFileArray = isMediaArrayDataType(dataType);
-
   return (
     <FormItem className={cn(isFileArray && "min-w-0 overflow-hidden", className)}>
       <FormLabel>
         {inputDef.label}
         {inputDef.required && <span className="text-destructive ml-1">*</span>}
+        {tooltipText && <HelpTooltip text={tooltipText} />}
       </FormLabel>
       <FormControl>
         <FieldControl field={field} inputDef={inputDef} appId={appId} />
       </FormControl>
-      {showDescription && (
-        <FormDescription>{inputDef.description}</FormDescription>
-      )}
       <FormMessage />
     </FormItem>
   );

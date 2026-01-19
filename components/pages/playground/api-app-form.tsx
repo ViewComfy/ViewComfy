@@ -56,27 +56,30 @@ export function ApiAppPlaygroundForm({
 
     const effectiveLoading = loading || isSubmitting;
 
+    const headerContent = (
+        <div className="mb-4">
+            <h2 className="text-lg font-semibold">{app.name}</h2>
+            {app.description && (
+                <p className="text-sm text-muted-foreground mt-1">
+                    {app.description}
+                </p>
+            )}
+        </div>
+    );
+
     return (
         <div className="flex flex-col h-full">
             <ScrollArea className="flex-1">
-                <div className="p-4 min-w-0">
-                    <div className="mb-4">
-                        <h2 className="text-lg font-semibold">{app.name}</h2>
-                        {app.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                                {app.description}
-                            </p>
-                        )}
-                    </div>
-
+                <div className="p-4 min-w-0 pb-24">
                     <AppForm
                         app={app}
                         onSubmit={handleSubmit}
+                        header={headerContent}
                     />
                 </div>
             </ScrollArea>
 
-            <div className="p-4 border-t bg-background">
+            <div className="sticky bottom-0 p-4 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t">
                 <Button
                     type="submit"
                     form="app-form"

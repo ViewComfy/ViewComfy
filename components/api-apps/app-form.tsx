@@ -23,6 +23,10 @@ interface AppFormProps {
   onSubmit: (data: AppFormValues) => void | Promise<void>;
   /** Additional class names for the form container */
   className?: string;
+  /** Optional header content to render before fields */
+  header?: React.ReactNode;
+  /** Optional children to render inside the form after fields (e.g., submit button) */
+  children?: React.ReactNode;
 }
 
 interface AppFormSkeletonProps {
@@ -70,6 +74,8 @@ export function AppForm({
   app,
   onSubmit,
   className,
+  header,
+  children,
 }: AppFormProps) {
   const inputs = app.inputs;
 
@@ -98,17 +104,20 @@ export function AppForm({
   return (
     <Form {...form}>
       <form id="app-form" onSubmit={handleSubmit} className={cn("space-y-6 min-w-0", className)}>
-        {inputs.map((inputDef: AppInputFieldOutputDTO) => (
-          <FormField
-            key={inputDef.name}
-            control={form.control}
-            name={inputDef.name}
-            render={({ field }) => (
-              <AppFormField field={field} inputDef={inputDef} appId={app.id} />
-            )}
-          />
-        ))}
-
+        {header}
+        <div className="space-y-6">
+          {inputs.map((inputDef: AppInputFieldOutputDTO) => (
+            <FormField
+              key={inputDef.name}
+              control={form.control}
+              name={inputDef.name}
+              render={({ field }) => (
+                <AppFormField field={field} inputDef={inputDef} appId={app.id} />
+              )}
+            />
+          ))}
+        </div>
+        {children}
       </form>
     </Form>
   );
