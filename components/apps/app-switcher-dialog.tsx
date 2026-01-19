@@ -13,16 +13,16 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { IViewComfyApp } from "@/app/interfaces/viewcomfy-app"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AppCardBase } from "@/components/apps/app-card-base"
+import { type UnifiedApp, getAppDisplayInfo } from "@/app/interfaces/unified-app"
 
 interface AppSwitcherDialogProps {
-    apps: IViewComfyApp[] | null
+    apps: UnifiedApp[] | null
     currentAppId: string | null
     isLoading: boolean
-    onSelectApp: (app: IViewComfyApp) => void
+    onSelectApp: (app: UnifiedApp) => void
 }
 
 export function AppSwitcherDialog({
@@ -33,12 +33,13 @@ export function AppSwitcherDialog({
 }: AppSwitcherDialogProps) {
     const [open, setOpen] = React.useState(false)
 
-    const handleSelectApp = (app: IViewComfyApp) => {
+    const handleSelectApp = (app: UnifiedApp) => {
         onSelectApp(app)
         setOpen(false)
     }
 
-    const currentApp = apps?.find(app => app.appId === currentAppId)
+    const currentApp = apps?.find(app => getAppDisplayInfo(app).id === currentAppId)
+    const currentAppName = currentApp ? getAppDisplayInfo(currentApp).name : null
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -51,7 +52,7 @@ export function AppSwitcherDialog({
                 >
                     <AppWindow className="h-4 w-4" />
                     <span className="truncate max-w-[150px]">
-                        {currentApp?.name || "Select App"}
+                        {currentAppName || "Select App"}
                     </span>
                     <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
@@ -80,17 +81,22 @@ export function AppSwitcherDialog({
                         </div>
                     ) : apps && apps.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {apps.map((app) => (
-                                <AppCardBase
-                                    key={app.appId}
-                                    app={app}
-                                    isSelected={app.appId === currentAppId}
-                                    showSelectedIndicator={true}
-                                    buttonText={app.appId === currentAppId ? "Selected" : "Select App"}
-                                    onButtonClick={() => handleSelectApp(app)}
-                                    onCardClick={() => handleSelectApp(app)}
-                                />
-                            ))}
+                            {apps.map((app) => {
+                                const displayInfo = getAppDisplayInfo(app)
+                                const isSelected = displayInfo.id === currentAppId
+
+                                return (
+                                    <AppCardBase
+                                        key={displayInfo.id}
+                                        app={app}
+                                        isSelected={isSelected}
+                                        showSelectedIndicator={true}
+                                        buttonText={isSelected ? "Selected" : "Select App"}
+                                        onButtonClick={() => handleSelectApp(app)}
+                                        onCardClick={() => handleSelectApp(app)}
+                                    />
+                                )
+                            })}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-[200px] text-muted-foreground">

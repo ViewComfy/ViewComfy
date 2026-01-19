@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint-fix": "eslint . --fix"
+    "lint-fix": "eslint . --fix",
+    "generate-api": "openapi --input http://localhost:8000/openapi.json --output src/generated --client fetch"
   },
   "dependencies": {
     "@clerk/nextjs": "6.36.5",
@@ -89,7 +90,8 @@
     "eslint-config-next": "16.0.2",
     "postcss": "^8",
     "tailwindcss": "^4.1.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "openapi-typescript-codegen": "^0.29.0"
   },
   "overrides": {
     "@types/react": "19.2.4",

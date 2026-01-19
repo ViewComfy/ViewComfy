@@ -1,17 +1,17 @@
 "use client"
 
-import { IViewComfyApp } from "@/app/interfaces/viewcomfy-app"
 import { useRouter } from "next/navigation"
 import { AppCardBase } from "@/components/apps/app-card-base"
+import { type UnifiedApp, getAppPlaygroundUrl } from "@/app/interfaces/unified-app"
 
 export function AppCard({
     className,
     app
-}: { app: IViewComfyApp, className?: string }) {
+}: { app: UnifiedApp; className?: string }) {
     const router = useRouter()
 
     const onAppButtonClick = () => {
-        router.push(`/playground?appId=${app.appId}`)
+        router.push(getAppPlaygroundUrl(app))
     }
 
     return (

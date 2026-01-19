@@ -10,6 +10,7 @@ import { useBoundStore } from "@/stores/bound-store";
 import { SettingsService } from "@/app/services/settings-service";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ITeam } from "@/app/interfaces/user";
+import { parseAppIdParam } from "@/app/interfaces/unified-app";
 import { TeamSwitch } from "@/components/team-switcher";
 import dynamic from "next/dynamic";
 
@@ -53,7 +54,8 @@ export function TopNav() {
     const userManagementEnabled = settingsServer.isUserManagementEnabled();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const appId = searchParams?.get("appId");
+    const appIdParam = searchParams?.get("appId");
+    const app = appIdParam ? parseAppIdParam(appIdParam) : undefined;
     const { viewComfyState } = useViewComfy();
     const { currentTeam } = useBoundStore();
     const appDetails = getAppDetails({
@@ -88,7 +90,7 @@ export function TopNav() {
                 {userManagementEnabled && (
                     <>
                         <div className="mx-3 h-6 w-px bg-border" />
-                        <TopNavAppSwitcher appId={appId} viewMode={viewMode} />
+                        <TopNavAppSwitcher app={app} viewMode={viewMode} />
                     </>
                 )}
             </div>) : (
