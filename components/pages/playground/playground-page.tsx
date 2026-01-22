@@ -490,7 +490,10 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             for (const exec of completedExecutions) {
                 const promptId = getApiAppPromptId(exec.executionId);
 
-                if (exec.status === "completed" && exec.results) {
+                // Check for failure by result field OR status field
+                const isFailure = exec.result === "failure" || exec.status === "failed";
+
+                if (!isFailure && exec.status === "completed" && exec.results) {
                     const outputs = convertApiAppResults(exec.results);
                     await onSetResults({
                         promptId,
@@ -498,7 +501,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                         status: "completed",
                     });
                     await sendNotification();
-                } else if (exec.status === "failed") {
+                } else if (isFailure) {
                     await onSetResults({
                         promptId,
                         outputs: [],
@@ -581,7 +584,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                 </div>
                 <main className="grid overflow-hidden flex-1 gap-0 p-2 md:grid-cols-2 lg:grid-cols-3">
                     <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-l-xl bg-muted/50 p-4 mb-12">
-                        <div className="flex flex-col w-full h-full min-h-0 bg-background rounded-xl overflow-hidden">
+                        <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden">
                             {hasViewComfyApp && viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                                 <div className="px-4 pt-4 w-full">
                                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
@@ -591,18 +594,20 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                         </div>
                     </div>
                     <div className="relative flex h-full min-h-[50vh] rounded-r-xl bg-muted/50 p-1 lg:col-span-2">
-                        <div className="absolute right-3 top-3 z-20 hidden md:flex items-center gap-2">
-                            <ComparisonButton />
-                            <ComparisonDialog />
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setHistorySidebarOpen(value => !value)}
-                            >
-                                <History className="h-4 w-4" />
-                                History
-                            </Button>
-                        </div>
+                        {!historySidebarOpen && (
+                            <div className="absolute right-3 top-3 z-20 hidden md:flex items-center gap-2">
+                                <ComparisonButton />
+                                <ComparisonDialog />
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setHistorySidebarOpen(value => !value)}
+                                >
+                                    <History className="h-4 w-4" />
+                                    History
+                                </Button>
+                            </div>
+                        )}
                         <ScrollArea className="relative flex h-full w-full flex-1 flex-col">
                             {(Object.keys(results).length === 0) && runningWorkflows.length === 0 && !loading && hasViewComfyApp && viewComfyState.currentViewComfy && (
                                 <>  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">

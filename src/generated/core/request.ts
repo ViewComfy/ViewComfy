@@ -1,6 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
+/* eslint-disable */
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
@@ -40,9 +41,8 @@ export const isFormData = (value: any): value is FormData => {
 export const base64 = (str: string): string => {
     try {
         return btoa(str);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-        // @ts-ignore base64 handling
+        // @ts-ignore
         return Buffer.from(str).toString('base64');
     }
 };
@@ -113,7 +113,6 @@ export const getFormData = (options: ApiRequestOptions): FormData | undefined =>
         };
 
         Object.entries(options.formData)
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             .filter(([_, value]) => isDefined(value))
             .forEach(([key, value]) => {
                 if (Array.isArray(value)) {
@@ -150,7 +149,6 @@ export const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptio
         ...additionalHeaders,
         ...options.headers,
     })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([_, value]) => isDefined(value))
         .reduce((headers, [key, value]) => ({
             ...headers,
@@ -274,7 +272,6 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
         const errorBody = (() => {
             try {
                 return JSON.stringify(result.body, null, 2);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
                 return undefined;
             }

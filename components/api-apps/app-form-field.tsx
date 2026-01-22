@@ -431,9 +431,16 @@ function FileArrayFieldControl({
 
       {/* Carousel */}
       {files.length > 0 && (
-        <div className="max-w-full overflow-x-auto rounded-md border">
-          <div className="flex gap-3 p-3">
-          {files.map((file) => (
+        <div
+          className="rounded-md border"
+          style={{
+            contain: 'inline-size',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+          }}
+        >
+          <div className="flex gap-3 p-3 w-max">
+            {files.map((file) => (
             <div
               key={file.id}
               className="relative shrink-0 w-32 h-32 rounded-md border overflow-hidden group"
@@ -487,7 +494,7 @@ function FileArrayFieldControl({
                 <X className="h-3 w-3" />
               </button>
             </div>
-          ))}
+            ))}
           </div>
         </div>
       )}

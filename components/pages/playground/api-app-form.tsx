@@ -69,8 +69,8 @@ export function ApiAppPlaygroundForm({
 
     return (
         <div className="flex flex-col h-full">
-            <ScrollArea className="flex-1">
-                <div className="p-4 min-w-0 pb-24">
+            <ScrollArea className="flex-1 w-full">
+                <div className="p-4 min-w-0 pb-24 overflow-hidden">
                     <AppForm
                         app={app}
                         onSubmit={handleSubmit}

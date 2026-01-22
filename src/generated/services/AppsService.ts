@@ -132,23 +132,25 @@ export class AppsService {
         });
     }
     /**
-     * Get Execution
+     * Get Executions
      * Get an execution by its public execution_id, including results.
-     * @param executionId
      * @param appId
+     * @param executionIds
      * @returns AppExecutionOutputDTO Successful Response
      * @throws ApiError
      */
-    public static getExecutionApiAppsAppIdHistoryExecutionIdGet(
-        executionId: number,
+    public static getExecutionsApiAppsAppIdHistoryRunningGet(
         appId: number,
-    ): CancelablePromise<AppExecutionOutputDTO> {
+        executionIds: Array<number>,
+    ): CancelablePromise<Array<AppExecutionOutputDTO>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/apps/{app_id}/history/{execution_id}',
+            url: '/api/apps/{app_id}/history/running',
             path: {
-                'execution_id': executionId,
                 'app_id': appId,
+            },
+            query: {
+                'execution_ids': executionIds,
             },
             errors: {
                 422: `Validation Error`,

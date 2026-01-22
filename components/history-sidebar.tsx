@@ -1,6 +1,6 @@
 "use client"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { History, Filter, ChevronRight, Copy, FileType, File } from "lucide-react"
+import { History, Filter, ChevronRight, Copy, FileType, File, CircleX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +25,7 @@ import { IWorkflowHistoryModel, IWorkflowHistoryFileModel } from "@/app/interfac
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "./ui/skeleton"
+import { ErrorAlertDialog } from "./ui/error-alert-dialog"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import {
     Select,
@@ -68,6 +69,9 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
     );
     const [successWorkflows, setSuccessWorkflows] = useState<IWorkflowHistoryModel[]>([]);
     const [successApiExecutions, setSuccessApiExecutions] = useState<AppExecutionOutputDTO[]>([]);
+    const [failedApiExecutions, setFailedApiExecutions] = useState<AppExecutionOutputDTO[]>([]);
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+    const [currentErrorMessage, setCurrentErrorMessage] = useState<string>("");
     const today = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
         from: subDays(today, 1),
@@ -148,15 +152,26 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
     // Process API App history
     useEffect(() => {
         if (!apiAppExecutions || !isApiMode) {
-            if (!isApiMode) setSuccessApiExecutions([]);
+            if (!isApiMode) {
+                setSuccessApiExecutions([]);
+                setFailedApiExecutions([]);
+            }
             return;
         }
-        setSuccessApiExecutions(apiAppExecutions.filter(e => e.status === "completed"))
+        setSuccessApiExecutions(apiAppExecutions.filter(e => e.status === "completed"));
+        setFailedApiExecutions(apiAppExecutions.filter(e => e.status === "failed"));
     }, [apiAppExecutions, isApiMode])
+
+    const handleShowError = (errorMessage: string | null | undefined) => {
+        setCurrentErrorMessage(errorMessage || "An unknown error occurred");
+        setErrorDialogOpen(true);
+    };
 
     // Determine which items to display
     const historyItems = isViewComfyMode ? successWorkflows : successApiExecutions;
-    const hasItems = historyItems && historyItems.length > 0;
+    const hasItems = isViewComfyMode
+        ? (historyItems && historyItems.length > 0)
+        : (successApiExecutions.length > 0 || failedApiExecutions.length > 0);
 
     if (!open) {
         return null;
@@ -442,6 +457,39 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                                     </div>
                                 ))}
 
+                            {/* Render Failed API App executions */}
+                            {isApiMode && failedApiExecutions?.map(
+                                (execution: AppExecutionOutputDTO) => (
+                                    <div key={execution.id}>
+                                        <div className="flex flex-col items-center justify-center">
+                                            <BlurFade key={execution.id + "blur-fade"} delay={0.23} inView>
+                                                <div className="relative inline-block">
+                                                    <div className="w-32 h-32 rounded-md bg-muted flex items-center justify-center border">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <CircleX className="h-8 w-8 text-destructive" />
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleShowError(execution.errorMessage)}
+                                                            >
+                                                                Show Error
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </BlurFade>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-2 text-center">
+                                            <span className="text-sm text-muted-foreground">
+                                                {format(
+                                                    new Date(execution.createdAt),
+                                                    "dd/M/yyyy HH:mm:ss",
+                                                )}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+
                             {/* Pagination Controls */}
                             <div className="flex items-center justify-center gap-4 pt-4 pb-2 w-full">
                                 <Button
@@ -472,6 +520,12 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                     )}
                 </ScrollArea>
             </div>
+            <ErrorAlertDialog
+                open={errorDialogOpen}
+                errorTitle="Execution Failed"
+                errorDescription={currentErrorMessage}
+                onClose={() => setErrorDialogOpen(false)}
+            />
         </div>
     )
 }

@@ -14,7 +14,26 @@ export interface ApiAppExecutionRef {
 }
 
 /**
- * Fetches multiple API app executions concurrently.
+ * Groups executions by appId for batch queries.
+ */
+function groupExecutionsByAppId(
+  executions: ApiAppExecutionRef[]
+): Map<number, number[]> {
+  const grouped = new Map<number, number[]>();
+  for (const { appId, executionId } of executions) {
+    const existing = grouped.get(appId);
+    if (existing) {
+      existing.push(executionId);
+    } else {
+      grouped.set(appId, [executionId]);
+    }
+  }
+  return grouped;
+}
+
+/**
+ * Fetches multiple API app executions using batch queries.
+ * Groups executions by appId and makes one request per unique app.
  */
 async function fetchExecutions(
   executions: ApiAppExecutionRef[]
@@ -23,13 +42,20 @@ async function fetchExecutions(
     return [];
   }
 
-  const results = await Promise.all(
-    executions.map(({ executionId, appId }) =>
-      AppsService.getExecutionApiAppsAppIdHistoryExecutionIdGet(executionId, appId)
-    )
+  // Group executions by appId
+  const groupedByApp = groupExecutionsByAppId(executions);
+
+  // Make one batch request per unique appId
+  const batchPromises = Array.from(groupedByApp.entries()).map(
+    ([appId, executionIds]) =>
+      AppsService.getExecutionsApiAppsAppIdHistoryRunningGet(appId, executionIds)
   );
 
-  return results;
+  // Execute all batch requests in parallel
+  const batchResults = await Promise.all(batchPromises);
+
+  // Flatten all results into a single array
+  return batchResults.flat();
 }
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import type { AppExecutionResultOutputDTO } from "@/src/generated";
+import type { AppExecutionResultOutputDTO, AppExecutionResultEnum } from "@/src/generated";
 import {
   useApiAppExecutions,
   isExecutionComplete,
@@ -24,6 +24,7 @@ export interface CompletedApiAppExecution {
   executionId: number;
   appId: number;
   status: "completed" | "failed";
+  result?: AppExecutionResultEnum | null;
   results?: AppExecutionResultOutputDTO[];
   errorMessage?: string;
   completedAt: string;
@@ -100,6 +101,7 @@ export function ApiAppExecutionProvider({
           executionId: execData.id,
           appId: execData.appId,
           status: execData.status as "completed" | "failed",
+          result: execData.result,
           results: execData.results,
           errorMessage: execData.errorMessage ?? undefined,
           completedAt: execData.completedAt ?? new Date().toISOString(),
