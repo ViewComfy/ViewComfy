@@ -276,6 +276,9 @@ function FileArrayFieldControl({
 }) {
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Track whether we've initialized from field.value to prevent re-initialization
+  // when user removes all files
+  const hasInitializedRef = React.useRef(false);
 
   const dataType = inputDef.dataType as AppInputDataTypeEnum;
   const baseMediaType = getBaseMediaType(dataType) || "image";
@@ -284,9 +287,12 @@ function FileArrayFieldControl({
   const maxFiles = inputDef.maxValue ?? Infinity;
 
   // Sync files state with field value on mount (for existing values)
+  // Only run once on mount to prevent re-initialization when user removes files
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+
     const currentUrls = Array.isArray(field.value) ? field.value : [];
-    if (currentUrls.length > 0 && files.length === 0) {
+    if (currentUrls.length > 0) {
       const existingFiles: UploadingFile[] = currentUrls.map((url, index) => ({
         id: `existing-${index}-${Date.now()}`,
         localPreview: url,
@@ -296,7 +302,8 @@ function FileArrayFieldControl({
       }));
       setFiles(existingFiles);
     }
-  }, [field.value, files.length]);
+    hasInitializedRef.current = true;
+  }, [field.value]);
 
   // Sync form field value when files change
   useEffect(() => {
@@ -322,7 +329,7 @@ function FileArrayFieldControl({
         return;
       }
 
-      const fileId = `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const fileId = `file-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
       const objectUrl = URL.createObjectURL(file);
 
       // Add file to list with uploading state

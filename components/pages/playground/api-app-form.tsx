@@ -72,6 +72,7 @@ export function ApiAppPlaygroundForm({
             <ScrollArea className="flex-1 w-full">
                 <div className="p-4 min-w-0 pb-24 overflow-hidden">
                     <AppForm
+                        key={app.id}
                         app={app}
                         onSubmit={handleSubmit}
                         header={headerContent}
