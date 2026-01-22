@@ -9,7 +9,7 @@ import type {
   AppInputDataTypeEnum,
 } from "@/src/generated";
 import { AppsService } from "@/src/generated";
-import { Trash2, Loader2, X, Info } from "lucide-react";
+import { Trash2, Loader2, X, Info, Dices } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, getComfyUIRandomSeed } from "@/lib/utils";
 import {
   getFileExtensions,
   isMediaDataType,
@@ -596,21 +596,40 @@ function FieldControl({
         />
       );
 
-    case "number":
+    case "number": {
+      const isSeedField = inputDef.label?.toLowerCase().includes("seed");
       return (
-        <Input
-          {...field}
-          type="number"
-          min={inputDef.minValue ?? undefined}
-          max={inputDef.maxValue ?? undefined}
-          step={inputDef.step ?? 1}
-          value={field.value ?? ""}
-          onChange={(e) => {
-            const value = e.target.valueAsNumber;
-            field.onChange(Number.isNaN(value) ? undefined : value);
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            {...field}
+            type="number"
+            min={inputDef.minValue ?? undefined}
+            max={inputDef.maxValue ?? undefined}
+            step={inputDef.step ?? 1}
+            value={field.value ?? ""}
+            onChange={(e) => {
+              const value = e.target.valueAsNumber;
+              field.onChange(Number.isNaN(value) ? undefined : value);
+            }}
+            className="flex-1"
+          />
+          {isSeedField && (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const newSeed = getComfyUIRandomSeed();
+                field.onChange(newSeed);
+              }}
+              className="shrink-0"
+            >
+              <Dices className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       );
+    }
 
     case "range":
       return (
