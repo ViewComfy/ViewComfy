@@ -583,7 +583,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     </Drawer>
                 </div>
                 <main className="flex overflow-hidden flex-1 gap-0">
-                    <div className="relative hidden flex-col max-w-[450px] items-start md:flex overflow-hidden rounded-l-xl bg-muted/50 p-4">
+                    <div className="relative hidden flex-col w-full max-w-[450px] items-start md:flex flex-shrink-0 overflow-hidden rounded-l-xl bg-muted/50 p-4">
                         <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden border shadow-md">
                             {hasViewComfyApp && viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                                 <div className="px-4 pt-4 w-full">
