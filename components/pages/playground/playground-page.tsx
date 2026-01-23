@@ -763,6 +763,9 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
     useEffect(() => {
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
+        image.onerror = () => {
+            console.error('Failed to load image:', output.url);
+        };
         image.src = output.url;
     }, [output]);
 

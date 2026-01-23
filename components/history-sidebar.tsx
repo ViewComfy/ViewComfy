@@ -607,6 +607,9 @@ function BlobPreview({
 
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
+        image.onerror = () => {
+            console.error('Failed to load image:', outputs[blobIndex].filepath);
+        };
         image.src = outputs[blobIndex].filepath;
     }, [blobIndex, outputs]);
 
