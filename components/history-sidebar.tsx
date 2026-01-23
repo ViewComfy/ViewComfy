@@ -206,7 +206,7 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
     };
 
     return (
-        <div className={cn("h-full w-[340px] sm:w-[340px] bg-background border-l flex flex-col", className)}>
+        <div className={cn("h-full w-[340px] sm:w-[340px] bg-background border flex flex-col rounded-xl shadow-md", className)}>
             <div className="border-b">
                 <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-2">
@@ -350,10 +350,10 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            Total size: {getTotalSize(workflowHistory.outputs)} MB
-                                            -
-                                            Prompt: <Button
-                                                variant="outline"
+                                            {/* Total size: {getTotalSize(workflowHistory.outputs)} MB
+                                            - */}
+                                            Copy prompt <Button
+                                                variant="ghost"
                                                 size="icon"
                                                 className="h-4 w-4"
                                                 onClick={() =>
@@ -412,10 +412,10 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            Total size: {getTotalSize(execution.results)} MB
-                                            -
-                                            Input: <Button
-                                                variant="outline"
+                                            {/* Total size: {getTotalSize(execution.results)} MB
+                                            - */}
+                                            Copy input data <Button
+                                                variant="ghost"
                                                 size="icon"
                                                 className="h-4 w-4"
                                                 onClick={() =>

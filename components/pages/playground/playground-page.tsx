@@ -581,7 +581,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
 
     return (
         <>
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-[calc(100vh-var(--top-nav-height))]">
                 <div className="md:hidden w-full flex pl-4 gap-x-2">
                     {hasViewComfyApp && viewComfyState.currentViewComfy && (
                         <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
@@ -598,9 +598,9 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                         </DrawerContent>
                     </Drawer>
                 </div>
-                <main className="grid overflow-hidden flex-1 gap-0 p-2 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="relative hidden flex-col items-start md:flex overflow-hidden rounded-l-xl bg-muted/50 p-4 mb-12">
-                        <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden">
+                <main className="flex overflow-hidden flex-1 gap-0">
+                    <div className="relative hidden flex-col w-full max-w-[450px] items-start md:flex flex-shrink-0 overflow-hidden rounded-l-xl bg-muted/50 p-4">
+                        <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden border shadow-md">
                             {hasViewComfyApp && viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
                                 <div className="px-4 pt-4 w-full">
                                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
@@ -609,7 +609,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                             {renderForm()}
                         </div>
                     </div>
-                    <div className="relative flex h-full min-h-[50vh] rounded-r-xl bg-muted/50 p-1 lg:col-span-2">
+                    <div className="relative flex h-full min-h-[50vh] w-full rounded-r-xl bg-muted/50 lg:col-span-2">
                         {!historySidebarOpen && (
                             <div className="absolute right-3 top-3 z-20 hidden md:flex items-center gap-2">
                                 <ComparisonButton />
@@ -676,7 +676,9 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                                 </div>
                             </div>
                         </ScrollArea>
-                        <HistorySidebar open={historySidebarOpen} setOpen={setHistorySidebarOpen} appType={appType} apiApp={apiApp} />
+                        <div className="py-4 pr-1 h-full">
+                            <HistorySidebar open={historySidebarOpen} setOpen={setHistorySidebarOpen} appType={appType} apiApp={apiApp} />
+                        </div>
                     </div>
                 </main>
                 <ErrorAlertDialog open={errorAlertDialog.open} errorTitle={errorAlertDialog.errorTitle} errorDescription={errorAlertDialog.errorDescription} onClose={errorAlertDialog.onClose} />
