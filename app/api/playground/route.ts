@@ -12,6 +12,27 @@ const errorResponseFactory = new ErrorResponseFactory();
 const settingsService = new SettingsService();
 const viewComfyService = new ViewComfyService();
 
+async function getTokenWithRetry(
+    getToken: (options?: { template?: string }) => Promise<string | null>,
+    maxRetries = 3,
+    baseDelayMs = 200
+): Promise<string | null> {
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            return await getToken({ template: "long_token" });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            if (attempt < maxRetries - 1) {
+                const delay = baseDelayMs * Math.pow(2, attempt);
+                await new Promise(resolve => setTimeout(resolve, delay / 2));
+            }
+        }
+    }
+
+    return null;
+}
+
 export async function GET(request: NextRequest) {
 
     if (settingsService.isUserManagementEnabled()) {
@@ -21,7 +42,8 @@ export async function GET(request: NextRequest) {
             return new Response('Unauthorized', { status: 401 })
         }
 
-        const token = await getToken({ template: "long_token" });
+        const token = await getTokenWithRetry(getToken);
+
         if (!token) {
             return new Response('Unauthorized: Token is missing', { status: 401 })
         }
