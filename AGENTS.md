@@ -9,6 +9,7 @@ local code conventions/rules to follow.
 - UI is largely shadcn/ui + Radix primitives (`components/ui/`).
 - Shared helpers live in `lib/`, app-specific logic in `app/`.
 - Path alias: import from `@/*` maps to repo root (see `tsconfig.json`).
+- OpenAPI-generated client in `src/generated/` with Clerk authentication (see below).
 
 ## Quick commands
 
@@ -144,6 +145,56 @@ Prefer existing patterns instead of inventing new ones:
 - Be careful with environment variables:
   - `NEXT_PUBLIC_*` is safe for client bundles.
   - Non-`NEXT_PUBLIC_*` should stay server-side.
+
+## OpenAPI Client & Authentication
+
+The project uses an OpenAPI-generated TypeScript client in `src/generated/`.
+
+### How Authentication Works
+Authentication is configured **at runtime** (not in generated files) so it survives regeneration:
+
+1. **`src/generated/auth-config.ts`** (NOT generated, manually maintained)
+   - Contains `initializeOpenAPIAuth()` function
+   - Sets up Clerk JWT authentication for all API calls
+
+2. **Integration in `components/auth/authenticated-wrapper.tsx`**
+   - Calls `useInitializeOpenAPIAuth()` hook on mount
+   - Automatically injects Bearer tokens into all OpenAPI service calls
+
+3. **Usage** - Simply use the generated services:
+   ```typescript
+   import { AppsService } from '@/src/generated';
+   
+   // Automatically authenticated via OpenAPI.TOKEN resolver
+   const data = await AppsService.listAppsApiAppsGet(projectId);
+   ```
+
+4. **With SWR** - Use directly in hooks:
+   ```typescript
+   const { data, error, isLoading } = useSWR(
+       projectId ? ["api-apps", projectId] : null,
+       () => AppsService.listAppsApiAppsGet(projectId!),
+   );
+   ```
+
+### Regenerating OpenAPI Client
+
+When regenerating (e.g., `npx openapi-typescript-codegen ...`):
+
+**✅ Keep these files (not regenerated):**
+- `src/generated/auth-config.ts`
+- `src/generated/README.md`
+
+**✅ Safe to regenerate:**
+- `src/generated/core/`
+- `src/generated/models/`
+- `src/generated/services/`
+- `src/generated/index.ts`
+
+**After regeneration:**
+- Authentication continues to work automatically ✅
+- No manual changes needed in generated files ✅
+- See `src/generated/README.md` for details
 
 ## Before you open a PR
 Run the closest available checks:

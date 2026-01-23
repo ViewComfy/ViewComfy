@@ -2,29 +2,34 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useBoundStore } from "@/stores/bound-store";
-import { useViewComfyApps, useGetTeamByAppId } from "@/hooks/use-data";
+import { useAllApps, useGetTeamByAppId } from "@/hooks/use-data";
 import { AppSwitcherDialog } from "@/components/apps/app-switcher-dialog";
-import type { IViewComfyApp } from "@/app/interfaces/viewcomfy-app";
+import { ParsedAppId, type UnifiedApp, getAppPlaygroundUrl } from "@/app/interfaces/unified-app";
 
 interface TopNavAppSwitcherProps {
-    appId: string | null | undefined;
+    app: ParsedAppId | undefined;
     viewMode: boolean;
 }
 
-export default function TopNavAppSwitcher({ appId, viewMode }: TopNavAppSwitcherProps) {
+export default function TopNavAppSwitcher({ app, viewMode }: TopNavAppSwitcherProps) {
     const router = useRouter();
     const { currentTeam } = useBoundStore();
 
     // These hooks use useAuth() internally - only safe inside ClerkProvider
-    const { teamId: appTeamId } = useGetTeamByAppId({ appId });
+    const viewComfyAppId = app?.type === "viewcomfy" ? app.id : undefined;
+    const { teamId: appTeamId } = useGetTeamByAppId({ appId: viewComfyAppId });
     const effectiveTeamId = currentTeam?.id ?? appTeamId;
-    const { viewComfyApps, isLoading: isLoadingApps } = useViewComfyApps({ teamId: effectiveTeamId });
+    const { apps, isLoading: isLoadingApps } = useAllApps({ teamId: effectiveTeamId });
 
-    const handleSelectApp = useCallback((app: IViewComfyApp) => {
-        router.push(`/playground?appId=${app.appId}`, { scroll: false });
+    const handleSelectApp = useCallback((app: UnifiedApp) => {
+        router.push(getAppPlaygroundUrl(app), { scroll: false });
     }, [router]);
 
-    const showAppSwitcher = viewMode && appId && viewComfyApps && viewComfyApps.length > 1;
+    if (!app || !app.id) {
+        return null;
+    }
+
+    const showAppSwitcher = viewMode && app.id && apps && apps.length > 1;
 
     if (!showAppSwitcher) {
         return null;
@@ -32,8 +37,8 @@ export default function TopNavAppSwitcher({ appId, viewMode }: TopNavAppSwitcher
 
     return (
         <AppSwitcherDialog
-            apps={viewComfyApps}
-            currentAppId={appId}
+            apps={apps}
+            currentAppId={app.id}
             isLoading={isLoadingApps}
             onSelectApp={handleSelectApp}
         />

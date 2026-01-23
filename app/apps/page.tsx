@@ -2,15 +2,16 @@
 import { AppCard } from "@/components/apps/apps-card"
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useViewComfyApps } from "@/hooks/use-data";
+import { useAllApps } from "@/hooks/use-data";
 import { useBoundStore } from "@/stores/bound-store";
 import { Suspense } from 'react'
+import { getAppDisplayInfo } from "@/app/interfaces/unified-app";
 
 export default function AppsPage() {
     const { currentTeam } = useBoundStore();
-    const { viewComfyApps, isLoading } = useViewComfyApps({ teamId: currentTeam?.id });
+    const { apps, isLoading } = useAllApps({ teamId: currentTeam?.id });
 
-    if (isLoading || !viewComfyApps) {
+    if (isLoading || !apps) {
         return <Skeleton />
     }
 
@@ -19,8 +20,8 @@ export default function AppsPage() {
             <ScrollArea className="h-full">
                 <div className="container mx-auto p-6 pb-20">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                        {viewComfyApps.map((app, index) => (
-                            <AppCard key={index} app={app} />
+                        {apps.map((app) => (
+                            <AppCard key={getAppDisplayInfo(app).id} app={app} />
                         ))}
                     </div>
                 </div>
@@ -28,4 +29,3 @@ export default function AppsPage() {
         </Suspense>
     )
 }
-

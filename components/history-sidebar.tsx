@@ -1,6 +1,6 @@
 "use client"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { History, Filter, ChevronRight, Copy, FileType, File } from "lucide-react"
+import { History, Filter, ChevronRight, Copy, FileType, File, CircleX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,7 @@ import DatePickerWithRange from "./ui/date-picker-with-range"
 import { DateRange } from "react-day-picker"
 import { subDays, format } from "date-fns"
 import { useWorkflowHistory } from "@/hooks/use-data"
+import { useApiAppHistory } from "@/hooks/use-api-app-history"
 import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import { Play } from "lucide-react"
 import { ChevronLeft } from "lucide-react"
@@ -24,6 +25,7 @@ import { IWorkflowHistoryModel, IWorkflowHistoryFileModel } from "@/app/interfac
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Skeleton } from "./ui/skeleton"
+import { ErrorAlertDialog } from "./ui/error-alert-dialog"
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch"
 import {
     Select,
@@ -32,16 +34,23 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import type { AppType } from "@/app/interfaces/unified-app"
+import type { AppOutputDTO, AppExecutionOutputDTO, AppExecutionResultOutputDTO } from "@/src/generated"
 
 type PageSize = 5 | 10 | 20;
+
+// Unified file type that works for both ViewComfy and API App outputs
+type UnifiedHistoryFile = IWorkflowHistoryFileModel | AppExecutionResultOutputDTO;
 
 interface HistorySidebarProps {
     open: boolean
     setOpen: (open: boolean) => void
     className?: string
+    appType?: AppType | null
+    apiApp?: AppOutputDTO | null
 }
 
-export function HistorySidebar({ open, setOpen, className }: HistorySidebarProps) {
+export function HistorySidebar({ open, setOpen, className, appType, apiApp }: HistorySidebarProps) {
     const userManagement = process.env.NEXT_PUBLIC_USER_MANAGEMENT === "true";
 
     // If user management is disabled, don't render the history sidebar
@@ -49,14 +58,20 @@ export function HistorySidebar({ open, setOpen, className }: HistorySidebarProps
         return null;
     }
 
-    return <HistorySidebarContent open={open} setOpen={setOpen} className={className} />;
+    return <HistorySidebarContent open={open} setOpen={setOpen} className={className} appType={appType} apiApp={apiApp} />;
 }
 
-export function HistorySidebarContent({ open, setOpen, className }: HistorySidebarProps) {
+export function HistorySidebarContent({ open, setOpen, className, appType, apiApp }: HistorySidebarProps) {
     const [showFilters, setShowFilters] = useState(true);
     const { viewComfyState } = useViewComfy();
-    const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy>(viewComfyState.viewComfys[0]);
+    const [currentViewComfySwitcher, setCurrentViewComfySwitcher] = useState<IViewComfy | null>(
+        viewComfyState.viewComfys[0] ?? null
+    );
     const [successWorkflows, setSuccessWorkflows] = useState<IWorkflowHistoryModel[]>([]);
+    const [successApiExecutions, setSuccessApiExecutions] = useState<AppExecutionOutputDTO[]>([]);
+    const [failedApiExecutions, setFailedApiExecutions] = useState<AppExecutionOutputDTO[]>([]);
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+    const [currentErrorMessage, setCurrentErrorMessage] = useState<string>("");
     const today = new Date();
     const [date, setDate] = useState<DateRange | undefined>({
         from: subDays(today, 1),
@@ -65,22 +80,44 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState<PageSize>(5);
 
+    const isViewComfyMode = appType === "viewcomfy" || !appType;
+    const isApiMode = appType === "api";
+
+    // ViewComfy history hook - only fetch when in ViewComfy mode
     const {
         workflowHistory,
         isLoading: isLoadingWorkflowHistory,
-        isError,
+        isError: isErrorWorkflowHistory,
     } = useWorkflowHistory({
-        apiEndpoint: currentViewComfySwitcher.viewComfyJSON.viewcomfyEndpoint || "",
+        apiEndpoint: isViewComfyMode && currentViewComfySwitcher
+            ? (currentViewComfySwitcher.viewComfyJSON.viewcomfyEndpoint || "")
+            : "",
         startDate: date?.from,
         endDate: date?.to,
         page,
         pageSize,
     });
 
+    // API App history hook - only fetch when in API mode
+    const {
+        executions: apiAppExecutions,
+        total: apiAppTotal,
+        isLoading: isLoadingApiHistory,
+        isError: isErrorApiHistory,
+    } = useApiAppHistory({
+        appId: isApiMode && apiApp ? apiApp.id : null,
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+    });
+
+    // Determine loading/error states based on mode
+    const isLoading = isViewComfyMode ? isLoadingWorkflowHistory : isLoadingApiHistory;
+    const isError = isViewComfyMode ? isErrorWorkflowHistory : isErrorApiHistory;
+
     // Reset page when filters change
     useEffect(() => {
         setPage(1);
-    }, [currentViewComfySwitcher, date, pageSize]);
+    }, [currentViewComfySwitcher, date, pageSize, appType, apiApp]);
 
     const handlePreviousPage = () => {
         setPage((prev) => Math.max(1, prev - 1));
@@ -94,31 +131,67 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
         setPageSize(Number(value) as PageSize);
     };
 
-    // Determine if we can navigate to next page (if we got a full page of results)
-    const hasNextPage = successWorkflows.length === pageSize;
+    // Determine pagination for ViewComfy mode
+    const hasNextPageViewComfy = successWorkflows.length === pageSize;
+
+    // Determine pagination for API mode (using total count)
+    const hasNextPageApi = isApiMode && apiAppTotal > page * pageSize;
+
+    const hasNextPage = isViewComfyMode ? hasNextPageViewComfy : hasNextPageApi;
     const hasPreviousPage = page > 1;
 
+    // Process ViewComfy history
     useEffect(() => {
-        if (!workflowHistory) {
+        if (!workflowHistory || !isViewComfyMode) {
+            if (!isViewComfyMode) setSuccessWorkflows([]);
             return;
         }
         setSuccessWorkflows(workflowHistory.filter(w => w.status === "success"))
-    }, [workflowHistory])
+    }, [workflowHistory, isViewComfyMode])
+
+    // Process API App history
+    useEffect(() => {
+        if (!apiAppExecutions || !isApiMode) {
+            if (!isApiMode) {
+                setSuccessApiExecutions([]);
+                setFailedApiExecutions([]);
+            }
+            return;
+        }
+        setSuccessApiExecutions(apiAppExecutions.filter(e => e.status === "completed"));
+        setFailedApiExecutions(apiAppExecutions.filter(e => e.status === "failed"));
+    }, [apiAppExecutions, isApiMode])
+
+    const handleShowError = (errorMessage: string | null | undefined) => {
+        setCurrentErrorMessage(errorMessage || "An unknown error occurred");
+        setErrorDialogOpen(true);
+    };
+
+    // Determine which items to display
+    const historyItems = isViewComfyMode ? successWorkflows : successApiExecutions;
+    const hasItems = isViewComfyMode
+        ? (historyItems && historyItems.length > 0)
+        : (successApiExecutions.length > 0 || failedApiExecutions.length > 0);
 
     if (!open) {
         return null;
     }
 
-    if (!viewComfyState.currentViewComfy) {
+    // For ViewComfy mode, we need a current view comfy
+    if (isViewComfyMode && !viewComfyState.currentViewComfy) {
         return null;
     }
 
+    // For API mode, we need an apiApp
+    if (isApiMode && !apiApp) {
+        return null;
+    }
 
-    const getTotalSize = (workflowHistory: IWorkflowHistoryModel) => {
-        if (!workflowHistory.outputs) {
+    const getTotalSize = (outputs: UnifiedHistoryFile[] | undefined | null) => {
+        if (!outputs) {
             return 0;
         }
-        const sizeInBytes = workflowHistory.outputs.reduce((acc, blob) => acc + blob.size, 0);
+        const sizeInBytes = outputs.reduce((acc, blob) => acc + (blob.size ?? 0), 0);
         const sizeInMB = sizeInBytes / (1024 * 1024);
         return sizeInMB.toFixed(2);
     }
@@ -166,14 +239,26 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                 <Collapsible open={showFilters} onOpenChange={setShowFilters}>
                     <CollapsibleContent className="space-y-4 p-4 border-b">
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={currentViewComfySwitcher} onSelectChange={setCurrentViewComfySwitcher} />
-                            </div>
-                            <DatePickerWithRange
-                                dateRange={date}
-                                setDate={setDate}
-                                disabled={false}
-                            />
+                            {/* Show WorkflowSwitcher only for ViewComfy apps */}
+                            {isViewComfyMode && currentViewComfySwitcher && (
+                                <div className="space-y-2">
+                                    <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={currentViewComfySwitcher} onSelectChange={setCurrentViewComfySwitcher} />
+                                </div>
+                            )}
+                            {/* Show app name for API apps */}
+                            {isApiMode && apiApp && (
+                                <div className="space-y-2">
+                                    <span className="text-sm font-medium">{apiApp.name}</span>
+                                </div>
+                            )}
+                            {/* Date picker only for ViewComfy apps (API doesn't support date filtering) */}
+                            {isViewComfyMode && (
+                                <DatePickerWithRange
+                                    dateRange={date}
+                                    setDate={setDate}
+                                    disabled={false}
+                                />
+                            )}
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Images per page</span>
                                 <Select
@@ -194,7 +279,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                     </CollapsibleContent>
                 </Collapsible>
                 <ScrollArea className="flex-1 p-4">
-                    {isLoadingWorkflowHistory ? (
+                    {isLoading ? (
                         <div className="flex items-center justify-center py-8">
                             <div className="flex flex-col space-y-3">
                                 <Skeleton className="h-[125px] w-[250px] rounded-xl" />
@@ -218,7 +303,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                 </div>
                             </div>
                         </div>
-                    ) : successWorkflows && successWorkflows.length === 0 && page === 1 ? (
+                    ) : !hasItems && page === 1 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <History className="h-12 w-12 text-muted-foreground mb-4" />
                             <h3 className="text-lg font-medium">No history found</h3>
@@ -226,7 +311,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                 Your generation history will appear here
                             </p>
                         </div>
-                    ) : successWorkflows && successWorkflows.length === 0 && page > 1 ? (
+                    ) : !hasItems && page > 1 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <History className="h-12 w-12 text-muted-foreground mb-4" />
                             <h3 className="text-lg font-medium">No more results</h3>
@@ -253,7 +338,8 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center space-y-4 mt-2">
-                                        {successWorkflows?.map(
+                            {/* Render ViewComfy history */}
+                            {isViewComfyMode && successWorkflows?.map(
                                 (workflowHistory: IWorkflowHistoryModel) => (
                                     <div key={workflowHistory.id} >
                                         <div className="flex flex-col items-center justify-center">
@@ -264,7 +350,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            Total size: {getTotalSize(workflowHistory)} MB
+                                            Total size: {getTotalSize(workflowHistory.outputs)} MB
                                             -
                                             Prompt: <Button
                                                 variant="outline"
@@ -310,7 +396,100 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
 
                                     </div>
                                 ))}
-                            
+
+                            {/* Render API App history */}
+                            {isApiMode && successApiExecutions?.map(
+                                (execution: AppExecutionOutputDTO) => (
+                                    <div key={execution.id} >
+                                        <div className="flex flex-col items-center justify-center">
+                                            <BlurFade key={execution.id + "blur-fade"} delay={0.23} inView>
+                                                {execution.results && execution.results.length > 0 && (
+                                                    <BlobPreview
+                                                        key={execution.id + "blob-preview"}
+                                                        outputs={execution.results}
+                                                    />
+                                                )}
+                                            </BlurFade>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            Total size: {getTotalSize(execution.results)} MB
+                                            -
+                                            Input: <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-4 w-4"
+                                                onClick={() =>
+                                                    copyPrompt(
+                                                        JSON.stringify(
+                                                            execution.inputData,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                <TooltipProvider
+                                                    delayDuration={100}
+                                                >
+                                                    <Tooltip>
+                                                        <TooltipTrigger className="flex justify-self-center gap-1">
+                                                            <Copy className="h-4 w-4" />
+                                                        </TooltipTrigger>
+
+                                                        <TooltipContent className="text-center">
+                                                            <p>
+                                                                Copy the
+                                                                input to the
+                                                                clipboard
+                                                            </p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </Button>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            <span className="text-sm text-muted-foreground">
+                                                {format(
+                                                    new Date(execution.createdAt),
+                                                    "dd/M/yyyy HH:mm:ss",
+                                                )}
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                ))}
+
+                            {/* Render Failed API App executions */}
+                            {isApiMode && failedApiExecutions?.map(
+                                (execution: AppExecutionOutputDTO) => (
+                                    <div key={execution.id}>
+                                        <div className="flex flex-col items-center justify-center">
+                                            <BlurFade key={execution.id + "blur-fade"} delay={0.23} inView>
+                                                <div className="relative inline-block">
+                                                    <div className="w-32 h-32 rounded-md bg-muted flex items-center justify-center border">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <CircleX className="h-8 w-8 text-destructive" />
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleShowError(execution.errorMessage)}
+                                                            >
+                                                                Show Error
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </BlurFade>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-2 text-center">
+                                            <span className="text-sm text-muted-foreground">
+                                                {format(
+                                                    new Date(execution.createdAt),
+                                                    "dd/M/yyyy HH:mm:ss",
+                                                )}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+
                             {/* Pagination Controls */}
                             <div className="flex items-center justify-center gap-4 pt-4 pb-2 w-full">
                                 <Button
@@ -341,6 +520,12 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
                     )}
                 </ScrollArea>
             </div>
+            <ErrorAlertDialog
+                open={errorDialogOpen}
+                errorTitle="Execution Failed"
+                errorDescription={currentErrorMessage}
+                onClose={() => setErrorDialogOpen(false)}
+            />
         </div>
     )
 }
@@ -348,7 +533,7 @@ export function HistorySidebarContent({ open, setOpen, className }: HistorySideb
 function BlobPreview({
     outputs,
 }: {
-    outputs: IWorkflowHistoryFileModel[] | null;
+    outputs: UnifiedHistoryFile[] | null;
 }) {
     const [blobIndex, setBlobIndex] = useState(0);
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -381,7 +566,7 @@ function BlobPreview({
         imageNaturalHeight,
     ]);
 
-    const isImageByMimeType = (file: IWorkflowHistoryFileModel) => {
+    const isImageByMimeType = (file: UnifiedHistoryFile) => {
         return file.contentType.startsWith(
             "image/",
         ) && file.contentType !== "image/vnd.adobe.photoshop"
@@ -422,6 +607,9 @@ function BlobPreview({
 
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
+        image.onerror = () => {
+            console.error('Failed to load image:', outputs[blobIndex].filepath);
+        };
         image.src = outputs[blobIndex].filepath;
     }, [blobIndex, outputs]);
 
@@ -639,5 +827,3 @@ function BlobPreview({
         </div>
     );
 }
-
-
