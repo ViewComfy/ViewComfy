@@ -33,7 +33,7 @@ export const AppCardBase = React.forwardRef<HTMLDivElement, AppCardBaseProps>(
             <Card
                 ref={ref}
                 className={cn(
-                    "w-full h-[260px] flex flex-col transition-all",
+                    "w-full h-[270px] flex flex-col transition-all",
                     onCardClick && "cursor-pointer hover:shadow-md hover:border-primary/50",
                     isSelected && showSelectedIndicator && "border-primary ring-2 ring-primary/20",
                     className
@@ -52,7 +52,7 @@ export const AppCardBase = React.forwardRef<HTMLDivElement, AppCardBaseProps>(
                     <img
                         src={displayInfo.imageUrl}
                         alt={displayInfo.name}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-contain rounded-lg"
                     />
                 </div>
                 <CardContent className="flex-1 p-3 pt-2 min-h-0">
@@ -60,7 +60,7 @@ export const AppCardBase = React.forwardRef<HTMLDivElement, AppCardBaseProps>(
                         {displayInfo.description || "No description"}
                     </CardDescription>
                 </CardContent>
-                <CardFooter className="p-3 pt-0 flex-shrink-0">
+                <CardFooter className="p-3 pt-6 flex-shrink-0">
                     <Button
                         onClick={(e) => {
                             e.stopPropagation()
