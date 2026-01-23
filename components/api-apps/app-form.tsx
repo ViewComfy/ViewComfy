@@ -105,7 +105,7 @@ export function AppForm({
     <Form {...form}>
       <form id="app-form" onSubmit={handleSubmit} className={cn("space-y-6 min-w-0", className)}>
         {header}
-        <div className="space-y-6">
+        <div className="space-y-2">
           {inputs.map((inputDef: AppInputFieldOutputDTO) => (
             <FormField
               key={inputDef.name}

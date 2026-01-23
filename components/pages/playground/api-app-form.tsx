@@ -80,11 +80,11 @@ export function ApiAppPlaygroundForm({
                 </div>
             </ScrollArea>
 
-            <div className="sticky bottom-0 p-4 backdrop-blur-sm supports-backdrop-filter:bg-background/60 border-t">
+            <div className="sticky bottom-0 p-4 mx-1 supports-backdrop-filter:bg-background/60 border-t">
                 <Button
                     type="submit"
                     form="app-form"
-                    className="w-full"
+                    className="w-full text-md"
                     disabled={effectiveLoading}
                 >
                     {effectiveLoading ? "Generating..." : "Generate"} <WandSparkles className={cn("size-5 ml-2")} />

@@ -206,7 +206,7 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
     };
 
     return (
-        <div className={cn("h-full w-[340px] sm:w-[340px] bg-background border-l flex flex-col", className)}>
+        <div className={cn("h-full w-[340px] sm:w-[340px] bg-background border flex flex-col rounded-xl shadow-md", className)}>
             <div className="border-b">
                 <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-2">
