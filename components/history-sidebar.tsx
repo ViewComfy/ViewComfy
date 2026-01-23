@@ -350,10 +350,10 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            Total size: {getTotalSize(workflowHistory.outputs)} MB
-                                            -
-                                            Prompt: <Button
-                                                variant="outline"
+                                            {/* Total size: {getTotalSize(workflowHistory.outputs)} MB
+                                            - */}
+                                            Copy prompt <Button
+                                                variant="ghost"
                                                 size="icon"
                                                 className="h-4 w-4"
                                                 onClick={() =>
@@ -412,10 +412,10 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
                                             </BlurFade>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            Total size: {getTotalSize(execution.results)} MB
-                                            -
-                                            Input: <Button
-                                                variant="outline"
+                                            {/* Total size: {getTotalSize(execution.results)} MB
+                                            - */}
+                                            Copy input data <Button
+                                                variant="ghost"
                                                 size="icon"
                                                 className="h-4 w-4"
                                                 onClick={() =>
