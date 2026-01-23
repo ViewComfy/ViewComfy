@@ -49,7 +49,8 @@ export function initializeOpenAPIAuth(getter: TokenGetter) {
   // Update BASE URL with settings service
   const settingsService = new SettingsService();
   const urlWithApi = settingsService.getApiUrl();
-  const url = urlWithApi.replace("/api", "")
+
+  const url = urlWithApi.slice(0, urlWithApi.length - 4 )
   OpenAPI.BASE = url; 
 }
 

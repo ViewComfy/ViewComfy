@@ -201,19 +201,24 @@ const subscribeToRunningWorkflows = async (params: {
         throw new Error("user token is missing");
     }
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/workflow/infer/subscribe/${socket.id!}`;
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-        },
-    });
-
-    if (!response.ok) {
-        const responseError: ResponseError = await response.json();
-        throw responseError;
+    try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/workflow/infer/subscribe/${socket.id!}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : {};
+            console.error({data})
+        }        
+    
+    } catch (err) {
+        console.error(err)
     }
-
-    return await response.json();
 };

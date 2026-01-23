@@ -22,7 +22,7 @@ import { ErrorAlertDialog } from "@/components/ui/error-alert-dialog";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 import { ApiError } from "@/src/generated";
 import { ApiErrorHandler } from "@/lib/api-error-handler";
-import type { ResponseError } from "@/app/models/errors";
+import { ResponseError } from "@/app/models/errors";
 import BlurFade from "@/components/ui/blur-fade";
 import { cn, getComfyUIRandomSeed } from "@/lib/utils";
 import { createMediaDragHandler } from "@/lib/drag-utils";
@@ -30,7 +30,7 @@ import WorkflowSwitcher from "@/components/workflow-switchter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PreviewOutputsImageGallery } from "@/components/images-preview"
 import dynamic from "next/dynamic";
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Dialog,
     DialogContent,
@@ -157,6 +157,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
     const [errorAlertDialog, setErrorAlertDialog] = useState<{ open: boolean, errorTitle: string | undefined, errorDescription: React.JSX.Element, onClose: () => void }>({ open: false, errorTitle: undefined, errorDescription: <></>, onClose: () => { } });
     const [apiErrorDialog, setApiErrorDialog] = useState<{ open: boolean, error: unknown }>({ open: false, error: null });
     const searchParams = useSearchParams();
+    const router = useRouter();
     const appIdParam = searchParams?.get("appId");
     // Parse the appId param to extract type and actual ID
     // API apps use "api-" prefix (e.g., "api-123"), ViewComfy apps use plain UUIDs
@@ -255,11 +256,26 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
         const fetchViewComfy = async () => {
             try {
                 const apiUrl = appId ? `/api/playground?appId=${appId}` : "/api/playground";
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        "accept": "application/json"
+                    }
+                });
                 if (!response.ok) {
-                    const responseError: ResponseError =
-                        await response.json();
-                    throw responseError;
+                    const text = await response.text()
+                    const data = text ? JSON.parse(text) : {};
+                    if (data) {
+                        const responseError: ResponseError = data;
+                        if (responseError.errorType === "ViewModeMissingAppIdError") {
+                            return router.push("/apps")
+                        }
+                        throw responseError;
+                    } else {
+                        const err = new ResponseError(data);
+
+                        throw err;
+                    }
+                    
                 }
                 const data = await response.json();
                 viewComfyStateDispatcher({ type: ActionType.INIT_VIEW_COMFY, payload: data.viewComfyJSON });
@@ -287,7 +303,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
             }
         };
         fetchViewComfy();
-    }, [viewMode, viewComfyStateDispatcher, appId, appTypeFromUrl]);
+    }, [viewMode, viewComfyStateDispatcher, appId, appTypeFromUrl, router]);
 
     const onSetResults = useCallback(async (params: ISetResults) => {
         const { promptId, status, errorData } = params;
@@ -749,6 +765,9 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
     useEffect(() => {
         const image = new Image();
         image.onload = () => handleImageOnLoad(image);
+        image.onerror = () => {
+            console.error('Failed to load image:', output.url);
+        };
         image.src = output.url;
     }, [output]);
 
