@@ -1797,7 +1797,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
             <FormControl>
                 <Slider onValueChange={onSliderChange} defaultValue={[field.value]} min={input.slider?.min} max={input.slider?.max} step={input.slider?.step} />
             </FormControl>
-            {!editMode && (
+            {/* {!editMode && (
                 <FormDescription className="text-xs">
                     {[
                         input.slider?.min !== undefined && `Min: ${input.slider.min}`,
@@ -1805,7 +1805,7 @@ function FormSliderInput(args: { input: IInputForm, field: any, editMode?: boole
                         `Default: ${input.value}`,
                     ].filter(Boolean).join(' • ')}
                 </FormDescription>
-            )}
+            )} */}
             <FormMessage />
         </FormItem>
     )

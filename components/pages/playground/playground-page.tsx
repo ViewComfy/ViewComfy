@@ -602,7 +602,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     <div className="relative hidden flex-col w-full max-w-[450px] items-start md:flex flex-shrink-0 overflow-hidden rounded-l-xl bg-muted/50 p-4">
                         <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden border shadow-md">
                             {hasViewComfyApp && viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
-                                <div className="px-4 pt-4 w-full">
+                                <div className="px-2 pt-4 w-full">
                                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                                 </div>
                             )}
@@ -771,7 +771,6 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
         image.src = output.url;
     }, [output]);
 
-
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -779,7 +778,7 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                     key={output.url}
                     src={output.url}
                     alt={`${output.url}`}
-                    className={cn("w-full h-64 object-cover rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
+                    className={cn("w-full h-64 object-contain rounded-md transition-all hover:scale-105 hover:cursor-pointer")}
                     draggable="true"
                     onDragStart={createMediaDragHandler({
                         url: output.url,
@@ -791,10 +790,10 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
             {showOutputFileName && parseFileName(getOutputFileName(output))}
             <DialogContent className="max-w-fit max-h-[90vh] border-0 p-0 bg-transparent [&>button]:bg-background [&>button]:border [&>button]:border-border [&>button]:rounded-full [&>button]:p-1 [&>button]:shadow-md">
                 <div
+                    className="rounded-md"
                     style={{
                         width: "100%",
                         height: "100%",
-                        backgroundColor,
                         cursor: "zoom-in"
                     }}
                     ref={(el: HTMLDivElement | null) => {
@@ -807,11 +806,13 @@ export function ImageDialog({ output, showOutputFileName }: { output: { file: Fi
                         minScale={imageScale}
                         maxScale={imageScale * zoomFactor}
                         centerOnInit
+
                     >
                         <TransformComponent
                             wrapperStyle={{
                                 width: "100%",
                                 height: "100%",
+                                borderRadius: "8px",
                             }}
                         >
                             <img key={output.url}

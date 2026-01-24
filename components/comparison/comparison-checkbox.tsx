@@ -5,7 +5,7 @@ interface ComparisonCheckboxProps {
     className?: string;
 }
 
-export function ComparisonCheckbox({ imageUrl, className = "absolute top-2 right-2 z-10 w-[20px] h-[20px]" }: ComparisonCheckboxProps) {
+export function ComparisonCheckbox({ imageUrl, className = "absolute top-3 right-3 z-10 w-[20px] h-[20px]" }: ComparisonCheckboxProps) {
     const { selectedImages, isCompareModeActive, handleImageSelection } = useImageComparison();
 
     if (!isCompareModeActive) {
