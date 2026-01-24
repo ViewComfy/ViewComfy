@@ -256,3 +256,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@layer utilities {
+  .vc-scrollbar {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
+  }
+
+  /* Chromium / Safari */
+  .vc-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .vc-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .vc-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}

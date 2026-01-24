@@ -67,10 +67,12 @@ export default function WorkflowSwitcher({ className, currentViewComfy, viewComf
                         role="combobox"
                         aria-expanded={open}
                         aria-label="Select a team"
-                        className={cn("w-full max-w-[300px] justify-between", className)}
+                        className={cn("w-full max-w-[300px] justify-between overflow-hidden", className)}
                     >
-                        {currentWorkflow.viewComfyJSON.title}
-                        <CaretSortIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                        <span className="line-clamp-1 overflow-hidden">
+                            {currentWorkflow.viewComfyJSON.title}
+                        </span>
+                        <CaretSortIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">

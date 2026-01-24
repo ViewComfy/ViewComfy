@@ -95,7 +95,7 @@ export function ComparisonDialog() {
                     className="inline-block w-[90vw] h-[90vh] max-w-[730px] max-h-[730px] overflow-hidden relative"
                 >
                     <ImgComparisonSlider 
-                        className=""
+                        className="bg-background/10 rounded-md"
                         style={{ 
                             width: `${imageSize}px`,
                             height: `${imageSize}px`,
