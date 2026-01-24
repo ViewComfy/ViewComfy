@@ -2,7 +2,7 @@
 import { useAuth } from "@clerk/nextjs";
 import useSWR from "swr";
 import useSWRImmutable from "swr/immutable";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { UTCDate } from "@date-fns/utc";
 
 import { IWorkflowHistoryModel } from "@/app/interfaces/workflow-history";
@@ -12,6 +12,10 @@ import { useRouter } from "next/navigation";
 import { IUser } from "@/app/interfaces/user";
 import { ApiResponseError } from "@/app/models/errors";
 import { IWorkflow } from "@/app/interfaces/workflow";
+import { AppsService } from "@/src/generated";
+import type { AppOutputDTO } from "@/src/generated";
+import type { UnifiedApp } from "@/app/interfaces/unified-app";
+import { initializeOpenAPIAuth } from "@/src/generated/auth-config";
 
 const settingsService = new SettingsService();
 
@@ -44,6 +48,29 @@ const fetcherWithAuth = async (
 
     return response.json();
 };
+
+/**
+ * Hook to initialize OpenAPI authentication with Clerk.
+ * Call this once in your app (e.g., in a layout or provider) to enable
+ * authentication for all OpenAPI-generated service calls.
+ * 
+ * @example
+ * ```tsx
+ * function MyLayout({ children }) {
+ *   useInitializeOpenAPIAuth();
+ *   return <>{children}</>;
+ * }
+ * ```
+ */
+export function useInitializeOpenAPIAuth() {
+    const { getToken } = useAuth();
+
+    useEffect(() => {
+        initializeOpenAPIAuth(async () => {
+            return await getToken({ template: "long_token" });
+        });
+    }, [getToken]);
+}
 
 export function useFetchWithToken() {
     const { getToken } = useAuth();
@@ -261,5 +288,82 @@ export function useGetTeamByAppId({
         isLoading,
         isError: error,
         mutateWorkflows: mutate,
+    };
+}
+
+/**
+ * Fetches API apps for a project using the generated AppsService.
+ * projectId is equivalent to teamId in the current architecture.
+ */
+export function useApiApps({
+    projectId
+}: { projectId: number | undefined; }) {
+    const { data, error, isLoading, mutate } = useSWR(
+        projectId ? ["api-apps", projectId] : null,
+        () => AppsService.listAppsApiAppsGet(projectId!),
+        {
+            refreshInterval: 5000,
+        },
+    );
+
+    let result: AppOutputDTO[] | null = null;
+
+    if (data && !error) {
+        result = data.apps;
+    } else {
+        result = null;
+    }
+
+    return {
+        apiApps: result,
+        isLoading,
+        isError: error,
+        mutateApiApps: mutate,
+    };
+}
+
+/**
+ * Combines ViewComfy apps and API apps into a unified list.
+ * Returns apps wrapped with type discriminator for easy type narrowing.
+ */
+export function useAllApps({
+    teamId
+}: { teamId: number | undefined; }) {
+    const { viewComfyApps, isLoading: vcLoading, isError: vcError } = useViewComfyApps({ teamId });
+    const { apiApps, isLoading: apiLoading, isError: apiError } = useApiApps({ projectId: teamId });
+
+    const apps = useMemo((): UnifiedApp[] | null => {
+        // Return null only if both are still loading with no data
+        if (!viewComfyApps && !apiApps) {
+            return null;
+        }
+
+        const unified: UnifiedApp[] = [];
+
+        if (viewComfyApps) {
+            unified.push(
+                ...viewComfyApps.map((app): UnifiedApp => ({
+                    type: "viewcomfy",
+                    data: app,
+                }))
+            );
+        }
+
+        if (apiApps) {
+            unified.push(
+                ...apiApps.map((app): UnifiedApp => ({
+                    type: "api",
+                    data: app,
+                }))
+            );
+        }
+
+        return unified;
+    }, [viewComfyApps, apiApps]);
+
+    return {
+        apps,
+        isLoading: vcLoading || apiLoading,
+        isError: vcError || apiError,
     };
 }

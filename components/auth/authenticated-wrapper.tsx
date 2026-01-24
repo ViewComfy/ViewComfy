@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SocketProvider } from "@/app/providers/socket-provider";
 import { WorkflowDataProvider } from "@/app/providers/workflows-data-provider";
-import { useGetTeamByAppId, useUser, useWorkflows } from "@/hooks/use-data";
+import { ApiAppExecutionProvider } from "@/app/providers/api-app-execution-provider";
+import { useGetTeamByAppId, useUser, useWorkflows, useInitializeOpenAPIAuth } from "@/hooks/use-data";
 import { useBoundStore } from "@/stores/bound-store";
 import { useSearchParams } from "next/navigation";
+import { parseAppIdParam } from "@/app/interfaces/unified-app";
 
 export default function AuthenticatedWrapper({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -14,9 +16,12 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
     const { setCurrentTeam, currentTeam, setWorkflows } = useBoundStore();
     const { user } = useUser();
     const searchParams = useSearchParams();
-    const appId: string | null | undefined = searchParams?.get("appId");
-    const { teamId, isLoading } = useGetTeamByAppId({ appId });
+    const appIdParam = searchParams?.get("appId");
+    const parsedAppId = appIdParam ? parseAppIdParam(appIdParam) : null;
+    const viewComfyAppId = parsedAppId?.type === "viewcomfy" ? parsedAppId.id : null;
+    const { teamId, isLoading } = useGetTeamByAppId({ appId: viewComfyAppId });
     const { workflows } = useWorkflows({ teamId: currentTeam?.id });
+    useInitializeOpenAPIAuth();
 
     useEffect(() => {
         if (user && user?.teams.length > 0 && !currentTeam && !isLoading) {
@@ -30,7 +35,7 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
                 setCurrentTeam(user.teams[0]);
             }
         }
-    }, [user, setCurrentTeam, teamId, appId, currentTeam, isLoading]);
+    }, [user, setCurrentTeam, teamId, viewComfyAppId, currentTeam, isLoading]);
 
     useEffect(() => {
         if (workflows) {
@@ -44,16 +49,17 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
         }
     }, [userId, isLoaded, router]);
 
-    // this should remain the only condition because people with glitchy connection face a flashing loading screen
     if (!isLoaded) {
         return <div>Loading...</div>;
     }
 
     return (
         <WorkflowDataProvider>
-            <SocketProvider>
-                {children}
-            </SocketProvider>
+            <ApiAppExecutionProvider>
+                <SocketProvider>
+                    {children}
+                </SocketProvider>
+            </ApiAppExecutionProvider>
         </WorkflowDataProvider>
     );
 } 

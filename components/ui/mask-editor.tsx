@@ -126,11 +126,17 @@ export function MaskEditor({ imageUrl, existingMask, onSave, onCancel, className
           opaqueImg.onload = () => {
             setImage(opaqueImg); // Replace the transparent image with opaque version
           };
+          opaqueImg.onerror = () => {
+            console.error('Failed to load opaque image from canvas data URL');
+          };
           opaqueImg.src = opaqueCanvas.toDataURL();
         }
 
         ctx.putImageData(maskData, 0, 0);
         saveToHistory(ctx);
+      };
+      maskImg.onerror = () => {
+        console.error('Failed to load mask image');
       };
       maskImg.src = URL.createObjectURL(existingMask);
     } else {
