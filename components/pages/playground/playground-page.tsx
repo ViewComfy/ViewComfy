@@ -602,7 +602,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
                     <div className="relative hidden flex-col w-full max-w-[450px] items-start md:flex flex-shrink-0 overflow-hidden rounded-l-xl bg-muted/50 p-4">
                         <div className="flex flex-col w-full h-full min-h-0 min-w-0 bg-background rounded-xl overflow-hidden border shadow-md">
                             {hasViewComfyApp && viewComfyState.viewComfys.length > 0 && viewComfyState.currentViewComfy && (
-                                <div className="px-4 pt-4 w-full">
+                                <div className="px-2 pt-4 w-full">
                                     <WorkflowSwitcher viewComfys={viewComfyState.viewComfys} currentViewComfy={viewComfyState.currentViewComfy} onSelectChange={onSelectChange} />
                                 </div>
                             )}
