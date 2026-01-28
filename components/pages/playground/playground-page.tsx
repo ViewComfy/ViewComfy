@@ -165,7 +165,7 @@ function PlaygroundPageContent({ doPost, loading, setLoading, runningWorkflows, 
     const appId = parsedAppId?.id ?? null;
     const appTypeFromUrl = parsedAppId?.type ?? null;
     const [apiApp, setApiApp] = useState<AppOutputDTO | null>(null);
-    const [appType, setAppType] = useState<AppType | null>(null);
+    const [appType, setAppType] = useState<AppType | null>("viewcomfy");
     const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
     const [textOutputEnabled, setTextOutputEnabled] = useState(false);
     const [showOutputFileName, setShowOutputFileName] = useState(false);
