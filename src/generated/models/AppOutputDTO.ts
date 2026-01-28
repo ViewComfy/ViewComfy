@@ -13,6 +13,7 @@ export type AppOutputDTO = {
     falModelUrl: string;
     inputs: Array<AppInputFieldOutputDTO>;
     generationPrice: number;
+    thumbnailUrl?: (string | null);
     createdAt: string;
     updatedAt?: (string | null);
 };

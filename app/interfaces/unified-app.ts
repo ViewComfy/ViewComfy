@@ -75,7 +75,7 @@ export function getAppDisplayInfo(app: UnifiedApp): AppDisplayInfo {
     id: String(app.data.id),
     name: app.data.name,
     description: app.data.description,
-    imageUrl: "/view_comfy_logo.svg", // Fallback for API apps
+    imageUrl: app.data.thumbnailUrl || "/view_comfy_logo.svg",
     type: "api",
   };
 }
