@@ -187,15 +187,6 @@ export function HistorySidebarContent({ open, setOpen, className, appType, apiAp
         return null;
     }
 
-    const getTotalSize = (outputs: UnifiedHistoryFile[] | undefined | null) => {
-        if (!outputs) {
-            return 0;
-        }
-        const sizeInBytes = outputs.reduce((acc, blob) => acc + (blob.size ?? 0), 0);
-        const sizeInMB = sizeInBytes / (1024 * 1024);
-        return sizeInMB.toFixed(2);
-    }
-
     const copyPrompt = (prompt: string) => {
         navigator.clipboard.writeText(prompt);
         toast.success(
