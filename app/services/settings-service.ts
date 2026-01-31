@@ -1,3 +1,5 @@
+import path from "node:path";
+
 export class SettingsService {
 
     public isUserManagementEnabled(): boolean {
@@ -31,6 +33,20 @@ export class SettingsService {
             throw new Error("COMFY_OUTPUT_DIR is not set, you need to use Full paths not relative paths");
         }
         return process.env.COMFY_OUTPUT_DIR;
+    }
+
+    public getComfyInputDirectory(): string {
+        if (process.env.COMFY_INPUT_DIR) {
+            return process.env.COMFY_INPUT_DIR;
+        }
+        return path.join(process.cwd(), "comfy", "inputs");
+    }
+
+    public getComfyWorkflowsDirectory(): string {
+        if (process.env.COMFY_WORKFLOWS_DIR) {
+            return process.env.COMFY_WORKFLOWS_DIR;
+        }
+        return path.join(process.cwd(), "comfy", "workflows");
     }
 
     public getIsRunningInViewComfy(): boolean {
