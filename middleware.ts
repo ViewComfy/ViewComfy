@@ -5,7 +5,7 @@ import {
     createRouteMatcher,
 } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher(["/login(.*)"]);
+const isPublicRoute = createRouteMatcher(["/login(.*)", "/sso(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
     // Check if user management is enabled
@@ -16,12 +16,10 @@ export default clerkMiddleware(async (auth, request) => {
         return NextResponse.next();
     }
 
-    const { userId, redirectToSignIn } = await auth();
-
+    const { userId } = await auth();
     if (!userId && !isPublicRoute(request)) {
         // Add custom logic to run before redirecting
-
-        return redirectToSignIn();
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 });
 

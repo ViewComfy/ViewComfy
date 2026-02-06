@@ -15,7 +15,7 @@ import { Suspense } from "react";
 
 const settingsService = new SettingsService();
 
-const validUrls = ["/playground", "/apps"];
+const validUrls = ["/playground", "/apps", "/sso"];
 
 const showSidebar = !(settingsService.getIsRunningInViewComfy() && settingsService.getIsViewMode());
 
@@ -33,7 +33,7 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
       if (settingsService.getIsViewMode()) {
         if (appId) {
           router.push(`/playground?appId=${appId}`);
-        } else if (!validUrls.includes(pathname)) {
+        } else if (!validUrls.some(url => pathname.startsWith(url))) {
           router.push("/apps");
         }
       } else {
