@@ -1,13 +1,6 @@
-"use client";
 import Image from "next/image";
 import { SignIn } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import { Key } from "lucide-react";
-import { useRouter } from "next/navigation";
 export default function Login() {
-
-    const router = useRouter();
-
     return (
         <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
             <div className="flex items-center justify-center py-12">
@@ -17,18 +10,19 @@ export default function Login() {
                             Welcome to <br /> ViewComfy Cloud
                         </h1>
                         <p className="text-balance text-muted-foreground">
-                            Login or Sign up to access the dashboard
+                            Login with your company email to access the dashboard
                         </p>
                     </div>
                     <div className="grid gap-4">
-                        <SignIn
+                        <SignIn                           
                             appearance={{
-                                layout: {
-                                    socialButtonsPlacement: "bottom",
-                                },
-                            }}
+                                elements: {
+                                    socialButtonsBlockButton: { display: 'none' },
+                                    socialButtonsIconButton: { display: 'none' },
+                                  },
+                              }} 
+                            
                         />
-                        <Button onClick={() => router.push("/sso")}> <Key /> Single Sign-On</Button>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,5 @@
 "use client";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SocketProvider } from "@/app/providers/socket-provider";
 import { WorkflowDataProvider } from "@/app/providers/workflows-data-provider";
@@ -11,8 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { parseAppIdParam } from "@/app/interfaces/unified-app";
 
 export default function AuthenticatedWrapper({ children }: { children: React.ReactNode }) {
-    const router = useRouter();
-    const { isLoaded, userId } = useAuth();
+    const { isLoaded } = useAuth();
     const { setCurrentTeam, currentTeam, setWorkflows } = useBoundStore();
     const { user } = useUser();
     const searchParams = useSearchParams();
@@ -42,12 +40,6 @@ export default function AuthenticatedWrapper({ children }: { children: React.Rea
             setWorkflows(workflows)
         };
     }, [workflows, setWorkflows])
-
-    useEffect(() => {
-        if (!userId && isLoaded) {
-            router.push("/login");
-        }
-    }, [userId, isLoaded, router]);
 
     if (!isLoaded) {
         return <div>Loading...</div>;
