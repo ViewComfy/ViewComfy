@@ -55,6 +55,7 @@ export class ComfyUIAPIService {
         this.wsBaseUrl = this.secure ? "wss://" : "ws://";
         this.baseUrl = process.env.COMFYUI_API_URL || "127.0.0.1:8188";
         this.clientId = clientId;
+        this.comfyuiApiKey = process.env.COMFYUI_API_KEY;
         this.comfyExecutionError = undefined;
         try {
             this.ws = new WebSocket(`${this.getUrl("ws")}/ws?clientId=${this.clientId}`);
@@ -166,6 +167,11 @@ export class ComfyUIAPIService {
         const data = {
             "prompt": workflow,
             "client_id": this.clientId,
+        }
+        if (this.comfyuiApiKey) {
+            data["extra_data"] = {
+                "api_key_comfy_org": this.comfyuiApiKey,
+            };
         }
         try {
             const response = await fetch(`${this.getUrl("http")}/prompt`, {
