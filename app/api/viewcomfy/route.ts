@@ -5,6 +5,16 @@ import { ViewComfyApiParamBuilder } from "@/app/models/viewcomfy-api-param-build
 import { SettingsService } from "@/app/services/settings-service";
 import { auth } from "@clerk/nextjs/server";
 import { Secret } from "@/app/services/viewcomfy-api-services";
+import { requireApiToken } from "@/app/lib/api-auth";
+import {
+    ProxyGuardError,
+    validateViewComfyEndpoint,
+} from "@/app/lib/ssrf-guard";
+
+export const runtime = 'nodejs';
+export const maxDuration = 300;
+
+const MAX_REQUEST_BYTES = 100 * 1024 * 1024; // 100 MB
 
 const errorResponseFactory = new ErrorResponseFactory();
 const settingsService = new SettingsService();
@@ -14,11 +24,39 @@ const clientSecret = settingsService.getViewComfyCloudApiClientSecret();
 
 export async function POST(request: NextRequest) {
 
+    // Auth gate: when Clerk is off, require VIEWCOMFY_API_TOKEN.
+    const authError = requireApiToken(request);
+    if (authError) return authError;
+
+    // Body size gate.
+    const contentLength = Number(request.headers.get('content-length') || 0);
+    if (contentLength > MAX_REQUEST_BYTES) {
+        return NextResponse.json(
+            { error: `Request body exceeds ${MAX_REQUEST_BYTES} bytes` },
+            { status: 413 },
+        );
+    }
+
     try {
         const formData = await request.formData();
 
         const viewComfyApiParamBuilder = new ViewComfyApiParamBuilder(formData);
         viewComfyApiParamBuilder.buildParamsForViewComfyApi();
+
+        // SSRF guard: the viewcomfyEndpoint is supplied by the client and
+        // is then POSTed to with the operator's own credentials. Without
+        // an allowlist this is a server-side SSRF with creds attached.
+        try {
+            validateViewComfyEndpoint(viewComfyApiParamBuilder.viewComfyUrl);
+        } catch (error) {
+            if (error instanceof ProxyGuardError) {
+                return NextResponse.json(
+                    { error: `Blocked viewcomfyEndpoint: ${error.message}` },
+                    { status: 403 },
+                );
+            }
+            throw error;
+        }
 
         let secret: Secret | undefined;
 
